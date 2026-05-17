@@ -1,0 +1,11 @@
+.env
+venv/
+.venv/
+__pycache__/
+*.pyc
+data/*.db
+data/*.db-*
+assets/raw/*
+assets/final/*
+logs/*.log
+

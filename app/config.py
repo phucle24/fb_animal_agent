@@ -1,0 +1,48 @@
+import os
+from pathlib import Path
+
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    def load_dotenv():
+        return False
+
+
+load_dotenv()
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+DB_PATH = BASE_DIR / os.getenv("ANIMAL_AGENT_DB_PATH", "data/agent.db")
+OUTPUT_DIR = BASE_DIR / os.getenv("ANIMAL_AGENT_OUTPUT_DIR", "assets")
+RAW_DIR = OUTPUT_DIR / "raw"
+FINAL_DIR = OUTPUT_DIR / "final"
+LOG_DIR = BASE_DIR / "logs"
+
+for path in [DB_PATH.parent, OUTPUT_DIR, RAW_DIR, FINAL_DIR, LOG_DIR]:
+    path.mkdir(parents=True, exist_ok=True)
+
+GEMINI_API_KEY = os.getenv("ANIMAL_AGENT_GEMINI_API_KEY", "").strip()
+GEMINI_TEXT_MODEL = os.getenv("ANIMAL_AGENT_GEMINI_TEXT_MODEL", "gemini-2.5-flash").strip()
+GEMINI_IMAGE_MODEL = os.getenv(
+    "ANIMAL_AGENT_GEMINI_IMAGE_MODEL",
+    "gemini-3.1-flash-image-preview",
+).strip()
+
+FB_PAGE_ID = os.getenv("ANIMAL_AGENT_FB_PAGE_ID", "").strip()
+FB_PAGE_TOKEN = os.getenv("ANIMAL_AGENT_FB_PAGE_TOKEN", "").strip()
+FB_GRAPH_VERSION = os.getenv("ANIMAL_AGENT_FB_GRAPH_VERSION", "v21.0").strip()
+TIMEZONE = os.getenv("ANIMAL_AGENT_TIMEZONE", "Asia/Ho_Chi_Minh").strip()
+
+FONT_BOLD = os.getenv(
+    "ANIMAL_AGENT_FONT_BOLD",
+    "/usr/share/fonts/truetype/noto/NotoSans-Bold.ttf",
+).strip()
+
+FONT_REGULAR = os.getenv(
+    "ANIMAL_AGENT_FONT_REGULAR",
+    "/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf",
+).strip()
+
+WEB_HOST = os.getenv("ANIMAL_AGENT_WEB_HOST", "127.0.0.1").strip()
+WEB_PORT = int(os.getenv("ANIMAL_AGENT_WEB_PORT", "8000"))
+WEB_SECRET_KEY = os.getenv("ANIMAL_AGENT_WEB_SECRET_KEY", "change-me-local-dashboard")

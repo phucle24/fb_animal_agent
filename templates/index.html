@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - FB Animal Agent{% endblock %}
+
+{% block content %}
+  <section class="workspace-header">
+    <div>
+      <h1>Dashboard</h1>
+      <p>Quản lý lịch bài, preview ảnh/caption và đăng thủ công lên fanpage.</p>
+    </div>
+    <div class="actions-row">
+      <form method="post" action="{{ url_for('action_init_db') }}">
+        <button class="button secondary" type="submit">Init DB</button>
+      </form>
+      <form method="post" action="{{ url_for('action_prepare_one_test') }}" class="inline-form">
+        <input type="number" min="0" max="99" name="topic_index" value="0" aria-label="Topic index">
+        <button class="button secondary" type="submit">Tạo 1 bài test</button>
+      </form>
+      <form method="post" action="{{ url_for('action_prepare_week') }}" class="inline-form">
+        <input type="number" min="1" max="30" name="days" value="7" aria-label="Số ngày">
+        <button class="button primary" type="submit">Tạo lịch tuần</button>
+      </form>
+    </div>
+  </section>
+
+  <section class="stats-grid" aria-label="Thống kê">
+    <div class="stat-card">
+      <span class="stat-label">Tổng bài</span>
+      <strong>{{ stats.total }}</strong>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">READY</span>
+      <strong>{{ stats.status_counts.READY }}</strong>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">POSTED</span>
+      <strong>{{ stats.status_counts.POSTED }}</strong>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">FAILED</span>
+      <strong>{{ stats.status_counts.FAILED }}</strong>
+    </div>
+  </section>
+
+  <section class="toolbar">
+    <div class="filters" aria-label="Bộ lọc trạng thái">
+      <a class="filter-pill {% if not active_status %}active{% endif %}" href="{{ url_for('index') }}">Tất cả</a>
+      <a class="filter-pill {% if active_status == 'READY' %}active{% endif %}" href="{{ url_for('index', status='READY') }}">READY</a>
+      <a class="filter-pill {% if active_status == 'POSTED' %}active{% endif %}" href="{{ url_for('index', status='POSTED') }}">POSTED</a>
+      <a class="filter-pill {% if active_status == 'FAILED' %}active{% endif %}" href="{{ url_for('index', status='FAILED') }}">FAILED</a>
+      <a class="filter-pill {% if active_status == 'SKIPPED' %}active{% endif %}" href="{{ url_for('index', status='SKIPPED') }}">SKIPPED</a>
+    </div>
+    <span class="db-path">{{ stats.db_path }}</span>
+  </section>
+
+  <section class="post-table-wrap">
+    <table class="post-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Lịch đăng</th>
+          <th>Slot</th>
+          <th>Topic</th>
+          <th>Tiêu đề</th>
+          <th>Loại</th>
+          <th>Trạng thái</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for post in posts %}
+          <tr>
+            <td>#{{ post.id }}</td>
+            <td>{{ post.scheduled_at }}</td>
+            <td>{{ post.slot }}</td>
+            <td class="mono">{{ post.topic_key }}</td>
+            <td>{{ post.title }}</td>
+            <td>{{ post.topic_type }}</td>
+            <td><span class="status status-{{ post.status|lower }}">{{ post.status }}</span></td>
+            <td><a class="row-link" href="{{ url_for('post_detail', post_id=post.id) }}">Mở</a></td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="8" class="empty-cell">Chưa có bài nào. Bấm Init DB rồi Tạo lịch tuần.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Post #{{ post.id }} - FB Animal Agent{% endblock %}
+
+{% block content %}
+  <section class="detail-header">
+    <div>
+      <a class="back-link" href="{{ url_for('index') }}">← Dashboard</a>
+      <h1>#{{ post.id }} {{ post.title }}</h1>
+      <div class="meta-line">
+        <span>{{ post.scheduled_at }}</span>
+        <span>{{ post.slot }}</span>
+        <span>{{ post.topic_key }}</span>
+        <span class="status status-{{ post.status|lower }}">{{ post.status }}</span>
+      </div>
+    </div>
+    <div class="actions-row">
+      {% if post.status != 'POSTED' %}
+        <form method="post" action="{{ url_for('action_publish', post_id=post.id) }}">
+          <button class="button primary danger-check" type="submit">Đăng ngay</button>
+        </form>
+      {% endif %}
+      <form method="post" action="{{ url_for('action_status', post_id=post.id) }}">
+        <input type="hidden" name="status" value="READY">
+        <button class="button secondary" type="submit">Reset READY</button>
+      </form>
+      <form method="post" action="{{ url_for('action_status', post_id=post.id) }}">
+        <input type="hidden" name="status" value="SKIPPED">
+        <button class="button secondary" type="submit">Skip</button>
+      </form>
+    </div>
+  </section>
+
+  {% if post.error_message %}
+    <section class="error-panel">
+      <strong>Lỗi gần nhất</strong>
+      <p>{{ post.error_message }}</p>
+    </section>
+  {% endif %}
+
+  <section class="detail-grid">
+    <div class="preview-pane">
+      {% if post.final_image_path %}
+        <img class="post-image" src="{{ url_for('media_post', post_id=post.id, kind='final') }}" alt="Ảnh final của post #{{ post.id }}">
+      {% else %}
+        <div class="missing-image">Chưa có ảnh final</div>
+      {% endif %}
+    </div>
+
+    <aside class="copy-pane">
+      <h2>Caption</h2>
+      <textarea id="caption" readonly>{{ post.caption }}</textarea>
+      <button class="button secondary" type="button" data-copy-target="caption">Copy caption</button>
+
+      <h2>Overlay</h2>
+      <dl class="kv-list">
+        <div><dt>Title</dt><dd>{{ post.overlay_title or '-' }}</dd></div>
+        <div><dt>Subtitle</dt><dd>{{ post.overlay_subtitle or '-' }}</dd></div>
+        <div><dt>Stat</dt><dd>{{ post.overlay_stat or '-' }}</dd></div>
+        <div><dt>Hook</dt><dd>{{ post.overlay_hook or '-' }}</dd></div>
+      </dl>
+
+      <h2>Image prompt</h2>
+      <p class="prompt-text">{{ post.image_prompt }}</p>
+
+      {% if post.fb_post_id %}
+        <h2>Facebook</h2>
+        <p class="mono">{{ post.fb_post_id }}</p>
+      {% endif %}
+    </aside>
+  </section>
+{% endblock %}
+
