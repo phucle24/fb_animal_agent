@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from PIL import Image, ImageDraw, ImageFont
 
 from app.config import FONT_BOLD, FONT_REGULAR
@@ -5,12 +7,36 @@ from app.config import FONT_BOLD, FONT_REGULAR
 
 TARGET_SIZE = (1080, 1350)
 
+BOLD_FONT_CANDIDATES = [
+    "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
+    "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
+    "/Library/Fonts/Arial Unicode.ttf",
+    "/usr/share/fonts/truetype/noto/NotoSans-Bold.ttf",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+]
 
-def load_font(path: str, size: int):
-    try:
-        return ImageFont.truetype(path, size)
-    except Exception:
-        return ImageFont.load_default()
+REGULAR_FONT_CANDIDATES = [
+    "/System/Library/Fonts/Supplemental/Arial.ttf",
+    "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
+    "/Library/Fonts/Arial Unicode.ttf",
+    "/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+]
+
+
+def load_font(path: str, size: int, candidates: list[str] | None = None):
+    for font_path in [path, *(candidates or [])]:
+        if not font_path:
+            continue
+        try:
+            if Path(font_path).exists():
+                return ImageFont.truetype(font_path, size)
+        except Exception:
+            continue
+    raise RuntimeError(
+        "No usable TrueType font found for Vietnamese text. "
+        "Set ANIMAL_AGENT_FONT_BOLD and ANIMAL_AGENT_FONT_REGULAR to fonts that support Vietnamese."
+    )
 
 
 def fit_cover(img: Image.Image, size=(1080, 1350)) -> Image.Image:
@@ -52,8 +78,8 @@ def wrap_text_by_width(draw, text, font, max_width):
     return lines
 
 
-def draw_text(draw, xy, text, font, fill):
-    draw.text(xy, text, font=font, fill=fill)
+def draw_text(draw, xy, text, font, fill, stroke_width: int = 0, stroke_fill=(0, 0, 0, 180)):
+    draw.text(xy, text, font=font, fill=fill, stroke_width=stroke_width, stroke_fill=stroke_fill)
 
 
 def overlay_single_card(
@@ -69,10 +95,10 @@ def overlay_single_card(
     overlay = Image.new("RGBA", img.size, (0, 0, 0, 0))
     draw = ImageDraw.Draw(overlay)
 
-    title_font = load_font(FONT_BOLD, 72)
-    stat_font = load_font(FONT_BOLD, 52)
-    hook_font = load_font(FONT_REGULAR, 36)
-    small_font = load_font(FONT_REGULAR, 24)
+    title_font = load_font(FONT_BOLD, 72, BOLD_FONT_CANDIDATES)
+    stat_font = load_font(FONT_BOLD, 52, BOLD_FONT_CANDIDATES)
+    hook_font = load_font(FONT_REGULAR, 36, REGULAR_FONT_CANDIDATES)
+    small_font = load_font(FONT_REGULAR, 24, REGULAR_FONT_CANDIDATES)
 
     panel = (50, 60, 760, 420)
     draw.rounded_rectangle(panel, radius=28, fill=(0, 0, 0, 150))
@@ -82,7 +108,7 @@ def overlay_single_card(
 
     y = 95
     for line in title_lines[:3]:
-        draw_text(draw, (85, y), line, title_font, (255, 255, 255, 255))
+        draw_text(draw, (85, y), line, title_font, (255, 255, 255, 255), stroke_width=2)
         y += 82
 
     badge_x1, badge_y1 = 85, y + 10
@@ -97,7 +123,7 @@ def overlay_single_card(
     hook_y = badge_y2 + 24
     hook_lines = wrap_text_by_width(draw, overlay_hook, hook_font, 620)
     for line in hook_lines[:2]:
-        draw_text(draw, (85, hook_y), line, hook_font, (245, 245, 245, 255))
+        draw_text(draw, (85, hook_y), line, hook_font, (245, 245, 245, 255), stroke_width=1)
         hook_y += 42
 
     draw_text(draw, (60, 1290), "Ảnh minh họa AI", small_font, (255, 255, 255, 220))
@@ -120,20 +146,20 @@ def overlay_comparison_top5(
     overlay = Image.new("RGBA", img.size, (0, 0, 0, 0))
     draw = ImageDraw.Draw(overlay)
 
-    title_font = load_font(FONT_BOLD, 68)
-    subtitle_font = load_font(FONT_REGULAR, 34)
-    row_name_font = load_font(FONT_BOLD, 34)
-    row_stat_font = load_font(FONT_BOLD, 30)
-    rank_font = load_font(FONT_BOLD, 34)
-    small_font = load_font(FONT_REGULAR, 22)
+    title_font = load_font(FONT_BOLD, 68, BOLD_FONT_CANDIDATES)
+    subtitle_font = load_font(FONT_REGULAR, 34, REGULAR_FONT_CANDIDATES)
+    row_name_font = load_font(FONT_BOLD, 34, BOLD_FONT_CANDIDATES)
+    row_stat_font = load_font(FONT_BOLD, 30, BOLD_FONT_CANDIDATES)
+    rank_font = load_font(FONT_BOLD, 34, BOLD_FONT_CANDIDATES)
+    small_font = load_font(FONT_REGULAR, 22, REGULAR_FONT_CANDIDATES)
 
     draw.rounded_rectangle((40, 40, 1040, 260), radius=28, fill=(0, 0, 0, 150))
-    draw_text(draw, (70, 70), overlay_title.upper(), title_font, (255, 255, 255, 255))
+    draw_text(draw, (70, 70), overlay_title.upper(), title_font, (255, 255, 255, 255), stroke_width=2)
 
     subtitle_lines = wrap_text_by_width(draw, overlay_subtitle, subtitle_font, 900)
     sub_y = 155
     for line in subtitle_lines[:2]:
-        draw_text(draw, (72, sub_y), line, subtitle_font, (240, 240, 240, 255))
+        draw_text(draw, (72, sub_y), line, subtitle_font, (240, 240, 240, 255), stroke_width=1)
         sub_y += 40
 
     panel_y1 = 310
@@ -165,7 +191,14 @@ def overlay_comparison_top5(
         name_lines = wrap_text_by_width(draw, item["name_vi"], row_name_font, 520)
 
         for j, line in enumerate(name_lines[:2]):
-            draw_text(draw, (name_x, name_y + j * 38), line, row_name_font, (255, 255, 255, 255))
+            draw_text(
+                draw,
+                (name_x, name_y + j * 38),
+                line,
+                row_name_font,
+                (255, 255, 255, 255),
+                stroke_width=1,
+            )
 
         badge_text = item["stat"].upper()
         badge_w = text_width(draw, badge_text, row_stat_font) + 40
@@ -187,4 +220,3 @@ def overlay_comparison_top5(
     out = Image.alpha_composite(img, overlay).convert("RGB")
     out.save(final_path, quality=95)
     return final_path
-

@@ -65,6 +65,7 @@ Yêu cầu:
 - gần gũi, dễ hiểu
 - không dài dòng
 - không cần liệt kê 5 mục vì hệ thống sẽ tự thêm phần đó
+- nếu nhắc tên loài cụ thể, ưu tiên tên tiếng Việt đã cho
 
 5. image_prompt
 - tiếng Anh

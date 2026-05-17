@@ -3,7 +3,7 @@
 Agent tạo bài Facebook tự động cho fanpage động vật/thực vật:
 
 - Text: `gemini-2.5-flash`
-- Image background: `gemini-3.1-flash-image-preview`
+- Image background: `gemini-2.5-flash-image`
 - Overlay text bằng Python để chữ tiếng Việt ổn định
 - Chủ đạo topic so sánh / Top 5
 - Dashboard Flask để preview, tạo lịch tuần, đăng thủ công, reset trạng thái
@@ -67,6 +67,12 @@ Bài test dùng topic index `0` mặc định. Muốn đổi topic:
 
 ```bash
 python scripts/create_test_post.py 1
+```
+
+Nếu chỉ muốn test overlay/caption dù Gemini image đang lỗi:
+
+```bash
+python scripts/create_test_post.py --allow-placeholder
 ```
 
 ## Preview bài

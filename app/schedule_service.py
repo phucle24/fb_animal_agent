@@ -56,7 +56,7 @@ def prepare_one_test_post(topic_index: int = 0) -> dict:
     tz = ZoneInfo(TIMEZONE)
     scheduled_at = datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S")
     topic = get_topic_by_index(topic_index)
-    post_id = build_post(topic, scheduled_at, "test")
+    post_id = build_post(topic, scheduled_at, "test", image_fallback_on_error=False)
     return {
         "id": post_id,
         "scheduled_at": scheduled_at,

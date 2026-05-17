@@ -25,8 +25,14 @@ GEMINI_API_KEY = os.getenv("ANIMAL_AGENT_GEMINI_API_KEY", "").strip()
 GEMINI_TEXT_MODEL = os.getenv("ANIMAL_AGENT_GEMINI_TEXT_MODEL", "gemini-2.5-flash").strip()
 GEMINI_IMAGE_MODEL = os.getenv(
     "ANIMAL_AGENT_GEMINI_IMAGE_MODEL",
-    "gemini-3.1-flash-image-preview",
+    "gemini-2.5-flash-image",
 ).strip()
+IMAGE_FALLBACK_ON_ERROR = os.getenv("ANIMAL_AGENT_IMAGE_FALLBACK_ON_ERROR", "false").lower() in {
+    "1",
+    "true",
+    "yes",
+    "on",
+}
 
 FB_PAGE_ID = os.getenv("ANIMAL_AGENT_FB_PAGE_ID", "").strip()
 FB_PAGE_TOKEN = os.getenv("ANIMAL_AGENT_FB_PAGE_TOKEN", "").strip()
