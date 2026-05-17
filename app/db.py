@@ -42,6 +42,19 @@ def init_db():
         """
     )
 
+    _ensure_columns(
+        cur,
+        "posts",
+        {
+            "batch_job_name": "TEXT",
+            "batch_request_key": "TEXT",
+            "batch_state": "TEXT",
+            "batch_error": "TEXT",
+            "batch_submitted_at": "TEXT",
+            "batch_completed_at": "TEXT",
+        },
+    )
+
     cur.execute(
         """
         CREATE UNIQUE INDEX IF NOT EXISTS idx_posts_schedule_slot
@@ -50,9 +63,18 @@ def init_db():
     )
     cur.execute("CREATE INDEX IF NOT EXISTS idx_posts_status ON posts (status)")
     cur.execute("CREATE INDEX IF NOT EXISTS idx_posts_topic_key ON posts (topic_key)")
+    cur.execute("CREATE INDEX IF NOT EXISTS idx_posts_batch_job_name ON posts (batch_job_name)")
 
     conn.commit()
     conn.close()
+
+
+def _ensure_columns(cur, table_name: str, columns: dict[str, str]):
+    cur.execute(f"PRAGMA table_info({table_name})")
+    existing = {row["name"] for row in cur.fetchall()}
+    for column, definition in columns.items():
+        if column not in existing:
+            cur.execute(f"ALTER TABLE {table_name} ADD COLUMN {column} {definition}")
 
 
 def insert_post(data: dict) -> int:
@@ -65,8 +87,9 @@ def insert_post(data: dict) -> int:
             scheduled_at, slot, topic_type, topic_key, title,
             overlay_title, overlay_subtitle, overlay_stat, overlay_hook,
             caption, image_prompt, topic_payload, raw_image_path,
-            final_image_path, status
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            final_image_path, status, batch_job_name, batch_request_key,
+            batch_state, batch_error, batch_submitted_at, batch_completed_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             data["scheduled_at"],
@@ -84,6 +107,12 @@ def insert_post(data: dict) -> int:
             data.get("raw_image_path"),
             data.get("final_image_path"),
             data.get("status", "READY"),
+            data.get("batch_job_name"),
+            data.get("batch_request_key"),
+            data.get("batch_state"),
+            data.get("batch_error"),
+            data.get("batch_submitted_at"),
+            data.get("batch_completed_at"),
         ),
     )
 
@@ -113,6 +142,24 @@ def count_posts() -> int:
     conn = get_conn()
     cur = conn.cursor()
     cur.execute("SELECT COUNT(*) AS total FROM posts")
+    total = cur.fetchone()["total"]
+    conn.close()
+    return total
+
+
+def count_future_posts(now_iso: str, statuses: tuple[str, ...] = ("READY", "WAITING_IMAGE")) -> int:
+    conn = get_conn()
+    cur = conn.cursor()
+    placeholders = ",".join("?" for _ in statuses)
+    cur.execute(
+        f"""
+        SELECT COUNT(*) AS total
+        FROM posts
+        WHERE scheduled_at > ?
+          AND status IN ({placeholders})
+        """,
+        (now_iso, *statuses),
+    )
     total = cur.fetchone()["total"]
     conn.close()
     return total
@@ -180,6 +227,48 @@ def mark_failed(post_id: int, error_message: str):
     conn.close()
 
 
+def mark_image_ready(post_id: int, raw_image_path: str, final_image_path: str):
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        UPDATE posts
+        SET status = 'READY',
+            raw_image_path = ?,
+            final_image_path = ?,
+            error_message = NULL,
+            batch_error = NULL,
+            batch_state = 'JOB_STATE_SUCCEEDED',
+            batch_completed_at = CURRENT_TIMESTAMP,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+        """,
+        (raw_image_path, final_image_path, post_id),
+    )
+    conn.commit()
+    conn.close()
+
+
+def mark_image_failed(post_id: int, error_message: str):
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        UPDATE posts
+        SET status = 'IMAGE_FAILED',
+            error_message = ?,
+            batch_error = ?,
+            batch_state = COALESCE(batch_state, 'JOB_STATE_FAILED'),
+            batch_completed_at = CURRENT_TIMESTAMP,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+        """,
+        (error_message[:1000], error_message[:1000], post_id),
+    )
+    conn.commit()
+    conn.close()
+
+
 def update_status(post_id: int, status: str):
     conn = get_conn()
     cur = conn.cursor()
@@ -195,6 +284,115 @@ def update_status(post_id: int, status: str):
     )
     conn.commit()
     conn.close()
+
+
+def update_post_caption(post_id: int, caption: str):
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        UPDATE posts
+        SET caption = ?,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+        """,
+        (caption, post_id),
+    )
+    conn.commit()
+    conn.close()
+
+
+def set_batch_for_posts(post_ids: list[int], batch_job_name: str, batch_state: str | None = None):
+    if not post_ids:
+        return
+    conn = get_conn()
+    cur = conn.cursor()
+    placeholders = ",".join("?" for _ in post_ids)
+    params = [batch_job_name, batch_state, *post_ids]
+    cur.execute(
+        f"""
+        UPDATE posts
+        SET batch_job_name = ?,
+            batch_state = ?,
+            batch_submitted_at = CURRENT_TIMESTAMP,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id IN ({placeholders})
+        """,
+        params,
+    )
+    conn.commit()
+    conn.close()
+
+
+def update_batch_state(batch_job_name: str, batch_state: str, batch_error: str | None = None):
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        UPDATE posts
+        SET batch_state = ?,
+            batch_error = ?,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE batch_job_name = ?
+          AND status = 'WAITING_IMAGE'
+        """,
+        (batch_state, batch_error[:1000] if batch_error else None, batch_job_name),
+    )
+    conn.commit()
+    conn.close()
+
+
+def list_posts_for_batch_submission(limit: int = 100):
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        SELECT * FROM posts
+        WHERE status = 'WAITING_IMAGE'
+          AND batch_job_name IS NULL
+        ORDER BY scheduled_at ASC, id ASC
+        LIMIT ?
+        """,
+        (limit,),
+    )
+    rows = cur.fetchall()
+    conn.close()
+    return rows
+
+
+def list_batch_jobs_to_poll():
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        SELECT batch_job_name
+        FROM posts
+        WHERE status = 'WAITING_IMAGE'
+          AND batch_job_name IS NOT NULL
+        GROUP BY batch_job_name
+        ORDER BY MIN(batch_submitted_at) ASC
+        """
+    )
+    rows = [row["batch_job_name"] for row in cur.fetchall()]
+    conn.close()
+    return rows
+
+
+def list_posts_by_batch_job(batch_job_name: str):
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        SELECT * FROM posts
+        WHERE batch_job_name = ?
+          AND status = 'WAITING_IMAGE'
+        ORDER BY id ASC
+        """,
+        (batch_job_name,),
+    )
+    rows = cur.fetchall()
+    conn.close()
+    return rows
 
 
 def list_recent_posts(limit: int = 10):
@@ -257,4 +455,3 @@ def dashboard_stats() -> dict:
         "type_counts": Counter(type_counts),
         "db_path": str(Path(DB_PATH)),
     }
-

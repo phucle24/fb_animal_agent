@@ -20,6 +20,17 @@
         <input type="number" min="1" max="30" name="days" value="7" aria-label="Số ngày">
         <button class="button primary" type="submit">Tạo lịch tuần</button>
       </form>
+      <form method="post" action="{{ url_for('action_prepare_week_batch') }}" class="inline-form">
+        <input type="number" min="1" max="30" name="days" value="7" aria-label="Số ngày batch">
+        <button class="button primary" type="submit">Tạo tuần Batch</button>
+      </form>
+      <form method="post" action="{{ url_for('action_poll_batch_images') }}">
+        <button class="button secondary" type="submit">Poll Batch ảnh</button>
+      </form>
+      <form method="post" action="{{ url_for('action_submit_pending_batch') }}" class="inline-form">
+        <input type="number" min="1" max="500" name="limit" value="100" aria-label="Batch limit">
+        <button class="button secondary" type="submit">Submit pending Batch</button>
+      </form>
     </div>
   </section>
 
@@ -37,6 +48,10 @@
       <strong>{{ stats.status_counts.POSTED }}</strong>
     </div>
     <div class="stat-card">
+      <span class="stat-label">WAITING_IMAGE</span>
+      <strong>{{ stats.status_counts.WAITING_IMAGE }}</strong>
+    </div>
+    <div class="stat-card">
       <span class="stat-label">FAILED</span>
       <strong>{{ stats.status_counts.FAILED }}</strong>
     </div>
@@ -47,7 +62,9 @@
       <a class="filter-pill {% if not active_status %}active{% endif %}" href="{{ url_for('index') }}">Tất cả</a>
       <a class="filter-pill {% if active_status == 'READY' %}active{% endif %}" href="{{ url_for('index', status='READY') }}">READY</a>
       <a class="filter-pill {% if active_status == 'POSTED' %}active{% endif %}" href="{{ url_for('index', status='POSTED') }}">POSTED</a>
+      <a class="filter-pill {% if active_status == 'WAITING_IMAGE' %}active{% endif %}" href="{{ url_for('index', status='WAITING_IMAGE') }}">WAITING_IMAGE</a>
       <a class="filter-pill {% if active_status == 'FAILED' %}active{% endif %}" href="{{ url_for('index', status='FAILED') }}">FAILED</a>
+      <a class="filter-pill {% if active_status == 'IMAGE_FAILED' %}active{% endif %}" href="{{ url_for('index', status='IMAGE_FAILED') }}">IMAGE_FAILED</a>
       <a class="filter-pill {% if active_status == 'SKIPPED' %}active{% endif %}" href="{{ url_for('index', status='SKIPPED') }}">SKIPPED</a>
     </div>
     <span class="db-path">{{ stats.db_path }}</span>

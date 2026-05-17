@@ -71,6 +71,34 @@ def create_placeholder_image(output_path: str) -> str:
     return output_path
 
 
+def save_image_from_response(response, output_path: str) -> str:
+    output_file = Path(output_path)
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+
+    parts = getattr(response, "parts", None)
+    if parts:
+        for part in parts:
+            if getattr(part, "inline_data", None) is not None:
+                image = part.as_image()
+                image.save(output_path)
+                return output_path
+
+    candidates = getattr(response, "candidates", None)
+    if candidates:
+        for candidate in candidates:
+            content = getattr(candidate, "content", None)
+            if not content:
+                continue
+            c_parts = getattr(content, "parts", [])
+            for part in c_parts:
+                if getattr(part, "inline_data", None) is not None:
+                    image = part.as_image()
+                    image.save(output_path)
+                    return output_path
+
+    raise RuntimeError(f"Model did not return an image part: {_describe_response(response)}")
+
+
 def generate_image(
     image_prompt: str,
     output_path: str,
@@ -92,29 +120,7 @@ def generate_image(
                 contents=[image_prompt],
                 config=types.GenerateContentConfig(response_modalities=["TEXT", "IMAGE"]),
             )
-
-            parts = getattr(response, "parts", None)
-            if parts:
-                for part in parts:
-                    if getattr(part, "inline_data", None) is not None:
-                        image = part.as_image()
-                        image.save(output_path)
-                        return output_path
-
-            candidates = getattr(response, "candidates", None)
-            if candidates:
-                for candidate in candidates:
-                    content = getattr(candidate, "content", None)
-                    if not content:
-                        continue
-                    c_parts = getattr(content, "parts", [])
-                    for part in c_parts:
-                        if getattr(part, "inline_data", None) is not None:
-                            image = part.as_image()
-                            image.save(output_path)
-                            return output_path
-
-            raise RuntimeError(f"Model did not return an image part: {_describe_response(response)}")
+            return save_image_from_response(response, output_path)
         except Exception as exc:
             last_error = repr(exc)
 

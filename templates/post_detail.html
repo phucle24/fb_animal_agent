@@ -15,7 +15,7 @@
       </div>
     </div>
     <div class="actions-row">
-      {% if post.status != 'POSTED' %}
+      {% if post.status == 'READY' %}
         <form method="post" action="{{ url_for('action_publish', post_id=post.id) }}">
           <button class="button primary danger-check" type="submit">Đăng ngay</button>
         </form>
@@ -63,6 +63,15 @@
       <h2>Image prompt</h2>
       <p class="prompt-text">{{ post.image_prompt }}</p>
 
+      {% if post.batch_job_name %}
+        <h2>Batch</h2>
+        <dl class="kv-list">
+          <div><dt>Job</dt><dd class="mono">{{ post.batch_job_name }}</dd></div>
+          <div><dt>State</dt><dd>{{ post.batch_state or '-' }}</dd></div>
+          <div><dt>Error</dt><dd>{{ post.batch_error or '-' }}</dd></div>
+        </dl>
+      {% endif %}
+
       {% if post.fb_post_id %}
         <h2>Facebook</h2>
         <p class="mono">{{ post.fb_post_id }}</p>
@@ -70,4 +79,3 @@
     </aside>
   </section>
 {% endblock %}
-

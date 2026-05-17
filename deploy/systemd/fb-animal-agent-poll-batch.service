@@ -1,0 +1,11 @@
+[Unit]
+Description=Poll FB Animal Agent Gemini Batch image jobs
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/fb_animal_agent
+EnvironmentFile=/opt/fb_animal_agent/.env
+ExecStart=/opt/fb_animal_agent/venv/bin/python scripts/poll_batch_images.py
+

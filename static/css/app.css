@@ -156,7 +156,7 @@ p {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 14px;
   margin-bottom: 20px;
 }
@@ -272,6 +272,16 @@ p {
 }
 
 .status-failed {
+  background: #fef3f2;
+  color: var(--failed);
+}
+
+.status-waiting_image {
+  background: #fffaeb;
+  color: var(--warn);
+}
+
+.status-image_failed {
   background: #fef3f2;
   color: var(--failed);
 }
@@ -457,4 +467,3 @@ textarea {
     max-width: 100%;
   }
 }
-

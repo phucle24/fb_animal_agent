@@ -52,3 +52,6 @@ FONT_REGULAR = os.getenv(
 WEB_HOST = os.getenv("ANIMAL_AGENT_WEB_HOST", "127.0.0.1").strip()
 WEB_PORT = int(os.getenv("ANIMAL_AGENT_WEB_PORT", "8000"))
 WEB_SECRET_KEY = os.getenv("ANIMAL_AGENT_WEB_SECRET_KEY", "change-me-local-dashboard")
+
+MIN_FUTURE_POSTS = int(os.getenv("ANIMAL_AGENT_MIN_FUTURE_POSTS", "4"))
+TARGET_FUTURE_POSTS = int(os.getenv("ANIMAL_AGENT_TARGET_FUTURE_POSTS", "4"))

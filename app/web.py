@@ -2,10 +2,11 @@ from pathlib import Path
 
 from flask import Flask, abort, flash, redirect, render_template, request, send_file, url_for
 
+from app.batch_service import poll_all_image_batches, submit_pending_image_batch
 from app.config import BASE_DIR, WEB_HOST, WEB_PORT, WEB_SECRET_KEY
 from app.db import dashboard_stats, get_post, init_db, list_posts, mark_failed, mark_posted, update_status
 from app.facebook_service import publish_photo
-from app.schedule_service import prepare_one_test_post, prepare_weekly_posts
+from app.schedule_service import prepare_one_test_post, prepare_weekly_posts, prepare_weekly_posts_for_batch
 
 
 def create_app() -> Flask:
@@ -47,6 +48,53 @@ def create_app() -> Flask:
             flash(f"Prepare failed: {exc}", "error")
         return redirect(url_for("index"))
 
+    @flask_app.post("/actions/prepare-week-batch")
+    def action_prepare_week_batch():
+        try:
+            days = int(request.form.get("days", "7"))
+            created = prepare_weekly_posts_for_batch(days=days)
+            if created:
+                result = submit_pending_image_batch(limit=len(created))
+                flash(
+                    f"Created {len(created)} posts and submitted batch {result['batch_job_name']}.",
+                    "success",
+                )
+            else:
+                flash("No new posts created; existing schedule was kept.", "success")
+        except Exception as exc:
+            flash(f"Batch prepare failed: {exc}", "error")
+        return redirect(url_for("index"))
+
+    @flask_app.post("/actions/poll-batch-images")
+    def action_poll_batch_images():
+        try:
+            results = poll_all_image_batches()
+            if not results:
+                flash("No batch image jobs to poll.", "success")
+            else:
+                ready = sum(result["ready"] for result in results)
+                failed = sum(result["failed"] for result in results)
+                flash(f"Polled {len(results)} batch jobs. READY={ready}, failed={failed}.", "success")
+        except Exception as exc:
+            flash(f"Poll batch failed: {exc}", "error")
+        return redirect(url_for("index"))
+
+    @flask_app.post("/actions/submit-pending-batch")
+    def action_submit_pending_batch():
+        try:
+            limit = int(request.form.get("limit", "100"))
+            result = submit_pending_image_batch(limit=limit)
+            if result["submitted"]:
+                flash(
+                    f"Submitted {result['submitted']} posts to batch {result['batch_job_name']}.",
+                    "success",
+                )
+            else:
+                flash("No pending image posts to submit.", "success")
+        except Exception as exc:
+            flash(f"Submit pending batch failed: {exc}", "error")
+        return redirect(url_for("index"))
+
     @flask_app.post("/actions/prepare-one-test")
     def action_prepare_one_test():
         try:
@@ -80,7 +128,7 @@ def create_app() -> Flask:
         if not post:
             abort(404)
         status = request.form.get("status", "").strip().upper()
-        if status not in {"READY", "FAILED", "SKIPPED"}:
+        if status not in {"READY", "FAILED", "SKIPPED", "WAITING_IMAGE", "IMAGE_FAILED"}:
             flash("Unsupported status.", "error")
             return redirect(url_for("post_detail", post_id=post_id))
         update_status(post_id, status)

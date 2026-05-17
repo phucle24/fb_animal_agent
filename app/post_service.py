@@ -31,6 +31,15 @@ Important rendering rules:
 - Keep the animal photo areas clear, realistic, sharp, and visually dominant.
 """.strip()
 
+CAPTION_HASHTAGS = "#thegioimuonloai #topdongvat #reivewthegioidongvat #khamphatunhien"
+
+
+def append_caption_hashtags(caption: str) -> str:
+    caption = caption.strip()
+    if CAPTION_HASHTAGS in caption:
+        return caption
+    return f"{caption}\n\n{CAPTION_HASHTAGS}"
+
 
 def reinforce_image_prompt(image_prompt: str, topic: dict) -> str:
     if topic["topic_type"] == "comparison_top5":
@@ -77,14 +86,14 @@ def build_comparison_caption(title: str, caption_intro: str, items: list) -> str
 
     lines += ["", "Ảnh minh họa AI."]
 
-    return "\n".join(lines)
+    return append_caption_hashtags("\n".join(lines))
 
 
 def build_single_caption(title: str, caption: str) -> str:
-    return f"{title}\n\n{caption.strip()}"
+    return append_caption_hashtags(f"{title}\n\n{caption.strip()}")
 
 
-def build_post(topic: dict, scheduled_at: str, slot: str, image_fallback_on_error: bool | None = None) -> int:
+def build_post_payload(topic: dict, scheduled_at: str, slot: str) -> dict:
     base_name = slugify(f"{scheduled_at}_{slot}_{topic['topic_key']}")
     raw_path = str(RAW_DIR / f"{base_name}.png")
     final_path = str(FINAL_DIR / f"{base_name}.jpg")
@@ -92,23 +101,12 @@ def build_post(topic: dict, scheduled_at: str, slot: str, image_fallback_on_erro
     if topic["topic_type"] == "comparison_top5":
         content = generate_comparison_content(topic)
         image_prompt = reinforce_image_prompt(content["image_prompt"], topic)
-        generate_image(image_prompt, raw_path, fallback_on_error=image_fallback_on_error)
-
-        overlay_comparison_top5(
-            raw_path=raw_path,
-            final_path=final_path,
-            overlay_title=content["overlay_title"],
-            overlay_subtitle=content["overlay_subtitle"],
-            items=topic["items"],
-        )
-
         caption = build_comparison_caption(
             title=content["title"],
             caption_intro=content["caption_intro"],
             items=topic["items"],
         )
-
-        post_data = {
+        return {
             "scheduled_at": scheduled_at,
             "slot": slot,
             "topic_type": topic["topic_type"],
@@ -125,24 +123,12 @@ def build_post(topic: dict, scheduled_at: str, slot: str, image_fallback_on_erro
             "final_image_path": final_path,
             "status": "READY",
         }
-        return insert_post(post_data)
 
     if topic["topic_type"] == "single_card":
         content = generate_single_card_content(topic)
         image_prompt = reinforce_image_prompt(content["image_prompt"], topic)
-        generate_image(image_prompt, raw_path, fallback_on_error=image_fallback_on_error)
-
-        overlay_single_card(
-            raw_path=raw_path,
-            final_path=final_path,
-            overlay_title=content["overlay_title"],
-            overlay_stat=content["overlay_stat"],
-            overlay_hook=content["overlay_hook"],
-        )
-
         caption = build_single_caption(content["title"], content["caption"])
-
-        post_data = {
+        return {
             "scheduled_at": scheduled_at,
             "slot": slot,
             "topic_type": topic["topic_type"],
@@ -159,6 +145,46 @@ def build_post(topic: dict, scheduled_at: str, slot: str, image_fallback_on_erro
             "final_image_path": final_path,
             "status": "READY",
         }
-        return insert_post(post_data)
 
     raise ValueError(f"Unsupported topic_type: {topic['topic_type']}")
+
+
+def overlay_post_image(post_data: dict) -> str:
+    topic = json.loads(post_data["topic_payload"])
+    if post_data["topic_type"] == "comparison_top5":
+        return overlay_comparison_top5(
+            raw_path=post_data["raw_image_path"],
+            final_path=post_data["final_image_path"],
+            overlay_title=post_data["overlay_title"],
+            overlay_subtitle=post_data["overlay_subtitle"],
+            items=topic["items"],
+        )
+
+    if post_data["topic_type"] == "single_card":
+        return overlay_single_card(
+            raw_path=post_data["raw_image_path"],
+            final_path=post_data["final_image_path"],
+            overlay_title=post_data["overlay_title"],
+            overlay_stat=post_data["overlay_stat"],
+            overlay_hook=post_data["overlay_hook"],
+        )
+
+    raise ValueError(f"Unsupported topic_type: {post_data['topic_type']}")
+
+
+def build_post(topic: dict, scheduled_at: str, slot: str, image_fallback_on_error: bool | None = None) -> int:
+    post_data = build_post_payload(topic, scheduled_at, slot)
+    generate_image(
+        post_data["image_prompt"],
+        post_data["raw_image_path"],
+        fallback_on_error=image_fallback_on_error,
+    )
+    overlay_post_image(post_data)
+    return insert_post(post_data)
+
+
+def build_post_for_batch(topic: dict, scheduled_at: str, slot: str) -> int:
+    post_data = build_post_payload(topic, scheduled_at, slot)
+    post_data["status"] = "WAITING_IMAGE"
+    post_data["batch_request_key"] = f"{post_data['scheduled_at']}_{post_data['slot']}_{post_data['topic_key']}"
+    return insert_post(post_data)

@@ -1,0 +1,11 @@
+[Unit]
+Description=Publish FB Animal Agent afternoon posts daily
+
+[Timer]
+OnCalendar=*-*-* 15:00:00
+Persistent=true
+Unit=fb-animal-agent-publish-afternoon.service
+
+[Install]
+WantedBy=timers.target
+
