@@ -5,7 +5,6 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
-WorkingDirectory=/opt/fb_animal_agent
-EnvironmentFile=/opt/fb_animal_agent/.env
-ExecStart=/opt/fb_animal_agent/venv/bin/python scripts/poll_batch_images.py
-
+WorkingDirectory=/root/fb_animal_agent
+EnvironmentFile=/root/fb_animal_agent/.env
+ExecStart=/root/fb_animal_agent/venv/bin/python scripts/poll_batch_images.py

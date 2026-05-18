@@ -9,29 +9,21 @@ from app.utils import slugify
 
 
 INFOGRAPHIC_IMAGE_TEMPLATE = """
-Universal infographic image template:
-Create a professionally designed vertical stacked-panel infographic background for a ranking or list.
-The style must be clean, modern data visualization combined with natural wildlife photography.
-
-Layout:
-- Vertical 4:5 social media poster composition.
-- A clear header area at the top.
-- Exactly five horizontal item panels stacked one above another for ranking items 1 to 5.
-- Each panel should feel like it has a left data area and a right image area.
-- The left data areas must be clean, low-detail, and suitable for later text overlay.
-- The right image area should contain the subject animal in realistic motion.
-- Use blurred natural landscape backgrounds appropriate to the habitat.
-- Add subtle motion lines, data glow, and dynamic flourishes.
-
-Important rendering rules:
-- Do not render any readable text, letters, numbers, labels, fake UI text, logos, watermarks, or captions.
-- Do not render ranking numbers; these will be added later by Python.
-- Do not render animal names; these will be added later by Python.
-- Leave clean space for text overlay in the header and left side of each panel.
-- Keep the animal photo areas clear, realistic, sharp, and visually dominant.
+FINAL INFOGRAPHIC MUST CONTAIN THE EXACT TEXT BELOW.
+Create a finished vertical 4:5 Vietnamese infographic poster for Facebook feed, in the same visual direction as a premium wildlife ranking graphic:
+- black/dark charcoal background panels
+- copper/orange border and separators
+- bold condensed white Vietnamese typography
+- large copper/orange rank numbers
+- stacked horizontal ranking panels
+- left black text block, right realistic wildlife photo block
+- dramatic photorealistic animal images, sharp eyes, motion, cinematic lighting
+- vertical 4:5 layout with enough height for a header and five stacked panels, all text readable without cropping
+- no Python overlay will be used later; all text must be rendered by the image model now
 """.strip()
 
-CAPTION_HASHTAGS = "#thegioimuonloai #topdongvat #reivewthegioidongvat #khamphatunhien"
+CAPTION_HASHTAGS = "#thegioimuonloai #topdongbat #reivewthegioidongvat #khamphatunhien"
+MODEL_RENDERED_TEXT_MARKER = "FINAL INFOGRAPHIC MUST CONTAIN THE EXACT TEXT BELOW."
 
 
 def append_caption_hashtags(caption: str) -> str:
@@ -41,36 +33,78 @@ def append_caption_hashtags(caption: str) -> str:
     return f"{caption}\n\n{CAPTION_HASHTAGS}"
 
 
-def reinforce_image_prompt(image_prompt: str, topic: dict) -> str:
+def metric_label_for_topic(topic: dict) -> str:
+    labels = {
+        "speed": "TỐC ĐỘ",
+        "height": "CHIỀU CAO",
+        "weight": "CÂN NẶNG",
+        "size": "KÍCH THƯỚC",
+        "special ability": "ĐẶC ĐIỂM",
+    }
+    return labels.get(topic.get("comparison_angle", ""), "THÔNG TIN")
+
+
+def stat_for_image(stat: str) -> str:
+    return stat.upper().replace("KM/H", "KM/H")
+
+
+def build_model_rendered_infographic_prompt(image_prompt: str, topic: dict, content: dict) -> str:
     if topic["topic_type"] == "comparison_top5":
-        animals = ", ".join(item["name_en"] for item in topic["items"])
-        item_list = "\n".join(
-            f"- Rank {item['rank']}: {item['name_en']} in dynamic natural motion"
+        title = content.get("overlay_subtitle") or topic["subject_vi"]
+        title = title.upper()
+        metric_label = metric_label_for_topic(topic)
+        rows = "\n".join(
+            "\n".join(
+                [
+                    f"Panel {item['rank']}:",
+                    f"- Rank text: {item['rank']:02d}",
+                    f"- Animal name text: {item['name_vi'].upper()}",
+                    f"- Metric label text: {metric_label}:",
+                    f"- Metric value text: {stat_for_image(item['stat'])}",
+                    f"- Animal photo: realistic {item['name_en']} in its natural habitat, dynamic motion, visible face and body",
+                ]
+            )
             for item in topic["items"]
         )
         return (
-            f"{image_prompt}\n\n"
             f"{INFOGRAPHIC_IMAGE_TEMPLATE}\n\n"
-            "Specific subject for this instance:\n"
-            f"- Topic: {topic['subject_en']}\n"
-            f"- Animals that must appear clearly and recognizably: {animals}\n"
-            f"{item_list}\n\n"
-            "Design adaptation:\n"
-            "- Use warm orange, amber, and earth-tone accents for land animals.\n"
-            "- Use an open savanna or grassland habitat where appropriate.\n"
-            "- Show each animal as a real full-body wildlife photo element, not an illustration or abstract symbol.\n"
-            "- Add a subtle thematic emblem or compass-star detail in the bottom corner, without text."
+            "Reference visual style:\n"
+            "- Reference layout: header title on top, numbered panels below, text column left, animal image right.\n"
+            "- Vertical 4:5 canvas for Facebook feed. Use compact spacing; do not crop or hide any panel.\n"
+            "- Use strong black and copper/orange theme, thin copper border, clean separators.\n"
+            "- Use realistic animal photography inside each right panel.\n\n"
+            "Header text to render exactly:\n"
+            f"{title}\n\n"
+            "Panel text and image content to render exactly:\n"
+            f"{rows}\n\n"
+            "Strict text rules:\n"
+            "- Render Vietnamese diacritics correctly.\n"
+            "- Use the exact text strings above, no extra words, no English labels, no fake text.\n"
+            "- Do not add watermark, logo, captions, brand text, or random symbols.\n"
+            "- If text cannot fit, reduce font size but keep all listed text readable.\n\n"
+            "Additional photo/style guidance from the text model, use only if it does not conflict with exact text rules:\n"
+            f"{image_prompt}"
         )
 
+    title = content.get("overlay_title") or topic["subject_vi"]
+    stat = content.get("overlay_stat") or topic.get("fact_value", "")
+    hook = content.get("overlay_hook") or ""
     return (
-        f"{image_prompt}\n\n"
-        "Single-card wildlife poster background:\n"
-        f"- Main subject: one real, recognizable {topic['subject_en']}.\n"
-        "- Use photorealistic wildlife or nature photography style.\n"
-        "- Keep one clean low-detail area for later text overlay.\n"
-        "- The animal must be visually dominant and shown clearly in its natural habitat.\n"
-        "- Do not render any readable text, letters, numbers, logos, watermarks, or fake UI text."
+        f"{INFOGRAPHIC_IMAGE_TEMPLATE}\n\n"
+        "Create a finished single-card Vietnamese wildlife poster.\n"
+        "Text to render exactly:\n"
+        f"- Main title: {title.upper()}\n"
+        f"- Large stat: {stat.upper()}\n"
+        f"- Hook: {hook}\n\n"
+        f"Main animal photo: realistic {topic['subject_en']} in its natural habitat, cinematic, sharp.\n"
+        "Strict text rules: render Vietnamese diacritics correctly, no extra words, no watermark, no logo.\n\n"
+        "Additional photo/style guidance from the text model, use only if it does not conflict with exact text rules:\n"
+        f"{image_prompt}"
     )
+
+
+def image_prompt_renders_final_text(image_prompt: str) -> bool:
+    return MODEL_RENDERED_TEXT_MARKER in image_prompt
 
 
 def build_comparison_caption(title: str, caption_intro: str, items: list) -> str:
@@ -95,12 +129,11 @@ def build_single_caption(title: str, caption: str) -> str:
 
 def build_post_payload(topic: dict, scheduled_at: str, slot: str) -> dict:
     base_name = slugify(f"{scheduled_at}_{slot}_{topic['topic_key']}")
-    raw_path = str(RAW_DIR / f"{base_name}.png")
     final_path = str(FINAL_DIR / f"{base_name}.jpg")
 
     if topic["topic_type"] == "comparison_top5":
         content = generate_comparison_content(topic)
-        image_prompt = reinforce_image_prompt(content["image_prompt"], topic)
+        image_prompt = build_model_rendered_infographic_prompt(content["image_prompt"], topic, content)
         caption = build_comparison_caption(
             title=content["title"],
             caption_intro=content["caption_intro"],
@@ -119,14 +152,14 @@ def build_post_payload(topic: dict, scheduled_at: str, slot: str) -> dict:
             "caption": caption,
             "image_prompt": image_prompt,
             "topic_payload": json.dumps(topic, ensure_ascii=False),
-            "raw_image_path": raw_path,
+            "raw_image_path": final_path,
             "final_image_path": final_path,
             "status": "READY",
         }
 
     if topic["topic_type"] == "single_card":
         content = generate_single_card_content(topic)
-        image_prompt = reinforce_image_prompt(content["image_prompt"], topic)
+        image_prompt = build_model_rendered_infographic_prompt(content["image_prompt"], topic, content)
         caption = build_single_caption(content["title"], content["caption"])
         return {
             "scheduled_at": scheduled_at,
@@ -141,7 +174,7 @@ def build_post_payload(topic: dict, scheduled_at: str, slot: str) -> dict:
             "caption": caption,
             "image_prompt": image_prompt,
             "topic_payload": json.dumps(topic, ensure_ascii=False),
-            "raw_image_path": raw_path,
+            "raw_image_path": final_path,
             "final_image_path": final_path,
             "status": "READY",
         }
@@ -176,10 +209,9 @@ def build_post(topic: dict, scheduled_at: str, slot: str, image_fallback_on_erro
     post_data = build_post_payload(topic, scheduled_at, slot)
     generate_image(
         post_data["image_prompt"],
-        post_data["raw_image_path"],
+        post_data["final_image_path"],
         fallback_on_error=image_fallback_on_error,
     )
-    overlay_post_image(post_data)
     return insert_post(post_data)
 
 

@@ -6,27 +6,29 @@ from zoneinfo import ZoneInfo
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app.config import TIMEZONE
-from app.db import get_due_posts, mark_failed, mark_posted
+from app.db import get_all_due_posts, get_due_posts, mark_failed, mark_posted
 from app.facebook_service import publish_photo
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python scripts/publish_due_posts.py morning|afternoon")
-        sys.exit(1)
-
-    slot = sys.argv[1].strip().lower()
-    if slot not in {"morning", "afternoon"}:
-        print("slot must be morning or afternoon")
+    slot = sys.argv[1].strip().lower() if len(sys.argv) >= 2 else "all"
+    if slot not in {"all", "morning", "afternoon"}:
+        print("Usage: python scripts/publish_due_posts.py [all|morning|afternoon]")
         sys.exit(1)
 
     tz = ZoneInfo(TIMEZONE)
     now_iso = datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S")
 
-    posts = get_due_posts(now_iso, slot)
+    if slot == "all":
+        posts = get_all_due_posts(now_iso)
+    else:
+        posts = get_due_posts(now_iso, slot)
+
     if not posts:
         print("No due posts.")
         sys.exit(0)
+
+    print(f"Found {len(posts)} due posts for slot={slot} at {now_iso}.")
 
     for post in posts:
         try:

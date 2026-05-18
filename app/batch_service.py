@@ -1,7 +1,7 @@
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from app.config import GEMINI_API_KEY, GEMINI_IMAGE_MODEL, TIMEZONE
+from app.config import GEMINI_API_KEY, GEMINI_IMAGE_MODEL, IMAGE_ASPECT_RATIO, TIMEZONE
 from app.db import (
     list_batch_jobs_to_poll,
     list_posts_by_batch_job,
@@ -12,7 +12,7 @@ from app.db import (
     update_batch_state,
 )
 from app.image_service import save_image_from_response
-from app.post_service import overlay_post_image
+from app.post_service import image_prompt_renders_final_text, overlay_post_image
 
 
 COMPLETED_STATES = {
@@ -44,6 +44,7 @@ def _image_batch_request(image_prompt: str) -> dict:
         ],
         "config": {
             "response_modalities": ["TEXT", "IMAGE"],
+            "image_config": {"aspect_ratio": IMAGE_ASPECT_RATIO},
         },
     }
 
@@ -148,9 +149,14 @@ def process_batch_job(batch_job_name: str) -> dict:
             continue
 
         try:
-            save_image_from_response(response, post["raw_image_path"])
-            overlay_post_image(post)
-            mark_image_ready(post["id"], post["raw_image_path"], post["final_image_path"])
+            if image_prompt_renders_final_text(post["image_prompt"]):
+                save_image_from_response(response, post["final_image_path"])
+                mark_image_ready(post["id"], post["final_image_path"], post["final_image_path"])
+            else:
+                # Legacy in-flight jobs created before model-rendered text was enabled.
+                save_image_from_response(response, post["raw_image_path"])
+                overlay_post_image(post)
+                mark_image_ready(post["id"], post["raw_image_path"], post["final_image_path"])
             ready += 1
         except Exception as exc:
             mark_image_failed(post["id"], str(exc))

@@ -183,6 +183,23 @@ def get_due_posts(now_iso: str, slot: str):
     return rows
 
 
+def get_all_due_posts(now_iso: str):
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        SELECT * FROM posts
+        WHERE status = 'READY'
+          AND scheduled_at <= ?
+        ORDER BY scheduled_at ASC, id ASC
+        """,
+        (now_iso,),
+    )
+    rows = cur.fetchall()
+    conn.close()
+    return rows
+
+
 def get_post(post_id: int):
     conn = get_conn()
     cur = conn.cursor()
@@ -300,6 +317,35 @@ def update_post_caption(post_id: int, caption: str):
     )
     conn.commit()
     conn.close()
+
+
+def list_unposted_posts():
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        SELECT *
+        FROM posts
+        WHERE status != 'POSTED'
+        ORDER BY id ASC
+        """
+    )
+    rows = cur.fetchall()
+    conn.close()
+    return rows
+
+
+def delete_posts(post_ids: list[int]) -> int:
+    if not post_ids:
+        return 0
+    conn = get_conn()
+    cur = conn.cursor()
+    placeholders = ",".join("?" for _ in post_ids)
+    cur.execute(f"DELETE FROM posts WHERE id IN ({placeholders})", post_ids)
+    deleted = cur.rowcount
+    conn.commit()
+    conn.close()
+    return deleted
 
 
 def set_batch_for_posts(post_ids: list[int], batch_job_name: str, batch_state: str | None = None):

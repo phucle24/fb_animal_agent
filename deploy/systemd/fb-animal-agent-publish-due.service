@@ -1,5 +1,5 @@
 [Unit]
-Description=Publish FB Animal Agent morning posts
+Description=Publish all due FB Animal Agent posts
 After=network-online.target
 Wants=network-online.target
 
@@ -7,4 +7,4 @@ Wants=network-online.target
 Type=oneshot
 WorkingDirectory=/root/fb_animal_agent
 EnvironmentFile=/root/fb_animal_agent/.env
-ExecStart=/root/fb_animal_agent/venv/bin/python scripts/publish_due_posts.py morning
+ExecStart=/root/fb_animal_agent/venv/bin/python scripts/publish_due_posts.py all

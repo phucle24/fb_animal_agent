@@ -33,6 +33,7 @@ IMAGE_FALLBACK_ON_ERROR = os.getenv("ANIMAL_AGENT_IMAGE_FALLBACK_ON_ERROR", "fal
     "yes",
     "on",
 }
+IMAGE_ASPECT_RATIO = os.getenv("ANIMAL_AGENT_IMAGE_ASPECT_RATIO", "4:5").strip()
 
 FB_PAGE_ID = os.getenv("ANIMAL_AGENT_FB_PAGE_ID", "").strip()
 FB_PAGE_TOKEN = os.getenv("ANIMAL_AGENT_FB_PAGE_TOKEN", "").strip()

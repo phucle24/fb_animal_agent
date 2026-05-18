@@ -69,12 +69,10 @@ Yêu cầu:
 
 5. image_prompt
 - tiếng Anh
-- ảnh dạng educational social media poster / infographic background
+- mô tả phong cách ảnh động vật hoang dã thực tế cho infographic ranking
 - cinematic, sharp, visually striking
-- mô tả các sinh vật liên quan trong cùng một khung hình
-- ưu tiên bố cục phù hợp cho poster dọc Facebook
-- chừa không gian rõ ràng ở phần trên và phần dưới để overlay text
-- no text
+- mô tả môi trường sống, ánh sáng, chuyển động, biểu cảm của các sinh vật
+- không cần tự viết layout chữ vì hệ thống sẽ dựng prompt infographic cuối cùng
 - no watermark
 - suitable for ranking infographic
 
@@ -143,8 +141,8 @@ Yêu cầu:
 - wildlife / nature cinematic
 - sharp, dramatic, beautiful
 - strong subject focus
-- chừa khoảng trống rõ ràng bên trái hoặc phía trên để overlay text
-- no text
+- mô tả môi trường sống, ánh sáng, chuyển động, biểu cảm của chủ thể
+- không cần tự viết layout chữ vì hệ thống sẽ dựng prompt poster cuối cùng
 - no watermark
 - suitable for educational social media poster
 

@@ -1,0 +1,10 @@
+[Unit]
+Description=Publish due FB Animal Agent posts every 15 minutes
+
+[Timer]
+OnCalendar=*:0/15
+Persistent=true
+Unit=fb-animal-agent-publish-due.service
+
+[Install]
+WantedBy=timers.target

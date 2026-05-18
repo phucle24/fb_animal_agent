@@ -2,7 +2,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw
 
-from app.config import GEMINI_API_KEY, GEMINI_IMAGE_MODEL, IMAGE_FALLBACK_ON_ERROR
+from app.config import GEMINI_API_KEY, GEMINI_IMAGE_MODEL, IMAGE_ASPECT_RATIO, IMAGE_FALLBACK_ON_ERROR
 
 
 def _ensure_api_key():
@@ -80,7 +80,7 @@ def save_image_from_response(response, output_path: str) -> str:
         for part in parts:
             if getattr(part, "inline_data", None) is not None:
                 image = part.as_image()
-                image.save(output_path)
+                save_pil_image(image, output_path)
                 return output_path
 
     candidates = getattr(response, "candidates", None)
@@ -93,10 +93,17 @@ def save_image_from_response(response, output_path: str) -> str:
             for part in c_parts:
                 if getattr(part, "inline_data", None) is not None:
                     image = part.as_image()
-                    image.save(output_path)
+                    save_pil_image(image, output_path)
                     return output_path
 
     raise RuntimeError(f"Model did not return an image part: {_describe_response(response)}")
+
+
+def save_pil_image(image: Image.Image, output_path: str):
+    suffix = Path(output_path).suffix.lower()
+    if suffix in {".jpg", ".jpeg"} and image.mode != "RGB":
+        image = image.convert("RGB")
+    image.save(output_path, quality=95)
 
 
 def generate_image(
@@ -118,7 +125,10 @@ def generate_image(
             response = client.models.generate_content(
                 model=GEMINI_IMAGE_MODEL,
                 contents=[image_prompt],
-                config=types.GenerateContentConfig(response_modalities=["TEXT", "IMAGE"]),
+                config=types.GenerateContentConfig(
+                    response_modalities=["TEXT", "IMAGE"],
+                    image_config=types.ImageConfig(aspect_ratio=IMAGE_ASPECT_RATIO),
+                ),
             )
             return save_image_from_response(response, output_path)
         except Exception as exc:

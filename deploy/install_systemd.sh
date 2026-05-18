@@ -13,8 +13,8 @@ systemctl daemon-reload
 systemctl enable --now fb-animal-agent-web.service
 systemctl enable --now fb-animal-agent-ensure.timer
 systemctl enable --now fb-animal-agent-poll-batch.timer
+systemctl enable --now fb-animal-agent-publish-due.timer
 systemctl enable --now fb-animal-agent-publish-morning.timer
 systemctl enable --now fb-animal-agent-publish-afternoon.timer
 
 systemctl list-timers 'fb-animal-agent-*'
-

@@ -3,8 +3,8 @@
 Agent tạo bài Facebook tự động cho fanpage động vật/thực vật:
 
 - Text: `gemini-2.5-flash`
-- Image background: `gemini-2.5-flash-image`
-- Overlay text bằng Python để chữ tiếng Việt ổn định
+- Image/full infographic: `gemini-2.5-flash-image`
+- Gemini image model render luôn ảnh final có chữ theo prompt
 - Chủ đạo topic so sánh / Top 5
 - Dashboard Flask để preview, tạo lịch tuần, đăng thủ công, reset trạng thái
 - Dùng bộ biến môi trường riêng với prefix `ANIMAL_AGENT_`
@@ -55,13 +55,13 @@ python scripts/prepare_weekly_posts.py
 
 ## Tạo trước bài viết bằng Gemini Batch API
 
-Batch API dùng cho ảnh nền bất đồng bộ, rẻ hơn standard image generation nhưng không có kết quả ngay.
+Batch API dùng cho ảnh infographic final bất đồng bộ, rẻ hơn standard image generation nhưng không có kết quả ngay.
 
 Qua dashboard:
 
 1. Bấm `Tạo tuần Batch`
 2. Chờ batch xử lý
-3. Bấm `Poll Batch ảnh` để tải ảnh về, overlay text, chuyển bài sang `READY`
+3. Bấm `Poll Batch ảnh` để tải ảnh final về và chuyển bài sang `READY`
 
 Hoặc chạy CLI:
 
@@ -73,17 +73,32 @@ python scripts/poll_batch_images.py
 Cron gợi ý:
 
 ```cron
-0 2 * * 0 cd /home/ubuntu/fb_animal_agent && /home/ubuntu/fb_animal_agent/venv/bin/python scripts/prepare_weekly_posts_batch.py >> logs/agent.log 2>&1
-*/30 * * * * cd /home/ubuntu/fb_animal_agent && /home/ubuntu/fb_animal_agent/venv/bin/python scripts/poll_batch_images.py >> logs/agent.log 2>&1
-0 10 * * * cd /home/ubuntu/fb_animal_agent && /home/ubuntu/fb_animal_agent/venv/bin/python scripts/publish_due_posts.py morning >> logs/agent.log 2>&1
-0 15 * * * cd /home/ubuntu/fb_animal_agent && /home/ubuntu/fb_animal_agent/venv/bin/python scripts/publish_due_posts.py afternoon >> logs/agent.log 2>&1
+0 2 * * * cd /root/fb_animal_agent && /root/fb_animal_agent/venv/bin/python scripts/ensure_future_posts_batch.py >> logs/agent.log 2>&1
+15 */6 * * * cd /root/fb_animal_agent && /root/fb_animal_agent/venv/bin/python scripts/poll_batch_images.py >> logs/agent.log 2>&1
+*/15 * * * * cd /root/fb_animal_agent && /root/fb_animal_agent/venv/bin/python scripts/publish_due_posts.py all >> logs/agent.log 2>&1
 ```
 
 Trạng thái liên quan:
 
 - `WAITING_IMAGE`: đã có caption/prompt, đang chờ ảnh batch
 - `READY`: đã có ảnh final, sẵn sàng đăng Facebook
-- `IMAGE_FAILED`: batch hoặc overlay ảnh lỗi
+- `IMAGE_FAILED`: batch hoặc lưu ảnh lỗi
+
+Ảnh mới dùng `ANIMAL_AGENT_IMAGE_ASPECT_RATIO=4:5`; đây là tỉ lệ dọc hợp với Facebook feed và infographic Top 5.
+
+### Reset batch/job cũ chưa đăng
+
+Xóa toàn bộ bài chưa đăng (`READY`, `WAITING_IMAGE`, `IMAGE_FAILED`, `FAILED`, `SKIPPED`) và file ảnh liên quan, giữ lại bài `POSTED`:
+
+```bash
+python scripts/reset_unposted_posts.py --cancel-batches
+```
+
+Sau đó tạo batch mới:
+
+```bash
+python scripts/ensure_future_posts_batch.py
+```
 
 ## Hashtag mặc định
 
@@ -115,7 +130,7 @@ Bài test dùng topic index `0` mặc định. Muốn đổi topic:
 python scripts/create_test_post.py 1
 ```
 
-Nếu chỉ muốn test overlay/caption dù Gemini image đang lỗi:
+Nếu chỉ muốn test caption dù Gemini image đang lỗi:
 
 ```bash
 python scripts/create_test_post.py --allow-placeholder
@@ -123,7 +138,7 @@ python scripts/create_test_post.py --allow-placeholder
 
 ## Preview bài
 
-Qua dashboard: mở từng bài để xem ảnh final, caption, overlay, image prompt.
+Qua dashboard: mở từng bài để xem ảnh final, caption, text fields, image prompt.
 
 Hoặc chạy CLI:
 
@@ -134,6 +149,7 @@ python scripts/preview_posts.py
 ## Đăng bài đến hạn
 
 ```bash
+python scripts/publish_due_posts.py all
 python scripts/publish_due_posts.py morning
 python scripts/publish_due_posts.py afternoon
 ```
@@ -141,9 +157,9 @@ python scripts/publish_due_posts.py afternoon
 ## Cron VPS
 
 ```cron
-0 2 * * 0 cd /home/ubuntu/fb_animal_agent && /home/ubuntu/fb_animal_agent/venv/bin/python scripts/prepare_weekly_posts.py >> logs/agent.log 2>&1
-0 10 * * * cd /home/ubuntu/fb_animal_agent && /home/ubuntu/fb_animal_agent/venv/bin/python scripts/publish_due_posts.py morning >> logs/agent.log 2>&1
-0 15 * * * cd /home/ubuntu/fb_animal_agent && /home/ubuntu/fb_animal_agent/venv/bin/python scripts/publish_due_posts.py afternoon >> logs/agent.log 2>&1
+0 2 * * * cd /root/fb_animal_agent && /root/fb_animal_agent/venv/bin/python scripts/ensure_future_posts_batch.py >> logs/agent.log 2>&1
+15 */6 * * * cd /root/fb_animal_agent && /root/fb_animal_agent/venv/bin/python scripts/poll_batch_images.py >> logs/agent.log 2>&1
+*/15 * * * * cd /root/fb_animal_agent && /root/fb_animal_agent/venv/bin/python scripts/publish_due_posts.py all >> logs/agent.log 2>&1
 ```
 
 ## Deploy VPS với Batch API
@@ -165,12 +181,10 @@ sudo apt update
 sudo apt install -y git python3 python3-venv python3-pip fonts-noto-core
 ```
 
-### 2. Đặt source vào `/opt/fb_animal_agent`
+### 2. Đặt source vào `/root/fb_animal_agent`
 
 ```bash
-sudo mkdir -p /opt/fb_animal_agent
-sudo chown -R $USER:$USER /opt/fb_animal_agent
-cd /opt/fb_animal_agent
+cd /root/fb_animal_agent
 ```
 
 Copy source project lên thư mục này bằng `scp`, `rsync`, hoặc `git clone`.
@@ -178,7 +192,7 @@ Copy source project lên thư mục này bằng `scp`, `rsync`, hoặc `git clon
 ### 3. Tạo venv và env
 
 ```bash
-cd /opt/fb_animal_agent
+cd /root/fb_animal_agent
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
@@ -192,6 +206,7 @@ ANIMAL_AGENT_GEMINI_API_KEY=...
 ANIMAL_AGENT_GEMINI_TEXT_MODEL=gemini-2.5-flash
 ANIMAL_AGENT_GEMINI_IMAGE_MODEL=gemini-2.5-flash-image
 ANIMAL_AGENT_IMAGE_FALLBACK_ON_ERROR=false
+ANIMAL_AGENT_IMAGE_ASPECT_RATIO=4:5
 
 ANIMAL_AGENT_FB_PAGE_ID=...
 ANIMAL_AGENT_FB_PAGE_TOKEN=...
@@ -236,7 +251,7 @@ Sau đó poll batch:
 venv/bin/python scripts/poll_batch_images.py
 ```
 
-Poll batch dùng để hỏi Google xem batch ảnh đã xử lý xong chưa. Khi xong, script tải ảnh raw về, overlay chữ, rồi chuyển bài từ `WAITING_IMAGE` sang `READY`.
+Poll batch dùng để hỏi Google xem batch ảnh đã xử lý xong chưa. Khi xong, script tải ảnh final đã có chữ về, rồi chuyển bài từ `WAITING_IMAGE` sang `READY`.
 
 Nếu batch chưa xong, chạy lại sau 6 giờ.
 
@@ -250,6 +265,7 @@ Các timer được bật:
 
 - `fb-animal-agent-ensure.timer`: 02:00 mỗi ngày, tự bù bài tương lai bằng Batch API
 - `fb-animal-agent-poll-batch.timer`: mỗi 6 giờ, poll ảnh batch
+- `fb-animal-agent-publish-due.timer`: mỗi 15 phút, đăng mọi bài `READY` đã đến giờ
 - `fb-animal-agent-publish-morning.timer`: 10:00 mỗi ngày
 - `fb-animal-agent-publish-afternoon.timer`: 15:00 mỗi ngày
 - `fb-animal-agent-web.service`: dashboard local ở `127.0.0.1:8000`
