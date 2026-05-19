@@ -11,9 +11,11 @@ from app.facebook_service import publish_photo
 
 
 if __name__ == "__main__":
-    slot = sys.argv[1].strip().lower() if len(sys.argv) >= 2 else "all"
+    args = [arg for arg in sys.argv[1:] if arg != "--dry-run"]
+    dry_run = "--dry-run" in sys.argv[1:]
+    slot = args[0].strip().lower() if args else "all"
     if slot not in {"all", "morning", "afternoon"}:
-        print("Usage: python scripts/publish_due_posts.py [all|morning|afternoon]")
+        print("Usage: python scripts/publish_due_posts.py [all|morning|afternoon] [--dry-run]")
         sys.exit(1)
 
     tz = ZoneInfo(TIMEZONE)
@@ -31,6 +33,14 @@ if __name__ == "__main__":
     print(f"Found {len(posts)} due posts for slot={slot} at {now_iso}.")
 
     for post in posts:
+        if dry_run:
+            print(
+                "Would post "
+                f"local_id={post['id']} | scheduled_at={post['scheduled_at']} | "
+                f"slot={post['slot']} | image={post['final_image_path']}"
+            )
+            continue
+
         try:
             result = publish_photo(post["final_image_path"], post["caption"])
             fb_post_id = result.get("post_id") or result.get("id", "")

@@ -18,7 +18,7 @@
       </form>
       <form method="post" action="{{ url_for('action_prepare_week') }}" class="inline-form">
         <input type="number" min="1" max="30" name="days" value="7" aria-label="Số ngày">
-        <button class="button primary" type="submit">Tạo lịch tuần</button>
+        <button class="button secondary" type="submit">Tạo tuần trực tiếp</button>
       </form>
       <form method="post" action="{{ url_for('action_prepare_week_batch') }}" class="inline-form">
         <input type="number" min="1" max="30" name="days" value="7" aria-label="Số ngày batch">
@@ -54,6 +54,18 @@
     <div class="stat-card">
       <span class="stat-label">FAILED</span>
       <strong>{{ stats.status_counts.FAILED }}</strong>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Batch chờ submit</span>
+      <strong>{{ overview.waiting_unsubmitted }}</strong>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Batch chờ poll</span>
+      <strong>{{ overview.batch_jobs_to_poll }}</strong>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">READY đến giờ</span>
+      <strong>{{ overview.due_ready }}</strong>
     </div>
   </section>
 

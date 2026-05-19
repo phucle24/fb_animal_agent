@@ -1,10 +1,21 @@
 from pathlib import Path
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from flask import Flask, abort, flash, redirect, render_template, request, send_file, url_for
 
 from app.batch_service import poll_all_image_batches, submit_pending_image_batch
-from app.config import BASE_DIR, WEB_HOST, WEB_PORT, WEB_SECRET_KEY
-from app.db import dashboard_stats, get_post, init_db, list_posts, mark_failed, mark_posted, update_status
+from app.config import BASE_DIR, TIMEZONE, WEB_HOST, WEB_PORT, WEB_SECRET_KEY
+from app.db import (
+    batch_publish_overview,
+    dashboard_stats,
+    get_post,
+    init_db,
+    list_posts,
+    mark_failed,
+    mark_posted,
+    update_status,
+)
 from app.facebook_service import publish_photo
 from app.schedule_service import prepare_one_test_post, prepare_weekly_posts, prepare_weekly_posts_for_batch
 
@@ -23,7 +34,15 @@ def create_app() -> Flask:
         status = request.args.get("status") or None
         posts = list_posts(status=status, limit=200)
         stats = dashboard_stats()
-        return render_template("index.html", posts=posts, stats=stats, active_status=status)
+        now_iso = datetime.now(ZoneInfo(TIMEZONE)).strftime("%Y-%m-%d %H:%M:%S")
+        overview = batch_publish_overview(now_iso)
+        return render_template(
+            "index.html",
+            posts=posts,
+            stats=stats,
+            overview=overview,
+            active_status=status,
+        )
 
     @flask_app.route("/posts/<int:post_id>")
     def post_detail(post_id: int):
@@ -70,7 +89,29 @@ def create_app() -> Flask:
         try:
             results = poll_all_image_batches()
             if not results:
-                flash("No batch image jobs to poll.", "success")
+                now_iso = datetime.now(ZoneInfo(TIMEZONE)).strftime("%Y-%m-%d %H:%M:%S")
+                overview = batch_publish_overview(now_iso)
+                if overview["waiting_unsubmitted"]:
+                    flash(
+                        "No batch jobs to poll. "
+                        f"{overview['waiting_unsubmitted']} WAITING_IMAGE posts have not been submitted yet; "
+                        "click Submit pending Batch.",
+                        "error",
+                    )
+                elif overview["due_ready"]:
+                    flash(
+                        "No batch jobs to poll. "
+                        f"{overview['due_ready']} READY posts are due; run publish_due_posts.py all or wait for publish timer.",
+                        "success",
+                    )
+                elif overview["future_ready"]:
+                    flash(
+                        "No batch jobs to poll. "
+                        f"{overview['future_ready']} posts are already READY for future scheduled time.",
+                        "success",
+                    )
+                else:
+                    flash("No batch image jobs to poll and no READY future posts found.", "error")
             else:
                 ready = sum(result["ready"] for result in results)
                 failed = sum(result["failed"] for result in results)

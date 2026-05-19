@@ -424,6 +424,72 @@ def list_batch_jobs_to_poll():
     return rows
 
 
+def batch_publish_overview(now_iso: str) -> dict:
+    conn = get_conn()
+    cur = conn.cursor()
+
+    cur.execute(
+        """
+        SELECT COUNT(*) AS total
+        FROM posts
+        WHERE status = 'WAITING_IMAGE'
+          AND batch_job_name IS NULL
+        """
+    )
+    waiting_unsubmitted = cur.fetchone()["total"]
+
+    cur.execute(
+        """
+        SELECT COUNT(*) AS total
+        FROM posts
+        WHERE status = 'WAITING_IMAGE'
+          AND batch_job_name IS NOT NULL
+        """
+    )
+    waiting_submitted = cur.fetchone()["total"]
+
+    cur.execute(
+        """
+        SELECT COUNT(DISTINCT batch_job_name) AS total
+        FROM posts
+        WHERE status = 'WAITING_IMAGE'
+          AND batch_job_name IS NOT NULL
+        """
+    )
+    batch_jobs_to_poll = cur.fetchone()["total"]
+
+    cur.execute(
+        """
+        SELECT COUNT(*) AS total
+        FROM posts
+        WHERE status = 'READY'
+          AND scheduled_at <= ?
+        """,
+        (now_iso,),
+    )
+    due_ready = cur.fetchone()["total"]
+
+    cur.execute(
+        """
+        SELECT COUNT(*) AS total
+        FROM posts
+        WHERE status = 'READY'
+          AND scheduled_at > ?
+        """,
+        (now_iso,),
+    )
+    future_ready = cur.fetchone()["total"]
+
+    conn.close()
+    return {
+        "waiting_unsubmitted": waiting_unsubmitted,
+        "waiting_submitted": waiting_submitted,
+        "batch_jobs_to_poll": batch_jobs_to_poll,
+        "due_ready": due_ready,
+        "future_ready": future_ready,
+    }
+
+
 def list_posts_by_batch_job(batch_job_name: str):
     conn = get_conn()
     cur = conn.cursor()
