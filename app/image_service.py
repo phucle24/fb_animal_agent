@@ -99,11 +99,23 @@ def save_image_from_response(response, output_path: str) -> str:
     raise RuntimeError(f"Model did not return an image part: {_describe_response(response)}")
 
 
-def save_pil_image(image: Image.Image, output_path: str):
+def save_pil_image(image, output_path: str):
     suffix = Path(output_path).suffix.lower()
-    if suffix in {".jpg", ".jpeg"} and image.mode != "RGB":
+    if isinstance(image, Image.Image) and suffix in {".jpg", ".jpeg"} and image.mode != "RGB":
         image = image.convert("RGB")
-    image.save(output_path, quality=95)
+        image.save(output_path, quality=95)
+        return
+
+    if isinstance(image, Image.Image):
+        image.save(output_path)
+        return
+
+    save = getattr(image, "save", None)
+    if callable(save):
+        save(output_path)
+        return
+
+    raise TypeError(f"Unsupported image object returned by SDK: {type(image)!r}")
 
 
 def generate_image(
