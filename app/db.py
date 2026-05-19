@@ -406,6 +406,25 @@ def list_posts_for_batch_submission(limit: int = 100):
     return rows
 
 
+def list_posts_for_direct_image_generation(start_after_iso: str, cutoff_iso: str):
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        SELECT *
+        FROM posts
+        WHERE status IN ('WAITING_IMAGE', 'IMAGE_FAILED')
+          AND scheduled_at > ?
+          AND scheduled_at <= ?
+        ORDER BY scheduled_at ASC, id ASC
+        """,
+        (start_after_iso, cutoff_iso),
+    )
+    rows = cur.fetchall()
+    conn.close()
+    return rows
+
+
 def list_batch_jobs_to_poll():
     conn = get_conn()
     cur = conn.cursor()

@@ -20,9 +20,4 @@ if __name__ == "__main__":
             f"{result['batch_job_name']} | state={result['state']} | "
             f"ready={result['ready']} | failed={result['failed']}"
         )
-        for error in result.get("errors", []):
-            print(
-                "  ERROR "
-                f"post_id={error['post_id']} | topic={error['topic_key']} | "
-                f"{error['error']}"
-            )
+

@@ -106,78 +106,45 @@ def process_batch_job(batch_job_name: str) -> dict:
         error_message = repr(error) if error else None
         update_batch_state(batch_job_name, state, error_message)
         failed = 0
-        errors = []
         if state in COMPLETED_STATES:
             message = error_message or f"Batch job finished with state {state}."
             for post in list_posts_by_batch_job(batch_job_name):
                 mark_image_failed(post["id"], message)
-                errors.append(
-                    {
-                        "post_id": post["id"],
-                        "topic_key": post["topic_key"],
-                        "error": message,
-                    }
-                )
                 failed += 1
         return {
             "batch_job_name": batch_job_name,
             "state": state,
             "ready": 0,
             "failed": failed,
-            "errors": errors,
         }
 
     posts = list_posts_by_batch_job(batch_job_name)
     responses = _inline_responses(batch_job)
     ready = 0
     failed = 0
-    errors = []
 
     if len(responses) != len(posts):
         message = f"Batch response count mismatch: posts={len(posts)} responses={len(responses)}"
         for post in posts:
             mark_image_failed(post["id"], message)
-            errors.append(
-                {
-                    "post_id": post["id"],
-                    "topic_key": post["topic_key"],
-                    "error": message,
-                }
-            )
             failed += 1
         return {
             "batch_job_name": batch_job_name,
             "state": state,
             "ready": ready,
             "failed": failed,
-            "errors": errors,
         }
 
     for post, inline_response in zip(posts, responses):
         error = _inline_response_error(inline_response)
         if error:
             mark_image_failed(post["id"], error)
-            errors.append(
-                {
-                    "post_id": post["id"],
-                    "topic_key": post["topic_key"],
-                    "error": error,
-                }
-            )
             failed += 1
             continue
 
         response = getattr(inline_response, "response", None)
         if not response:
-            message = "Batch inline response has no response payload."
-            mark_image_failed(post["id"], message)
-            errors.append(
-                {
-                    "post_id": post["id"],
-                    "topic_key": post["topic_key"],
-                    "error": message,
-                }
-            )
+            mark_image_failed(post["id"], "Batch inline response has no response payload.")
             failed += 1
             continue
 
@@ -192,15 +159,7 @@ def process_batch_job(batch_job_name: str) -> dict:
                 mark_image_ready(post["id"], post["raw_image_path"], post["final_image_path"])
             ready += 1
         except Exception as exc:
-            message = str(exc)
-            mark_image_failed(post["id"], message)
-            errors.append(
-                {
-                    "post_id": post["id"],
-                    "topic_key": post["topic_key"],
-                    "error": message,
-                }
-            )
+            mark_image_failed(post["id"], str(exc))
             failed += 1
 
     update_batch_state(batch_job_name, state, None)
@@ -209,7 +168,6 @@ def process_batch_job(batch_job_name: str) -> dict:
         "state": state,
         "ready": ready,
         "failed": failed,
-        "errors": errors,
     }
 
 

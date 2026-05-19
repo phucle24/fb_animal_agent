@@ -3,7 +3,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from app.config import MIN_FUTURE_POSTS, TARGET_FUTURE_POSTS
+from app.config import DIRECT_IMAGE_BOOTSTRAP_DAYS, MIN_FUTURE_POSTS, TARGET_FUTURE_POSTS
 from app.schedule_service import ensure_future_posts_for_batch
 
 
@@ -17,11 +17,21 @@ if __name__ == "__main__":
     )
 
     print(f"Current future posts before ensure: {result['current_future']}")
+    print(f"Direct image bootstrap days: {DIRECT_IMAGE_BOOTSTRAP_DAYS}")
+    print(f"Direct image enabled: {result['direct_enabled']}")
+    print(f"Direct image cutoff: {result['direct_cutoff']}")
+    print(f"Converted existing near-term posts: {len(result['direct_existing'])}")
+    for post in result["direct_existing"]:
+        print(
+            "Converted post "
+            f"ID={post['id']} | {post['scheduled_at']} | {post['slot']} | {post['topic_key']} | {post['mode']}"
+        )
     print(f"Created posts: {len(result['created'])}")
     for post in result["created"]:
         print(
             "Created post "
-            f"ID={post['id']} | {post['scheduled_at']} | {post['slot']} | {post['topic_key']}"
+            f"ID={post['id']} | {post['scheduled_at']} | {post['slot']} | {post['topic_key']} | "
+            f"{post.get('mode', 'batch_new')}"
         )
 
     batch = result["batch"]

@@ -225,6 +225,8 @@ ANIMAL_AGENT_WEB_SECRET_KEY=change-me
 
 ANIMAL_AGENT_MIN_FUTURE_POSTS=4
 ANIMAL_AGENT_TARGET_FUTURE_POSTS=4
+ANIMAL_AGENT_DIRECT_IMAGE_BOOTSTRAP_DAYS=2
+ANIMAL_AGENT_DIRECT_IMAGE_BOOTSTRAP_UNTIL=
 ```
 
 ### 4. Init DB
@@ -242,8 +244,9 @@ venv/bin/python scripts/ensure_future_posts_batch.py
 Lệnh này:
 
 - đếm số bài tương lai `READY + WAITING_IMAGE`
-- nếu dưới `ANIMAL_AGENT_MIN_FUTURE_POSTS`, tạo thêm `ANIMAL_AGENT_TARGET_FUTURE_POSTS` bài mới
-- submit Gemini Batch API cho ảnh
+- trong giai đoạn bootstrap `ANIMAL_AGENT_DIRECT_IMAGE_BOOTSTRAP_DAYS=2`, tạo/lấy ảnh trực tiếp bằng API thường để bài có ảnh ngay
+- mốc kết thúc bootstrap được lưu ở `data/direct_image_bootstrap_until.txt`; sau mốc này bot tự chuyển sang Batch API hoàn toàn
+- nếu muốn tắt direct ngay, đặt `ANIMAL_AGENT_DIRECT_IMAGE_BOOTSTRAP_DAYS=0` và xóa `data/direct_image_bootstrap_until.txt`
 
 Sau đó poll batch:
 
