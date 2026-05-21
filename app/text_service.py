@@ -92,7 +92,7 @@ def generate_single_card_content(topic: dict) -> dict:
     _ensure_api_key()
     client, types = _client_and_types()
     prompt = f"""
-Bạn là biên tập viên nội dung Facebook chuyên về kiến thức động vật và thực vật.
+Bạn là biên tập viên nội dung Facebook chuyên về kiến thức động vật và thực vật lạ, dễ viral.
 
 Hãy tạo output JSON hợp lệ với đúng các key sau:
 - title
@@ -112,37 +112,45 @@ Thông tin bài viết:
 Yêu cầu:
 1. title
 - tiếng Việt
-- ngắn, hấp dẫn
+- ngắn, hấp dẫn, có tính tò mò hoặc bất ngờ
 - tối đa 12 từ
 
 2. overlay_title
 - cực ngắn
-- 2 đến 5 từ
-- viết theo hướng mạnh, dễ đọc
+- 2 đến 4 từ
+- viết như headline poster mạnh, dễ đọc
+- KHÔNG dùng dạng Top/Top 5/xếp hạng
+- KHÔNG dùng dấu câu
 
 3. overlay_stat
 - lấy trọng tâm từ fact_value
 - cực ngắn
-- ví dụ: "110 KM/H"
+- tối đa 14 ký tự nếu có thể
+- ví dụ: "110 KM/H", "SỐC ĐIỆN", "BẤT TỬ"
 
 4. overlay_hook
-- tối đa 6 từ
+- tối đa 5 từ
 - tạo tò mò
-- ví dụ: "Vua tốc độ thảo nguyên"
+- dễ đọc trên ảnh
+- ví dụ: "Vua tốc độ", "Cú đấm sấm sét"
 
 5. caption
-- 2 đến 4 câu
+- 3 đến 5 câu
 - gần gũi, dễ hiểu
-- có kiến thức
-- câu cuối cùng phải là: "Ảnh minh họa AI."
+- có kiến thức thật từ fact_detail
+- mở đầu bằng một câu hook khiến người đọc muốn dừng lại
+- nên có một câu hỏi ngắn để kéo bình luận, ví dụ: "Bạn nghĩ nó dùng khả năng này để làm gì?"
+- không dùng từ ngữ giật gân sai sự thật
+- KHÔNG viết "Ảnh minh họa AI", "Ảnh minh hoạ AI", hoặc bất kỳ câu nào nói ảnh là AI
 
 6. image_prompt
 - tiếng Anh
-- wildlife / nature cinematic
+- single-subject wildlife/nature cinematic poster
 - sharp, dramatic, beautiful
 - strong subject focus
 - mô tả môi trường sống, ánh sáng, chuyển động, biểu cảm của chủ thể
-- không cần tự viết layout chữ vì hệ thống sẽ dựng prompt poster cuối cùng
+- không tự viết text layout, không thêm ranking/list/panel instructions
+- no ranking, no list, no top 5, no fake text
 - no watermark
 - suitable for educational social media poster
 

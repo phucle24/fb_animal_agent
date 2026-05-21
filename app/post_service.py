@@ -22,8 +22,27 @@ Create a finished vertical 4:5 Vietnamese infographic poster for Facebook feed, 
 - no Python overlay will be used later; all text must be rendered by the image model now
 """.strip()
 
+SINGLE_CARD_IMAGE_TEMPLATE = """
+FINAL INFOGRAPHIC MUST CONTAIN THE EXACT TEXT BELOW.
+Create a finished vertical 4:5 Vietnamese single-subject fact poster for Facebook feed:
+- one dramatic photorealistic animal or plant hero image, large and unmistakable
+- premium dark charcoal poster style with copper/orange accents
+- bold readable Vietnamese headline at the top
+- one large metric/stat badge
+- one short hook line
+- clean editorial layout, not a ranking, not a comparison, not a list
+- no Python overlay will be used later; all text must be rendered by the image model now
+""".strip()
+
 CAPTION_HASHTAGS = "#thegioimuonloai #topdongbat #reivewthegioidongvat #khamphatunhien"
 MODEL_RENDERED_TEXT_MARKER = "FINAL INFOGRAPHIC MUST CONTAIN THE EXACT TEXT BELOW."
+AI_DISCLAIMERS = (
+    "Ảnh minh họa AI.",
+    "Ảnh minh hoạ AI.",
+    "Ảnh AI minh họa.",
+    "Ảnh AI minh hoạ.",
+    "AI illustration.",
+)
 
 
 def append_caption_hashtags(caption: str) -> str:
@@ -31,6 +50,13 @@ def append_caption_hashtags(caption: str) -> str:
     if CAPTION_HASHTAGS in caption:
         return caption
     return f"{caption}\n\n{CAPTION_HASHTAGS}"
+
+
+def remove_ai_disclaimer(caption: str) -> str:
+    cleaned = caption.strip()
+    for disclaimer in AI_DISCLAIMERS:
+        cleaned = cleaned.replace(disclaimer, "").strip()
+    return "\n".join(line.rstrip() for line in cleaned.splitlines()).strip()
 
 
 def metric_label_for_topic(topic: dict) -> str:
@@ -90,14 +116,21 @@ def build_model_rendered_infographic_prompt(image_prompt: str, topic: dict, cont
     stat = content.get("overlay_stat") or topic.get("fact_value", "")
     hook = content.get("overlay_hook") or ""
     return (
-        f"{INFOGRAPHIC_IMAGE_TEMPLATE}\n\n"
-        "Create a finished single-card Vietnamese wildlife poster.\n"
-        "Text to render exactly:\n"
-        f"- Main title: {title.upper()}\n"
-        f"- Large stat: {stat.upper()}\n"
-        f"- Hook: {hook}\n\n"
-        f"Main animal photo: realistic {topic['subject_en']} in its natural habitat, cinematic, sharp.\n"
-        "Strict text rules: render Vietnamese diacritics correctly, no extra words, no watermark, no logo.\n\n"
+        f"{SINGLE_CARD_IMAGE_TEMPLATE}\n\n"
+        "Critical layout rules:\n"
+        "- This is a single-card poster, not a ranking and not a multi-panel list.\n"
+        "- Do not render rank numbers such as 01, 02, 03, 1, 2, 5.\n"
+        "- Do not render placeholder words such as Stat, data, label, lorem ipsum, UI text, or fake text.\n"
+        "- Do not add any extra captions, labels, subtitles, watermark, logo, or random symbols.\n"
+        "- Use only the exact text strings listed below.\n"
+        "- If text cannot fit, reduce font size; never invent additional text.\n\n"
+        "Text to render exactly, and only these text strings:\n"
+        f"HEADLINE: {title.upper()}\n"
+        f"STAT: {stat.upper()}\n"
+        f"HOOK: {hook}\n\n"
+        f"Hero image: realistic {topic['subject_en']} in its natural habitat, cinematic, sharp, dramatic, visually striking.\n"
+        "Composition: top headline, large hero subject, one copper stat badge, one short hook line near the bottom.\n"
+        "Text quality: render Vietnamese diacritics carefully and keep every word readable.\n\n"
         "Additional photo/style guidance from the text model, use only if it does not conflict with exact text rules:\n"
         f"{image_prompt}"
     )
@@ -118,13 +151,11 @@ def build_comparison_caption(title: str, caption_intro: str, items: list) -> str
     for item in items:
         lines.append(f'{item["rank"]}. {item["name_vi"]} ({item["name_en"]}) - {item["stat"]}')
 
-    lines += ["", "Ảnh minh họa AI."]
-
-    return append_caption_hashtags("\n".join(lines))
+    return append_caption_hashtags(remove_ai_disclaimer("\n".join(lines)))
 
 
 def build_single_caption(title: str, caption: str) -> str:
-    return append_caption_hashtags(f"{title}\n\n{caption.strip()}")
+    return append_caption_hashtags(remove_ai_disclaimer(f"{title}\n\n{caption.strip()}"))
 
 
 def build_post_payload(topic: dict, scheduled_at: str, slot: str) -> dict:
