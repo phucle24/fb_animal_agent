@@ -59,39 +59,92 @@ def remove_ai_disclaimer(caption: str) -> str:
     return "\n".join(line.rstrip() for line in cleaned.splitlines()).strip()
 
 
-def metric_label_for_topic(topic: dict) -> str:
+def metric_label_for_topic(topic: dict) -> str | None:
     labels = {
         "speed": "TỐC ĐỘ",
         "height": "CHIỀU CAO",
         "weight": "CÂN NẶNG",
         "size": "KÍCH THƯỚC",
         "special ability": "ĐẶC ĐIỂM",
+        "bite force": "LỰC CẮN",
+        "lifespan": "TUỔI THỌ",
+        "venom": "NỌC ĐỘC",
+        "toxicity": "ĐỘC TÍNH",
     }
-    return labels.get(topic.get("comparison_angle", ""), "THÔNG TIN")
+    return labels.get(topic.get("comparison_angle", ""))
 
 
-def stat_for_image(stat: str) -> str:
-    return stat.upper().replace("KM/H", "KM/H")
+def compact_text(text: str, max_chars: int) -> str:
+    text = " ".join(text.split()).strip()
+    if len(text) <= max_chars:
+        return text
+    return text[: max_chars - 1].rstrip() + "…"
+
+
+def comparison_item_detail(item: dict, topic: dict) -> str:
+    detail = item.get("detail_vi", "").strip()
+    if detail:
+        return detail
+
+    angle = topic.get("comparison_angle", "")
+    fallback_details = {
+        "speed": "mốc tốc độ nổi bật khi bứt tốc trong môi trường tự nhiên",
+        "height": "chiều cao nổi bật giúp nó vượt trội trong nhóm này",
+        "weight": "khối lượng lớn khiến nó trở thành một trong những loài nặng nhất",
+        "size": "kích thước nổi bật so với phần lớn loài cùng nhóm",
+        "special ability": "đặc điểm nổi bật giúp nó săn mồi, sinh tồn hoặc tự vệ",
+        "bite force": "lực cắn ước tính rất mạnh, đủ tạo lợi thế khi săn mồi hoặc phòng thủ",
+        "lifespan": "tuổi thọ ấn tượng khiến các nhà nghiên cứu đặc biệt chú ý",
+        "venom": "cơ chế độc/nọc giúp nó săn mồi hoặc tự vệ cực hiệu quả",
+        "toxicity": "độc tính tự nhiên khiến con người phải rất thận trọng",
+        "camouflage": "khả năng hòa vào môi trường khiến kẻ thù hoặc con mồi khó nhận ra",
+        "bioluminescence": "ánh sáng sinh học giúp giao tiếp, dụ mồi hoặc tự vệ trong bóng tối",
+        "building ability": "khả năng xây dựng nơi ở hoặc cấu trúc sống rất tinh vi",
+        "survival": "chiến lược sinh tồn giúp nó chịu được điều kiện khắc nghiệt",
+        "parenting": "cách chăm con đặc biệt giúp thế hệ sau có cơ hội sống sót cao hơn",
+    }
+    return fallback_details.get(angle, "đặc điểm nổi bật khiến loài này rất đáng chú ý")
+
+
+def comparison_item_image_fact_text(item: dict, topic: dict) -> str:
+    stat = compact_text(item["stat"], 16)
+    detail = compact_text(comparison_item_detail(item, topic), 42)
+    return f"{stat} - {detail}"
+
+
+def comparison_caption_line(item: dict, topic: dict) -> str:
+    return (
+        f'{item["rank"]}. {item["name_vi"]} ({item["name_en"]}) - '
+        f'{item["stat"]}: {comparison_item_detail(item, topic)}'
+    )
+
+
+def comparison_prompt_rows(topic: dict) -> str:
+    metric_label = metric_label_for_topic(topic)
+    rows = []
+    for item in topic["items"]:
+        lines = [
+            f"Panel {item['rank']}:",
+            f"- Rank text: {item['rank']:02d}",
+            f"- Animal or plant name text: {item['name_vi'].upper()}",
+        ]
+        if metric_label:
+            lines.append(f"- Metric label text: {metric_label}:")
+        lines.extend(
+            [
+                f"- Metric value text: {comparison_item_image_fact_text(item, topic)}",
+                f"- Visual scene: realistic {item['name_en']} showing or strongly suggesting this fact: {comparison_caption_line(item, topic)}",
+            ]
+        )
+        rows.append("\n".join(lines))
+    return "\n".join(rows)
 
 
 def build_model_rendered_infographic_prompt(image_prompt: str, topic: dict, content: dict) -> str:
     if topic["topic_type"] == "comparison_top5":
         title = content.get("overlay_subtitle") or topic["subject_vi"]
         title = title.upper()
-        metric_label = metric_label_for_topic(topic)
-        rows = "\n".join(
-            "\n".join(
-                [
-                    f"Panel {item['rank']}:",
-                    f"- Rank text: {item['rank']:02d}",
-                    f"- Animal name text: {item['name_vi'].upper()}",
-                    f"- Metric label text: {metric_label}:",
-                    f"- Metric value text: {stat_for_image(item['stat'])}",
-                    f"- Animal photo: realistic {item['name_en']} in its natural habitat, dynamic motion, visible face and body",
-                ]
-            )
-            for item in topic["items"]
-        )
+        rows = comparison_prompt_rows(topic)
         return (
             f"{INFOGRAPHIC_IMAGE_TEMPLATE}\n\n"
             "Reference visual style:\n"
@@ -106,8 +159,10 @@ def build_model_rendered_infographic_prompt(image_prompt: str, topic: dict, cont
             "Strict text rules:\n"
             "- Render Vietnamese diacritics correctly.\n"
             "- Use the exact text strings above, no extra words, no English labels, no fake text.\n"
+            "- Never render generic labels or placeholder labels.\n"
             "- Do not add watermark, logo, captions, brand text, or random symbols.\n"
-            "- If text cannot fit, reduce font size but keep all listed text readable.\n\n"
+            "- If text cannot fit inside a panel, reduce font size, tighten spacing, or split into two short lines.\n"
+            "- Never crop, truncate, overlap, or replace the listed text; readability is more important than large type.\n\n"
             "Additional photo/style guidance from the text model, use only if it does not conflict with exact text rules:\n"
             f"{image_prompt}"
         )
@@ -115,6 +170,7 @@ def build_model_rendered_infographic_prompt(image_prompt: str, topic: dict, cont
     title = content.get("overlay_title") or topic["subject_vi"]
     stat = content.get("overlay_stat") or topic.get("fact_value", "")
     hook = content.get("overlay_hook") or ""
+    visual_detail = topic.get("detail_vi") or topic.get("fact_detail", "")
     return (
         f"{SINGLE_CARD_IMAGE_TEMPLATE}\n\n"
         "Critical layout rules:\n"
@@ -129,6 +185,7 @@ def build_model_rendered_infographic_prompt(image_prompt: str, topic: dict, cont
         f"STAT: {stat.upper()}\n"
         f"HOOK: {hook}\n\n"
         f"Hero image: realistic {topic['subject_en']} in its natural habitat, cinematic, sharp, dramatic, visually striking.\n"
+        f"Visual fact to suggest without rendering as extra text: {visual_detail}\n"
         "Composition: top headline, large hero subject, one copper stat badge, one short hook line near the bottom.\n"
         "Text quality: render Vietnamese diacritics carefully and keep every word readable.\n\n"
         "Additional photo/style guidance from the text model, use only if it does not conflict with exact text rules:\n"
@@ -140,7 +197,8 @@ def image_prompt_renders_final_text(image_prompt: str) -> bool:
     return MODEL_RENDERED_TEXT_MARKER in image_prompt
 
 
-def build_comparison_caption(title: str, caption_intro: str, items: list) -> str:
+def build_comparison_caption(title: str, caption_intro: str, items: list, topic: dict | None = None) -> str:
+    topic = topic or {}
     lines = [
         title,
         "",
@@ -149,7 +207,7 @@ def build_comparison_caption(title: str, caption_intro: str, items: list) -> str
     ]
 
     for item in items:
-        lines.append(f'{item["rank"]}. {item["name_vi"]} ({item["name_en"]}) - {item["stat"]}')
+        lines.append(comparison_caption_line(item, topic))
 
     return append_caption_hashtags(remove_ai_disclaimer("\n".join(lines)))
 
@@ -169,6 +227,7 @@ def build_post_payload(topic: dict, scheduled_at: str, slot: str) -> dict:
             title=content["title"],
             caption_intro=content["caption_intro"],
             items=topic["items"],
+            topic=topic,
         )
         return {
             "scheduled_at": scheduled_at,

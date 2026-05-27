@@ -303,6 +303,35 @@ def update_status(post_id: int, status: str):
     conn.close()
 
 
+def reset_posts_for_image_retry(post_ids: list[int]) -> int:
+    if not post_ids:
+        return 0
+    conn = get_conn()
+    cur = conn.cursor()
+    placeholders = ",".join("?" for _ in post_ids)
+    cur.execute(
+        f"""
+        UPDATE posts
+        SET status = 'WAITING_IMAGE',
+            error_message = NULL,
+            batch_job_name = NULL,
+            batch_request_key = NULL,
+            batch_state = NULL,
+            batch_error = NULL,
+            batch_submitted_at = NULL,
+            batch_completed_at = NULL,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id IN ({placeholders})
+          AND status = 'IMAGE_FAILED'
+        """,
+        post_ids,
+    )
+    updated = cur.rowcount
+    conn.commit()
+    conn.close()
+    return updated
+
+
 def update_post_caption(post_id: int, caption: str):
     conn = get_conn()
     cur = conn.cursor()

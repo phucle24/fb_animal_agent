@@ -91,6 +91,7 @@ Chỉ trả về JSON, không giải thích thêm.
 def generate_single_card_content(topic: dict) -> dict:
     _ensure_api_key()
     client, types = _client_and_types()
+    detail_vi = topic.get("detail_vi", "").strip()
     prompt = f"""
 Bạn là biên tập viên nội dung Facebook chuyên về kiến thức động vật và thực vật lạ, dễ viral.
 
@@ -108,6 +109,7 @@ Thông tin bài viết:
 - fact_label: {topic["fact_label"]}
 - fact_value: {topic["fact_value"]}
 - fact_detail: {topic["fact_detail"]}
+- detail_vi: {detail_vi}
 
 Yêu cầu:
 1. title
@@ -137,7 +139,8 @@ Yêu cầu:
 5. caption
 - 3 đến 5 câu
 - gần gũi, dễ hiểu
-- có kiến thức thật từ fact_detail
+- có kiến thức thật từ detail_vi và fact_detail
+- ưu tiên dùng detail_vi để giải thích bằng tiếng Việt rõ ràng
 - mở đầu bằng một câu hook khiến người đọc muốn dừng lại
 - nên có một câu hỏi ngắn để kéo bình luận, ví dụ: "Bạn nghĩ nó dùng khả năng này để làm gì?"
 - không dùng từ ngữ giật gân sai sự thật
@@ -149,6 +152,7 @@ Yêu cầu:
 - sharp, dramatic, beautiful
 - strong subject focus
 - mô tả môi trường sống, ánh sáng, chuyển động, biểu cảm của chủ thể
+- phản ánh đúng detail_vi/fact_detail bằng hình ảnh, không cần render câu giải thích thành chữ
 - không tự viết text layout, không thêm ranking/list/panel instructions
 - no ranking, no list, no top 5, no fake text
 - no watermark

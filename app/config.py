@@ -17,8 +17,12 @@ OUTPUT_DIR = BASE_DIR / os.getenv("ANIMAL_AGENT_OUTPUT_DIR", "assets")
 RAW_DIR = OUTPUT_DIR / "raw"
 FINAL_DIR = OUTPUT_DIR / "final"
 LOG_DIR = BASE_DIR / "logs"
+GENERATED_TOPICS_PATH = BASE_DIR / os.getenv(
+    "ANIMAL_AGENT_GENERATED_TOPICS_PATH",
+    "data/generated_topics.jsonl",
+)
 
-for path in [DB_PATH.parent, OUTPUT_DIR, RAW_DIR, FINAL_DIR, LOG_DIR]:
+for path in [DB_PATH.parent, OUTPUT_DIR, RAW_DIR, FINAL_DIR, LOG_DIR, GENERATED_TOPICS_PATH.parent]:
     path.mkdir(parents=True, exist_ok=True)
 
 GEMINI_API_KEY = os.getenv("ANIMAL_AGENT_GEMINI_API_KEY", "").strip()
@@ -63,3 +67,9 @@ DIRECT_IMAGE_BOOTSTRAP_DAYS = int(
     )
 )
 DIRECT_IMAGE_BOOTSTRAP_UNTIL = os.getenv("ANIMAL_AGENT_DIRECT_IMAGE_BOOTSTRAP_UNTIL", "").strip()
+AUTO_GENERATE_TOPICS = os.getenv("ANIMAL_AGENT_AUTO_GENERATE_TOPICS", "true").lower() in {
+    "1",
+    "true",
+    "yes",
+    "on",
+}

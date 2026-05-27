@@ -227,6 +227,8 @@ ANIMAL_AGENT_MIN_FUTURE_POSTS=4
 ANIMAL_AGENT_TARGET_FUTURE_POSTS=4
 ANIMAL_AGENT_DIRECT_IMAGE_BOOTSTRAP_DAYS=2
 ANIMAL_AGENT_DIRECT_IMAGE_BOOTSTRAP_UNTIL=
+ANIMAL_AGENT_AUTO_GENERATE_TOPICS=true
+ANIMAL_AGENT_GENERATED_TOPICS_PATH=data/generated_topics.jsonl
 ```
 
 ### 4. Init DB
@@ -247,6 +249,7 @@ Lệnh này:
 - trong giai đoạn bootstrap `ANIMAL_AGENT_DIRECT_IMAGE_BOOTSTRAP_DAYS=2`, tạo/lấy ảnh trực tiếp bằng API thường để bài có ảnh ngay
 - mốc kết thúc bootstrap được lưu ở `data/direct_image_bootstrap_until.txt`; sau mốc này bot tự chuyển sang Batch API hoàn toàn
 - nếu muốn tắt direct ngay, đặt `ANIMAL_AGENT_DIRECT_IMAGE_BOOTSTRAP_DAYS=0` và xóa `data/direct_image_bootstrap_until.txt`
+- nếu topic bank cục bộ đã dùng hết, bot tự sinh topic mới bằng Gemini text và lưu vào `data/generated_topics.jsonl` để dùng lại
 
 Sau đó poll batch:
 
@@ -257,6 +260,13 @@ venv/bin/python scripts/poll_batch_images.py
 Poll batch dùng để hỏi Google xem batch ảnh đã xử lý xong chưa. Khi xong, script tải ảnh final đã có chữ về, rồi chuyển bài từ `WAITING_IMAGE` sang `READY`.
 
 Nếu batch chưa xong, chạy lại sau 6 giờ.
+
+Sinh topic thủ công trước nếu muốn kiểm tra nội dung:
+
+```bash
+venv/bin/python scripts/generate_topics.py comparison_top5 5
+venv/bin/python scripts/generate_topics.py single_card 2
+```
 
 ### 6. Bật systemd cho chạy tự động
 

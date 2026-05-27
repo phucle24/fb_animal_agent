@@ -1,3 +1,6 @@
+from copy import deepcopy
+
+
 COMPARISON_TOPICS = [
     {
         "topic_type": "comparison_top5",
@@ -230,11 +233,41 @@ COMPARISON_TOPICS = [
         "subject_en": "Top 5 surprising animal parents",
         "comparison_angle": "parenting",
         "items": [
-            {"rank": 1, "name_vi": "Chim Cánh Cụt Hoàng Đế", "name_en": "Emperor penguin", "stat": "Ấp trứng"},
-            {"rank": 2, "name_vi": "Cá Ngựa", "name_en": "Seahorse", "stat": "Con đực mang thai"},
-            {"rank": 3, "name_vi": "Cá Sấu", "name_en": "Crocodile", "stat": "Bảo vệ con"},
-            {"rank": 4, "name_vi": "Ếch Phi Tiêu Độc", "name_en": "Poison dart frog", "stat": "Cõng nòng nọc"},
-            {"rank": 5, "name_vi": "Voi", "name_en": "Elephant", "stat": "Cả đàn chăm"},
+            {
+                "rank": 1,
+                "name_vi": "Chim Cánh Cụt Hoàng Đế",
+                "name_en": "Emperor penguin",
+                "stat": "Ấp trứng",
+                "detail_vi": "con đực giữ trứng trên chân qua mùa đông băng giá",
+            },
+            {
+                "rank": 2,
+                "name_vi": "Cá Ngựa",
+                "name_en": "Seahorse",
+                "stat": "Con đực mang thai",
+                "detail_vi": "con cái gửi trứng vào túi ấp của con đực",
+            },
+            {
+                "rank": 3,
+                "name_vi": "Cá Sấu",
+                "name_en": "Crocodile",
+                "stat": "Bảo vệ con",
+                "detail_vi": "mẹ cá sấu ngậm con rất nhẹ để đưa xuống nước",
+            },
+            {
+                "rank": 4,
+                "name_vi": "Ếch Phi Tiêu Độc",
+                "name_en": "Poison dart frog",
+                "stat": "Cõng nòng nọc",
+                "detail_vi": "bố mẹ chở nòng nọc tới vũng nước nhỏ an toàn",
+            },
+            {
+                "rank": 5,
+                "name_vi": "Voi",
+                "name_en": "Elephant",
+                "stat": "Cả đàn chăm",
+                "detail_vi": "voi con được mẹ, dì và cả đàn cùng bảo vệ",
+            },
         ],
     },
 ]
@@ -248,6 +281,7 @@ SINGLE_TOPICS = [
         "fact_label": "speed",
         "fact_value": "110 km/h",
         "fact_detail": "one of the fastest land animals on Earth",
+        "detail_vi": "có thể bứt tốc cực nhanh trong vài giây ngắn",
     },
     {
         "topic_type": "single_card",
@@ -257,6 +291,7 @@ SINGLE_TOPICS = [
         "fact_label": "special ability",
         "fact_value": "cú đấm siêu tốc",
         "fact_detail": "its strike is among the fastest animal movements and can crack shells",
+        "detail_vi": "cú đấm tạo lực mạnh đến mức có thể làm nứt vỏ con mồi",
     },
     {
         "topic_type": "single_card",
@@ -266,6 +301,7 @@ SINGLE_TOPICS = [
         "fact_label": "special ability",
         "fact_value": "phóng điện mạnh",
         "fact_detail": "it can generate powerful electric pulses to hunt and defend itself",
+        "detail_vi": "dùng xung điện mạnh để săn mồi và tự vệ dưới nước",
     },
     {
         "topic_type": "single_card",
@@ -275,6 +311,7 @@ SINGLE_TOPICS = [
         "fact_label": "special ability",
         "fact_value": "đảo ngược tuổi",
         "fact_detail": "it can revert to an earlier life stage under stress",
+        "detail_vi": "khi gặp căng thẳng, nó có thể quay về giai đoạn non hơn",
     },
     {
         "topic_type": "single_card",
@@ -284,6 +321,7 @@ SINGLE_TOPICS = [
         "fact_label": "regeneration",
         "fact_value": "tái tạo chi",
         "fact_detail": "it can regrow limbs and repair parts of its body with unusual ability",
+        "detail_vi": "có thể mọc lại chi và sửa chữa một số mô bị tổn thương",
     },
     {
         "topic_type": "single_card",
@@ -293,6 +331,7 @@ SINGLE_TOPICS = [
         "fact_label": "hunting ability",
         "fact_value": "bắn tia nước",
         "fact_detail": "it shoots water jets to knock insects off branches above the surface",
+        "detail_vi": "bắn tia nước chính xác để hạ côn trùng trên cành cây",
     },
     {
         "topic_type": "single_card",
@@ -302,6 +341,7 @@ SINGLE_TOPICS = [
         "fact_label": "camouflage",
         "fact_value": "giả dạng bậc thầy",
         "fact_detail": "it can imitate the look and movement of several dangerous sea animals",
+        "detail_vi": "bắt chước hình dáng và cách di chuyển của loài biển nguy hiểm",
     },
     {
         "topic_type": "single_card",
@@ -311,6 +351,7 @@ SINGLE_TOPICS = [
         "fact_label": "sound mimicry",
         "fact_value": "nhại âm siêu thật",
         "fact_detail": "it is famous for copying natural and artificial sounds with striking accuracy",
+        "detail_vi": "có thể bắt chước nhiều âm thanh tự nhiên và nhân tạo rất giống",
     },
     {
         "topic_type": "single_card",
@@ -320,6 +361,7 @@ SINGLE_TOPICS = [
         "fact_label": "defense",
         "fact_value": "áo giáp vảy",
         "fact_detail": "its keratin scales help it curl into a tough defensive ball",
+        "detail_vi": "cuộn tròn thành quả bóng vảy cứng để tự bảo vệ",
     },
     {
         "topic_type": "single_card",
@@ -329,6 +371,7 @@ SINGLE_TOPICS = [
         "fact_label": "survival",
         "fact_value": "sống cực hạn",
         "fact_detail": "it can survive extreme environments by entering a dormant state",
+        "detail_vi": "chuyển sang trạng thái ngủ sâu để chịu điều kiện khắc nghiệt",
     },
     {
         "topic_type": "single_card",
@@ -338,6 +381,7 @@ SINGLE_TOPICS = [
         "fact_label": "plant ability",
         "fact_value": "mùi xác thối",
         "fact_detail": "its odor attracts pollinators that are drawn to decaying organic matter",
+        "detail_vi": "tỏa mùi giống xác thối để thu hút côn trùng thụ phấn",
     },
     {
         "topic_type": "single_card",
@@ -347,6 +391,7 @@ SINGLE_TOPICS = [
         "fact_label": "plant record",
         "fact_value": "hoa khổng lồ",
         "fact_detail": "it produces one of the largest individual flowers in the world",
+        "detail_vi": "tạo ra một trong những bông hoa đơn lẻ lớn nhất thế giới",
     },
     {
         "topic_type": "single_card",
@@ -356,6 +401,7 @@ SINGLE_TOPICS = [
         "fact_label": "plant feature",
         "fact_value": "nhựa đỏ",
         "fact_detail": "its red resin gives the tree its dramatic name and unusual appearance",
+        "detail_vi": "nhựa cây màu đỏ khiến nó có vẻ ngoài rất kỳ lạ",
     },
     {
         "topic_type": "single_card",
@@ -365,6 +411,7 @@ SINGLE_TOPICS = [
         "fact_label": "special ability",
         "fact_value": "bay gần như im lặng",
         "fact_detail": "its wing structure helps reduce turbulence and noise",
+        "detail_vi": "cấu trúc lông cánh giúp giảm tiếng động khi lao xuống săn mồi",
     },
     {
         "topic_type": "single_card",
@@ -374,6 +421,7 @@ SINGLE_TOPICS = [
         "fact_label": "intelligence",
         "fact_value": "rất thông minh",
         "fact_detail": "known for problem-solving and escaping from tight spaces",
+        "detail_vi": "giải quyết vấn đề tốt và nổi tiếng với khả năng thoát khỏi khe hẹp",
     },
     {
         "topic_type": "single_card",
@@ -383,6 +431,7 @@ SINGLE_TOPICS = [
         "fact_label": "special ability",
         "fact_value": "cây ăn thịt",
         "fact_detail": "it traps insects with a fast snap-trap mechanism",
+        "detail_vi": "khép bẫy rất nhanh để giữ côn trùng làm nguồn dinh dưỡng",
     },
 ]
 
@@ -390,7 +439,20 @@ SINGLE_TOPICS = [
 def get_topic_by_index(index: int) -> dict:
     """80% comparison, 20% single-card."""
     if index % 5 != 4:
-        comparison_index = (index - (index // 5)) % len(COMPARISON_TOPICS)
-        return COMPARISON_TOPICS[comparison_index]
-    single_index = (index // 5) % len(SINGLE_TOPICS)
-    return SINGLE_TOPICS[single_index]
+        comparison_slot_index = index - (index // 5)
+        if comparison_slot_index < len(COMPARISON_TOPICS):
+            return deepcopy(COMPARISON_TOPICS[comparison_slot_index])
+
+        from app.generated_topic_service import get_generated_topic
+
+        generated_index = comparison_slot_index - len(COMPARISON_TOPICS)
+        return get_generated_topic("comparison_top5", generated_index, COMPARISON_TOPICS + SINGLE_TOPICS)
+
+    single_slot_index = index // 5
+    if single_slot_index < len(SINGLE_TOPICS):
+        return deepcopy(SINGLE_TOPICS[single_slot_index])
+
+    from app.generated_topic_service import get_generated_topic
+
+    generated_index = single_slot_index - len(SINGLE_TOPICS)
+    return get_generated_topic("single_card", generated_index, COMPARISON_TOPICS + SINGLE_TOPICS)
