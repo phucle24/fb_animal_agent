@@ -1,0 +1,10 @@
+[Unit]
+Description=Publish due FB Animal Agent product comments
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/root/fb_animal_agent
+EnvironmentFile=/root/fb_animal_agent/.env
+ExecStart=/root/fb_animal_agent/venv/bin/python scripts/publish_due_product_comments.py 3

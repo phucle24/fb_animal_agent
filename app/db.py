@@ -65,6 +65,33 @@ def init_db():
     cur.execute("CREATE INDEX IF NOT EXISTS idx_posts_topic_key ON posts (topic_key)")
     cur.execute("CREATE INDEX IF NOT EXISTS idx_posts_batch_job_name ON posts (batch_job_name)")
 
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS post_product_comments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            post_id INTEGER NOT NULL,
+            fb_post_id TEXT NOT NULL,
+            comment_index INTEGER NOT NULL,
+            product_name TEXT NOT NULL,
+            product_link TEXT NOT NULL,
+            message TEXT NOT NULL,
+            scheduled_at TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT 'PENDING',
+            fb_comment_id TEXT,
+            error_message TEXT,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(post_id, comment_index)
+        )
+        """
+    )
+    cur.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_post_product_comments_status_schedule
+        ON post_product_comments (status, scheduled_at)
+        """
+    )
+
     conn.commit()
     conn.close()
 
@@ -298,6 +325,86 @@ def update_status(post_id: int, status: str):
         WHERE id = ?
         """,
         (status, status, post_id),
+    )
+    conn.commit()
+    conn.close()
+
+
+def insert_product_comment(data: dict) -> bool:
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        INSERT OR IGNORE INTO post_product_comments (
+            post_id, fb_post_id, comment_index, product_name, product_link,
+            message, scheduled_at, status
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, 'PENDING')
+        """,
+        (
+            data["post_id"],
+            data["fb_post_id"],
+            data["comment_index"],
+            data["product_name"],
+            data["product_link"],
+            data["message"],
+            data["scheduled_at"],
+        ),
+    )
+    inserted = cur.rowcount > 0
+    conn.commit()
+    conn.close()
+    return inserted
+
+
+def list_due_product_comments(now_iso: str, limit: int = 10):
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        SELECT *
+        FROM post_product_comments
+        WHERE status = 'PENDING'
+          AND scheduled_at <= ?
+        ORDER BY scheduled_at ASC, id ASC
+        LIMIT ?
+        """,
+        (now_iso, limit),
+    )
+    rows = cur.fetchall()
+    conn.close()
+    return rows
+
+
+def mark_product_comment_posted(comment_id: int, fb_comment_id: str):
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        UPDATE post_product_comments
+        SET status = 'POSTED',
+            fb_comment_id = ?,
+            error_message = NULL,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+        """,
+        (fb_comment_id, comment_id),
+    )
+    conn.commit()
+    conn.close()
+
+
+def mark_product_comment_failed(comment_id: int, error_message: str):
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        UPDATE post_product_comments
+        SET status = 'FAILED',
+            error_message = ?,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+        """,
+        (error_message[:1000], comment_id),
     )
     conn.commit()
     conn.close()

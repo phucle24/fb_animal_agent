@@ -33,3 +33,21 @@ def publish_photo(image_path: str, caption: str) -> dict:
 
     return result
 
+
+def publish_comment(fb_post_id: str, message: str) -> dict:
+    _ensure_facebook_config()
+    url = f"https://graph.facebook.com/{FB_GRAPH_VERSION}/{fb_post_id}/comments"
+    response = requests.post(
+        url,
+        data={
+            "message": message,
+            "access_token": FB_PAGE_TOKEN,
+        },
+        timeout=60,
+    )
+    result = response.json()
+
+    if response.status_code >= 400 or "error" in result:
+        raise RuntimeError(str(result))
+
+    return result

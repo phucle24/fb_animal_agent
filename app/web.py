@@ -17,6 +17,7 @@ from app.db import (
     update_status,
 )
 from app.facebook_service import publish_photo
+from app.product_comment_service import schedule_product_comments_for_post
 from app.schedule_service import prepare_one_test_post, prepare_weekly_posts, prepare_weekly_posts_for_batch
 
 
@@ -157,7 +158,8 @@ def create_app() -> Flask:
             result = publish_photo(post["final_image_path"], post["caption"])
             fb_post_id = result.get("post_id") or result.get("id", "")
             mark_posted(post_id, fb_post_id)
-            flash(f"Published post #{post_id}.", "success")
+            scheduled_comments = schedule_product_comments_for_post(post, fb_post_id)
+            flash(f"Published post #{post_id}. Scheduled {scheduled_comments} product comments.", "success")
         except Exception as exc:
             mark_failed(post_id, str(exc))
             flash(f"Publish failed: {exc}", "error")

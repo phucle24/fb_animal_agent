@@ -229,6 +229,11 @@ ANIMAL_AGENT_DIRECT_IMAGE_BOOTSTRAP_DAYS=2
 ANIMAL_AGENT_DIRECT_IMAGE_BOOTSTRAP_UNTIL=
 ANIMAL_AGENT_AUTO_GENERATE_TOPICS=true
 ANIMAL_AGENT_GENERATED_TOPICS_PATH=data/generated_topics.jsonl
+
+ANIMAL_AGENT_PRODUCT_LINKS_CSV=data/product_links.csv
+ANIMAL_AGENT_PRODUCT_COMMENT_IMAGE_DELAY_MINUTES=15
+ANIMAL_AGENT_PRODUCT_COMMENT_VIDEO_DELAY_MINUTES=30
+ANIMAL_AGENT_PRODUCT_COMMENTS_PER_POST=2
 ```
 
 ### 4. Init DB
@@ -268,6 +273,21 @@ venv/bin/python scripts/generate_topics.py comparison_top5 5
 venv/bin/python scripts/generate_topics.py single_card 2
 ```
 
+Nếu muốn tự comment link sản phẩm sau khi bài đã đăng, copy file CSV sản phẩm vào VPS, ví dụ:
+
+```bash
+mkdir -p data
+cp /path/to/products.csv data/product_links.csv
+venv/bin/python scripts/publish_due_product_comments.py --dry-run
+```
+
+Luồng comment sản phẩm:
+
+- bài ảnh: tạo 2 comment sau khi bài đăng được 15 phút
+- bài video: tạo 2 comment sau khi bài đăng được 30 phút
+- mỗi bài chỉ tạo 1 lần, tối đa 2 comment, mỗi comment 1 link
+- comment không kèm giá, chỉ có mô tả ngắn và link ưu đãi/sản phẩm
+
 ### 6. Bật systemd cho chạy tự động
 
 ```bash
@@ -279,6 +299,7 @@ Các timer được bật:
 - `fb-animal-agent-ensure.timer`: 02:00 mỗi ngày, tự bù bài tương lai bằng Batch API
 - `fb-animal-agent-poll-batch.timer`: mỗi 6 giờ, poll ảnh batch
 - `fb-animal-agent-publish-due.timer`: mỗi 15 phút, đăng mọi bài `READY` đã đến giờ
+- `fb-animal-agent-product-comments.timer`: mỗi 5 phút, đăng các comment sản phẩm đã đến hạn
 - `fb-animal-agent-publish-morning.timer`: 10:00 mỗi ngày
 - `fb-animal-agent-publish-afternoon.timer`: 15:00 mỗi ngày
 - `fb-animal-agent-web.service`: dashboard local ở `127.0.0.1:8000`

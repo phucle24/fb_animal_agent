@@ -1,0 +1,10 @@
+[Unit]
+Description=Publish due FB Animal Agent product comments every 5 minutes
+
+[Timer]
+OnCalendar=*:0/5
+Persistent=true
+Unit=fb-animal-agent-product-comments.service
+
+[Install]
+WantedBy=timers.target

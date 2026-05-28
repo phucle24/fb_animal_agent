@@ -14,6 +14,7 @@ systemctl enable --now fb-animal-agent-web.service
 systemctl enable --now fb-animal-agent-ensure.timer
 systemctl enable --now fb-animal-agent-poll-batch.timer
 systemctl enable --now fb-animal-agent-publish-due.timer
+systemctl enable --now fb-animal-agent-product-comments.timer
 systemctl enable --now fb-animal-agent-publish-morning.timer
 systemctl enable --now fb-animal-agent-publish-afternoon.timer
 
