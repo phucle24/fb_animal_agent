@@ -415,13 +415,13 @@ SINGLE_TOPICS = [
     },
     {
         "topic_type": "single_card",
-        "topic_key": "octopus_intelligence_card",
-        "subject_vi": "Bạch Tuộc",
-        "subject_en": "Octopus",
-        "fact_label": "intelligence",
-        "fact_value": "rất thông minh",
-        "fact_detail": "known for problem-solving and escaping from tight spaces",
-        "detail_vi": "giải quyết vấn đề tốt và nổi tiếng với khả năng thoát khỏi khe hẹp",
+        "topic_key": "exploding_ant_defense_card",
+        "subject_vi": "Kiến Nổ",
+        "subject_en": "Exploding ant",
+        "fact_label": "defense",
+        "fact_value": "tự nổ bảo vệ đàn",
+        "fact_detail": "some worker ants rupture their own bodies to release sticky defensive fluid",
+        "detail_vi": "một số kiến thợ hy sinh thân mình để phun chất dính bảo vệ tổ",
     },
     {
         "topic_type": "single_card",
@@ -436,23 +436,152 @@ SINGLE_TOPICS = [
 ]
 
 
+MATCHUP_TOPICS = [
+    {
+        "topic_type": "matchup_versus",
+        "topic_key": "tibetan_mastiff_vs_bengal_tiger",
+        "subject_vi": "Chó Ngao Tây Tạng đối đầu Hổ Bengal",
+        "subject_en": "Tibetan Mastiff versus Bengal tiger",
+        "left": {
+            "name_vi": "Chó Ngao Tây Tạng",
+            "name_en": "Tibetan Mastiff",
+            "height": "76 cm",
+            "weight": "70 kg",
+            "bite_force": "550 PSI",
+            "edge_vi": "lông cổ dày, thân hình lớn, tiếng sủa uy hiếp",
+        },
+        "right": {
+            "name_vi": "Hổ Bengal",
+            "name_en": "Bengal tiger",
+            "height": "110 cm",
+            "weight": "220 kg",
+            "bite_force": "1050 PSI",
+            "edge_vi": "khối cơ bùng nổ, móng vuốt, bản năng săn mồi độc lập",
+        },
+        "verdict_vi": "Hổ Bengal vượt trội rõ rệt về khối lượng, lực cắn, tốc độ và vũ khí tự nhiên.",
+        "reality_note_vi": "Đây là so sánh giả định dựa trên số liệu sinh học, không cổ vũ cho động vật đối đầu thật.",
+        "debate_question_vi": "Bạn nghĩ ưu thế nào quyết định nhiều nhất: cân nặng, lực cắn hay bản năng săn mồi?",
+    },
+    {
+        "topic_type": "matchup_versus",
+        "topic_key": "gray_wolf_vs_spotted_hyena",
+        "subject_vi": "Sói Xám đối đầu Linh Cẩu Đốm",
+        "subject_en": "Gray wolf versus spotted hyena",
+        "left": {
+            "name_vi": "Sói Xám",
+            "name_en": "Gray wolf",
+            "height": "85 cm",
+            "weight": "55 kg",
+            "bite_force": "400 PSI",
+            "edge_vi": "sức bền cao, phối hợp bầy đàn, phản xạ linh hoạt",
+        },
+        "right": {
+            "name_vi": "Linh Cẩu Đốm",
+            "name_en": "Spotted hyena",
+            "height": "90 cm",
+            "weight": "70 kg",
+            "bite_force": "1100 PSI",
+            "edge_vi": "hàm cực khỏe, thân trước mạnh, chịu va chạm tốt",
+        },
+        "verdict_vi": "Linh cẩu đốm có lợi thế lớn trong va chạm trực diện nhờ hàm và thể lực.",
+        "reality_note_vi": "Ngoài tự nhiên, môi trường, số lượng bầy và tình huống mới là yếu tố quyết định.",
+        "debate_question_vi": "Nếu bỏ qua bầy đàn, bạn chọn sự bền bỉ của sói hay lực hàm của linh cẩu?",
+    },
+    {
+        "topic_type": "matchup_versus",
+        "topic_key": "gorilla_vs_grizzly_bear",
+        "subject_vi": "Khỉ Đột đối đầu Gấu Xám Bắc Mỹ",
+        "subject_en": "Gorilla versus grizzly bear",
+        "left": {
+            "name_vi": "Khỉ Đột",
+            "name_en": "Gorilla",
+            "height": "170 cm",
+            "weight": "180 kg",
+            "bite_force": "1300 PSI",
+            "edge_vi": "tay rất khỏe, lực cắn lớn, khả năng vật lộn tốt",
+        },
+        "right": {
+            "name_vi": "Gấu Xám",
+            "name_en": "Grizzly bear",
+            "height": "150 cm",
+            "weight": "270 kg",
+            "bite_force": "975 PSI",
+            "edge_vi": "cơ thể nặng hơn, móng vuốt dài, lớp mỡ và cơ dày",
+        },
+        "verdict_vi": "Gấu xám thường có lợi thế nhờ khối lượng, móng vuốt và khả năng chịu đòn.",
+        "reality_note_vi": "Đây là so sánh giả định; hai loài sống ở môi trường khác nhau và không nên bị đặt vào đối đầu.",
+        "debate_question_vi": "Theo bạn, sức tay của khỉ đột có đủ bù lại khối lượng của gấu xám không?",
+    },
+    {
+        "topic_type": "matchup_versus",
+        "topic_key": "komodo_dragon_vs_king_cobra",
+        "subject_vi": "Rồng Komodo đối đầu Rắn Hổ Mang Chúa",
+        "subject_en": "Komodo dragon versus king cobra",
+        "left": {
+            "name_vi": "Rồng Komodo",
+            "name_en": "Komodo dragon",
+            "height": "60 cm",
+            "weight": "70 kg",
+            "bite_force": "600 PSI",
+            "edge_vi": "da dày, hàm răng sắc, sức kéo mạnh",
+        },
+        "right": {
+            "name_vi": "Rắn Hổ Mang Chúa",
+            "name_en": "King cobra",
+            "height": "Nâng đầu 150 cm",
+            "weight": "9 kg",
+            "bite_force": "Nọc độc",
+            "edge_vi": "tầm đánh nhanh, nọc thần kinh, khả năng cảnh báo mạnh",
+        },
+        "verdict_vi": "Komodo áp đảo về thể hình, còn hổ mang chúa nguy hiểm nhờ nọc và khoảng cách tấn công.",
+        "reality_note_vi": "Kết quả giả định phụ thuộc rất lớn vào cú tấn công đầu tiên và môi trường.",
+        "debate_question_vi": "Bạn nghĩ thể hình Komodo hay nọc độc hổ mang chúa đáng sợ hơn?",
+    },
+]
+
+
 def get_topic_by_index(index: int) -> dict:
-    """80% comparison, 20% single-card."""
-    if index % 5 != 4:
-        comparison_slot_index = index - (index // 5)
+    """Rotate evenly across Top 5, single-card, and matchup topics."""
+    topic_group = index % 3
+    group_index = index // 3
+
+    if topic_group == 0:
+        comparison_slot_index = group_index
         if comparison_slot_index < len(COMPARISON_TOPICS):
             return deepcopy(COMPARISON_TOPICS[comparison_slot_index])
 
         from app.generated_topic_service import get_generated_topic
 
         generated_index = comparison_slot_index - len(COMPARISON_TOPICS)
-        return get_generated_topic("comparison_top5", generated_index, COMPARISON_TOPICS + SINGLE_TOPICS)
+        return get_generated_topic(
+            "comparison_top5",
+            generated_index,
+            COMPARISON_TOPICS + SINGLE_TOPICS + MATCHUP_TOPICS,
+        )
 
-    single_slot_index = index // 5
-    if single_slot_index < len(SINGLE_TOPICS):
-        return deepcopy(SINGLE_TOPICS[single_slot_index])
+    if topic_group == 1:
+        single_slot_index = group_index
+        if single_slot_index < len(SINGLE_TOPICS):
+            return deepcopy(SINGLE_TOPICS[single_slot_index])
+
+        from app.generated_topic_service import get_generated_topic
+
+        generated_index = single_slot_index - len(SINGLE_TOPICS)
+        return get_generated_topic(
+            "single_card",
+            generated_index,
+            COMPARISON_TOPICS + SINGLE_TOPICS + MATCHUP_TOPICS,
+        )
+
+    matchup_slot_index = group_index
+    if matchup_slot_index < len(MATCHUP_TOPICS):
+        return deepcopy(MATCHUP_TOPICS[matchup_slot_index])
 
     from app.generated_topic_service import get_generated_topic
 
-    generated_index = single_slot_index - len(SINGLE_TOPICS)
-    return get_generated_topic("single_card", generated_index, COMPARISON_TOPICS + SINGLE_TOPICS)
+    generated_index = matchup_slot_index - len(MATCHUP_TOPICS)
+    return get_generated_topic(
+        "matchup_versus",
+        generated_index,
+        COMPARISON_TOPICS + SINGLE_TOPICS + MATCHUP_TOPICS,
+    )

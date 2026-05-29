@@ -89,11 +89,15 @@ def pick_products_for_post(post_id: int, count: int) -> list[dict]:
 
 
 def build_product_comment(product: dict, comment_index: int) -> str:
-    prefixes = (
-        "Gợi ý liên quan cho bạn tham khảo:",
-        "Nếu cần món hữu ích, bạn có thể xem thử:",
+    templates = (
+        "Cứu vớt admin khỏi cảnh nói chuyện một mình bằng một cú click nhẹ:\n{product_name}\n{product_link}",
+        "Một món nhỏ xinh đi ngang qua, ai thương admin thì ghé xem thử:\n{product_name}\n{product_link}",
+        "Không bắt mua đâu, chỉ xin một ánh nhìn cho admin có động lực nuôi page:\n{product_name}\n{product_link}",
+        "Nếu bài này làm bạn cười 1 chút, cho admin gửi ké món này nha:\n{product_name}\n{product_link}",
+        "Góc tự cứu lấy ví content của admin, xem vui cũng được:\n{product_name}\n{product_link}",
     )
-    return f"{prefixes[(comment_index - 1) % len(prefixes)]}\n{product['name']}\n{product['link']}"
+    template = templates[(comment_index - 1) % len(templates)]
+    return template.format(product_name=product["name"], product_link=product["link"])
 
 
 def schedule_product_comments_for_post(post: dict, fb_post_id: str, posted_at: datetime | None = None) -> int:

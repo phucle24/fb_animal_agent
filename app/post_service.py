@@ -4,7 +4,7 @@ from app.config import FINAL_DIR, RAW_DIR
 from app.db import insert_post
 from app.image_service import generate_image
 from app.overlay_service import overlay_comparison_top5, overlay_single_card
-from app.text_service import generate_comparison_content, generate_single_card_content
+from app.text_service import generate_comparison_content, generate_matchup_content, generate_single_card_content
 from app.utils import slugify
 
 
@@ -31,6 +31,18 @@ Create a finished vertical 4:5 Vietnamese single-subject fact poster for Faceboo
 - one large metric/stat badge
 - one short hook line
 - clean editorial layout, not a ranking, not a comparison, not a list
+- no Python overlay will be used later; all text must be rendered by the image model now
+""".strip()
+
+MATCHUP_IMAGE_TEMPLATE = """
+FINAL INFOGRAPHIC MUST CONTAIN THE EXACT TEXT BELOW.
+Create a finished vertical 4:5 Vietnamese scientific animal face-off infographic poster for Facebook feed:
+- premium split-screen layout with left animal versus right animal
+- dark forest/jungle background, copper/orange accents, cinematic shafts of light
+- bold condensed Vietnamese typography, clean science infographic mood
+- two realistic full-body or half-body animal portraits facing forward, separated by a thin vertical divider
+- data cards under each animal with concise measurements
+- no gore, no blood, no injury, no violent impact
 - no Python overlay will be used later; all text must be rendered by the image model now
 """.strip()
 
@@ -140,6 +152,42 @@ def comparison_prompt_rows(topic: dict) -> str:
     return "\n".join(rows)
 
 
+def matchup_stat_lines(animal: dict) -> list[str]:
+    return [
+        f"Chiều cao: {animal['height']}",
+        f"Trọng lượng: {animal['weight']}",
+        f"Lực cắn: {animal['bite_force']}",
+        f"Lợi thế: {animal['edge_vi']}",
+    ]
+
+
+def matchup_caption(topic: dict, content: dict) -> str:
+    left = topic["left"]
+    right = topic["right"]
+    lines = [
+        content["title"],
+        "",
+        content["caption_intro"].strip(),
+        "",
+        f"{left['name_vi']} ({left['name_en']})",
+        f"- Chiều cao: {left['height']}",
+        f"- Trọng lượng: {left['weight']}",
+        f"- Lực cắn: {left['bite_force']}",
+        f"- Lợi thế: {left['edge_vi']}",
+        "",
+        f"{right['name_vi']} ({right['name_en']})",
+        f"- Chiều cao: {right['height']}",
+        f"- Trọng lượng: {right['weight']}",
+        f"- Lực cắn: {right['bite_force']}",
+        f"- Lợi thế: {right['edge_vi']}",
+        "",
+        f"Kết luận: {topic['verdict_vi']}",
+        topic["reality_note_vi"],
+        topic["debate_question_vi"],
+    ]
+    return append_caption_hashtags(remove_ai_disclaimer("\n".join(lines)))
+
+
 def build_model_rendered_infographic_prompt(image_prompt: str, topic: dict, content: dict) -> str:
     if topic["topic_type"] == "comparison_top5":
         title = content.get("overlay_subtitle") or topic["subject_vi"]
@@ -163,6 +211,36 @@ def build_model_rendered_infographic_prompt(image_prompt: str, topic: dict, cont
             "- Do not add watermark, logo, captions, brand text, or random symbols.\n"
             "- If text cannot fit inside a panel, reduce font size, tighten spacing, or split into two short lines.\n"
             "- Never crop, truncate, overlap, or replace the listed text; readability is more important than large type.\n\n"
+            "Additional photo/style guidance from the text model, use only if it does not conflict with exact text rules:\n"
+            f"{image_prompt}"
+        )
+
+    if topic["topic_type"] == "matchup_versus":
+        left = topic["left"]
+        right = topic["right"]
+        title = content.get("overlay_title") or topic["subject_vi"]
+        left_text = "\n".join([left["name_vi"].upper(), *matchup_stat_lines(left)])
+        right_text = "\n".join([right["name_vi"].upper(), *matchup_stat_lines(right)])
+        return (
+            f"{MATCHUP_IMAGE_TEMPLATE}\n\n"
+            "Header text to render exactly:\n"
+            f"{title.upper()}\n\n"
+            "Left side visible text lines to render exactly:\n"
+            f"{left_text}\n\n"
+            "Right side visible text lines to render exactly:\n"
+            f"{right_text}\n\n"
+            "Bottom note text to render exactly:\n"
+            "Số liệu ước tính, có thể thay đổi theo cá thể\n\n"
+            "Strict text rules:\n"
+            "- Render Vietnamese diacritics correctly.\n"
+            "- Use the exact text strings above, no extra words, no English labels, no fake text.\n"
+            "- Keep labels and values readable; reduce font size or split into two lines if needed.\n"
+            "- Never crop, truncate, overlap, or replace the listed text.\n"
+            "- Do not add watermark, logo, captions, brand text, random symbols, blood, or injury.\n\n"
+            "Visual direction:\n"
+            f"- Left animal: realistic {left['name_en']}, dignified, alert, no aggression impact.\n"
+            f"- Right animal: realistic {right['name_en']}, powerful, alert, no aggression impact.\n"
+            "- Create tension through posture, lighting, scale, and composition, not violence.\n\n"
             "Additional photo/style guidance from the text model, use only if it does not conflict with exact text rules:\n"
             f"{image_prompt}"
         )
@@ -269,6 +347,28 @@ def build_post_payload(topic: dict, scheduled_at: str, slot: str) -> dict:
             "status": "READY",
         }
 
+    if topic["topic_type"] == "matchup_versus":
+        content = generate_matchup_content(topic)
+        image_prompt = build_model_rendered_infographic_prompt(content["image_prompt"], topic, content)
+        caption = matchup_caption(topic, content)
+        return {
+            "scheduled_at": scheduled_at,
+            "slot": slot,
+            "topic_type": topic["topic_type"],
+            "topic_key": topic["topic_key"],
+            "title": content["title"],
+            "overlay_title": content["overlay_title"],
+            "overlay_subtitle": None,
+            "overlay_stat": None,
+            "overlay_hook": None,
+            "caption": caption,
+            "image_prompt": image_prompt,
+            "topic_payload": json.dumps(topic, ensure_ascii=False),
+            "raw_image_path": final_path,
+            "final_image_path": final_path,
+            "status": "READY",
+        }
+
     raise ValueError(f"Unsupported topic_type: {topic['topic_type']}")
 
 
@@ -291,6 +391,9 @@ def overlay_post_image(post_data: dict) -> str:
             overlay_stat=post_data["overlay_stat"],
             overlay_hook=post_data["overlay_hook"],
         )
+
+    if post_data["topic_type"] == "matchup_versus":
+        return post_data["final_image_path"]
 
     raise ValueError(f"Unsupported topic_type: {post_data['topic_type']}")
 

@@ -11,8 +11,8 @@ if __name__ == "__main__":
     topic_type = sys.argv[1] if len(sys.argv) > 1 else "comparison_top5"
     count = int(sys.argv[2]) if len(sys.argv) > 2 else 1
 
-    if topic_type not in {"comparison_top5", "single_card"}:
-        print("Usage: python scripts/generate_topics.py comparison_top5|single_card [count]")
+    if topic_type not in {"comparison_top5", "single_card", "matchup_versus"}:
+        print("Usage: python scripts/generate_topics.py comparison_top5|single_card|matchup_versus [count]")
         sys.exit(1)
 
     existing_topics = COMPARISON_TOPICS + SINGLE_TOPICS + load_generated_topics()

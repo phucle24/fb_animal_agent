@@ -168,3 +168,68 @@ Chỉ trả về JSON.
     )
 
     return safe_json_loads(response.text)
+
+
+def generate_matchup_content(topic: dict) -> dict:
+    _ensure_api_key()
+    client, types = _client_and_types()
+    left = topic["left"]
+    right = topic["right"]
+    prompt = f"""
+Bạn là biên tập viên nội dung Facebook chuyên về kiến thức động vật theo hướng khoa học, dễ viral.
+
+Hãy tạo output JSON hợp lệ với đúng các key sau:
+- title
+- overlay_title
+- caption_intro
+- image_prompt
+
+Thông tin bài viết:
+- Chủ đề: {topic["subject_vi"]}
+- Bên trái: {left["name_vi"]} ({left["name_en"]})
+- Bên phải: {right["name_vi"]} ({right["name_en"]})
+- Kết luận khoa học: {topic["verdict_vi"]}
+- Lưu ý thực tế: {topic["reality_note_vi"]}
+- Câu hỏi kéo bình luận: {topic["debate_question_vi"]}
+
+Số liệu cố định, KHÔNG thay đổi:
+- {left["name_vi"]}: chiều cao {left["height"]}, trọng lượng {left["weight"]}, lực cắn {left["bite_force"]}, lợi thế {left["edge_vi"]}
+- {right["name_vi"]}: chiều cao {right["height"]}, trọng lượng {right["weight"]}, lực cắn {right["bite_force"]}, lợi thế {right["edge_vi"]}
+
+Yêu cầu:
+1. title
+- tiếng Việt
+- hấp dẫn, gây tò mò, tối đa 14 từ
+- không cổ vũ bạo lực thật
+
+2. overlay_title
+- tiếng Việt, rất ngắn
+- dạng poster đối đầu, ví dụ: "NGẠO TẠNG VS HỔ BENGAL"
+- tối đa 9 từ
+
+3. caption_intro
+- 3 đến 5 câu
+- mở đầu tươi mới, có chất tranh luận
+- giải thích rằng đây là so sánh giả định dựa trên số liệu sinh học, không cổ vũ cho động vật đối đầu thật
+- không thay đổi số liệu
+- câu cuối nên là câu hỏi kéo bình luận
+
+4. image_prompt
+- tiếng Anh
+- cinematic wildlife face-off infographic poster
+- two animals facing forward in split-screen forest/jungle scene
+- premium dark copper/orange style, dramatic light beams, scientific comparison mood
+- no gore, no injury, no blood, no fighting impact
+- no watermark
+- do not invent extra text layout; system will build final infographic prompt
+
+Chỉ trả về JSON, không giải thích thêm.
+"""
+
+    response = client.models.generate_content(
+        model=GEMINI_TEXT_MODEL,
+        contents=prompt,
+        config=types.GenerateContentConfig(response_mime_type="application/json"),
+    )
+
+    return safe_json_loads(response.text)
