@@ -47,11 +47,12 @@ if __name__ == "__main__":
 
         try:
             result = publish_photo(post["final_image_path"], post["caption"])
+            fb_photo_id = result.get("id", "")
             fb_post_id = result.get("post_id") or result.get("id", "")
-            mark_posted(post["id"], fb_post_id)
+            mark_posted(post["id"], fb_post_id, fb_photo_id)
             scheduled_comments = schedule_product_comments_for_post(post, fb_post_id)
             print(
-                f"Posted local_id={post['id']} => fb_post_id={fb_post_id} | "
+                f"Posted local_id={post['id']} => fb_post_id={fb_post_id} | fb_photo_id={fb_photo_id} | "
                 f"scheduled_product_comments={scheduled_comments}"
             )
         except Exception as exc:

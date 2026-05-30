@@ -16,7 +16,7 @@ from app.db import (
     mark_product_comment_failed,
     mark_product_comment_posted,
 )
-from app.facebook_service import publish_comment
+from app.facebook_service import FacebookGraphError, publish_comment
 
 
 LINK_FIELDS = ("Link ưu đãi", "Link sản phẩm", "link", "url")
@@ -140,6 +140,33 @@ def schedule_product_comments_for_post(
     return inserted
 
 
+def should_try_photo_fallback(exc: Exception) -> bool:
+    if not isinstance(exc, FacebookGraphError):
+        return False
+    return exc.code in {10, 100}
+
+
+def publish_comment_with_fallback(row) -> dict:
+    tried = [row["fb_post_id"]]
+    try:
+        return publish_comment(row["fb_post_id"], row["message"])
+    except Exception as first_exc:
+        fb_photo_id = ""
+        try:
+            fb_photo_id = row["fb_photo_id"] or ""
+        except (IndexError, KeyError):
+            fb_photo_id = ""
+
+        if fb_photo_id and fb_photo_id not in tried and should_try_photo_fallback(first_exc):
+            try:
+                return publish_comment(fb_photo_id, row["message"])
+            except Exception as second_exc:
+                raise RuntimeError(
+                    f"post_id target failed: {first_exc}; photo_id fallback failed: {second_exc}"
+                ) from second_exc
+        raise
+
+
 def publish_due_product_comments(now: datetime | None = None, limit: int = 5, dry_run: bool = False) -> list[dict]:
     tz = ZoneInfo(TIMEZONE)
     now = now or datetime.now(tz)
@@ -153,7 +180,7 @@ def publish_due_product_comments(now: datetime | None = None, limit: int = 5, dr
             results.append({"id": row["id"], "status": "DRY_RUN", "fb_post_id": row["fb_post_id"]})
             continue
         try:
-            result = publish_comment(row["fb_post_id"], row["message"])
+            result = publish_comment_with_fallback(row)
             fb_comment_id = result.get("id", "")
             mark_product_comment_posted(row["id"], fb_comment_id)
             results.append({"id": row["id"], "status": "POSTED", "fb_comment_id": fb_comment_id})

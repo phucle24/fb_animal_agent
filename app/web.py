@@ -156,8 +156,9 @@ def create_app() -> Flask:
 
         try:
             result = publish_photo(post["final_image_path"], post["caption"])
+            fb_photo_id = result.get("id", "")
             fb_post_id = result.get("post_id") or result.get("id", "")
-            mark_posted(post_id, fb_post_id)
+            mark_posted(post_id, fb_post_id, fb_photo_id)
             scheduled_comments = schedule_product_comments_for_post(post, fb_post_id)
             flash(f"Published post #{post_id}. Scheduled {scheduled_comments} product comments.", "success")
         except Exception as exc:

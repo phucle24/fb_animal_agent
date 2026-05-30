@@ -46,6 +46,7 @@ def init_db():
         cur,
         "posts",
         {
+            "fb_photo_id": "TEXT",
             "batch_job_name": "TEXT",
             "batch_request_key": "TEXT",
             "batch_state": "TEXT",
@@ -102,6 +103,14 @@ def _ensure_columns(cur, table_name: str, columns: dict[str, str]):
     for column, definition in columns.items():
         if column not in existing:
             cur.execute(f"ALTER TABLE {table_name} ADD COLUMN {column} {definition}")
+
+
+def ensure_runtime_schema():
+    conn = get_conn()
+    cur = conn.cursor()
+    _ensure_columns(cur, "posts", {"fb_photo_id": "TEXT"})
+    conn.commit()
+    conn.close()
 
 
 def insert_post(data: dict) -> int:
@@ -299,7 +308,8 @@ def get_post(post_id: int):
     return row
 
 
-def mark_posted(post_id: int, fb_post_id: str):
+def mark_posted(post_id: int, fb_post_id: str, fb_photo_id: str | None = None):
+    ensure_runtime_schema()
     conn = get_conn()
     cur = conn.cursor()
     cur.execute(
@@ -307,11 +317,12 @@ def mark_posted(post_id: int, fb_post_id: str):
         UPDATE posts
         SET status = 'POSTED',
             fb_post_id = ?,
+            fb_photo_id = ?,
             error_message = NULL,
             updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
         """,
-        (fb_post_id, post_id),
+        (fb_post_id, fb_photo_id, post_id),
     )
     conn.commit()
     conn.close()
@@ -398,10 +409,20 @@ def insert_product_comment(data: dict) -> bool:
     cur = conn.cursor()
     cur.execute(
         """
-        INSERT OR IGNORE INTO post_product_comments (
+        INSERT INTO post_product_comments (
             post_id, fb_post_id, comment_index, product_name, product_link,
             message, scheduled_at, status
         ) VALUES (?, ?, ?, ?, ?, ?, ?, 'PENDING')
+        ON CONFLICT(post_id, comment_index) DO UPDATE SET
+            fb_post_id = excluded.fb_post_id,
+            product_name = excluded.product_name,
+            product_link = excluded.product_link,
+            message = excluded.message,
+            scheduled_at = excluded.scheduled_at,
+            status = 'PENDING',
+            error_message = NULL,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE post_product_comments.status != 'POSTED'
         """,
         (
             data["post_id"],
@@ -420,15 +441,17 @@ def insert_product_comment(data: dict) -> bool:
 
 
 def list_due_product_comments(now_iso: str, limit: int = 10):
+    ensure_runtime_schema()
     conn = get_conn()
     cur = conn.cursor()
     cur.execute(
         """
-        SELECT *
-        FROM post_product_comments
-        WHERE status = 'PENDING'
-          AND scheduled_at <= ?
-        ORDER BY scheduled_at ASC, id ASC
+        SELECT c.*, p.fb_photo_id AS fb_photo_id
+        FROM post_product_comments c
+        LEFT JOIN posts p ON p.id = c.post_id
+        WHERE c.status = 'PENDING'
+          AND c.scheduled_at <= ?
+        ORDER BY c.scheduled_at ASC, c.id ASC
         LIMIT ?
         """,
         (now_iso, limit),
