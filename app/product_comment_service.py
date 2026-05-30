@@ -100,7 +100,12 @@ def build_product_comment(product: dict, comment_index: int) -> str:
     return template.format(product_name=product["name"], product_link=product["link"])
 
 
-def schedule_product_comments_for_post(post: dict, fb_post_id: str, posted_at: datetime | None = None) -> int:
+def schedule_product_comments_for_post(
+    post: dict,
+    fb_post_id: str,
+    posted_at: datetime | None = None,
+    immediate: bool = False,
+) -> int:
     if not fb_post_id:
         return 0
 
@@ -114,7 +119,7 @@ def schedule_product_comments_for_post(post: dict, fb_post_id: str, posted_at: d
         base_time = base_time.replace(tzinfo=tz)
 
     media_type = infer_media_type(post["final_image_path"])
-    delay_minutes = product_comment_delay_minutes(media_type)
+    delay_minutes = 0 if immediate else product_comment_delay_minutes(media_type)
 
     inserted = 0
     for index, product in enumerate(products, start=1):
