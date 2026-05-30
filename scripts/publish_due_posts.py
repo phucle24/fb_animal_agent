@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app.config import TIMEZONE
-from app.db import get_all_due_posts, get_due_posts, mark_failed, mark_posted
+from app.db import claim_due_posts_for_publish, get_all_due_posts, get_due_posts, mark_failed, mark_posted
 from app.facebook_service import publish_photo
 from app.product_comment_service import schedule_product_comments_for_post
 
@@ -15,17 +15,20 @@ if __name__ == "__main__":
     args = [arg for arg in sys.argv[1:] if arg != "--dry-run"]
     dry_run = "--dry-run" in sys.argv[1:]
     slot = args[0].strip().lower() if args else "all"
-    if slot not in {"all", "morning", "afternoon"}:
-        print("Usage: python scripts/publish_due_posts.py [all|morning|afternoon] [--dry-run]")
+    if slot not in {"all", "morning", "afternoon", "evening"}:
+        print("Usage: python scripts/publish_due_posts.py [all|morning|afternoon|evening] [--dry-run]")
         sys.exit(1)
 
     tz = ZoneInfo(TIMEZONE)
     now_iso = datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S")
 
-    if slot == "all":
-        posts = get_all_due_posts(now_iso)
+    if dry_run:
+        if slot == "all":
+            posts = get_all_due_posts(now_iso)
+        else:
+            posts = get_due_posts(now_iso, slot)
     else:
-        posts = get_due_posts(now_iso, slot)
+        posts = claim_due_posts_for_publish(now_iso, slot)
 
     if not posts:
         print("No due posts.")

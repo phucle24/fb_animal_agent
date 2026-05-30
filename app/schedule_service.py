@@ -23,6 +23,15 @@ from app.topic_bank import get_topic_by_index
 BOOTSTRAP_STATE_PATH = DB_PATH.parent / "direct_image_bootstrap_until.txt"
 
 
+def posting_slots_for_date(day):
+    # Monday=0 ... Sunday=6
+    if day.weekday() == 5:
+        return [("morning", 9, 15), ("evening", 21, 0)]
+    if day.weekday() == 6:
+        return [("morning", 9, 15), ("evening", 20, 30)]
+    return [("morning", 8, 15), ("evening", 20, 30)]
+
+
 def generate_schedule(days: int = 7):
     tz = ZoneInfo(TIMEZONE)
     now = datetime.now(tz)
@@ -31,10 +40,9 @@ def generate_schedule(days: int = 7):
     slots = []
     for i in range(days):
         day = start_date + timedelta(days=i)
-        morning = datetime(day.year, day.month, day.day, 10, 0, tzinfo=tz)
-        afternoon = datetime(day.year, day.month, day.day, 15, 0, tzinfo=tz)
-        slots.append(("morning", morning))
-        slots.append(("afternoon", afternoon))
+        for slot_name, hour, minute in posting_slots_for_date(day):
+            dt = datetime(day.year, day.month, day.day, hour, minute, tzinfo=tz)
+            slots.append((slot_name, dt))
     return slots
 
 
@@ -45,8 +53,8 @@ def generate_future_schedule(target_slots: int, lookahead_days: int = 60):
 
     for i in range(lookahead_days):
         day = now.date() + timedelta(days=i)
-        for slot_name, hour in [("morning", 10), ("afternoon", 15)]:
-            dt = datetime(day.year, day.month, day.day, hour, 0, tzinfo=tz)
+        for slot_name, hour, minute in posting_slots_for_date(day):
+            dt = datetime(day.year, day.month, day.day, hour, minute, tzinfo=tz)
             if dt > now:
                 slots.append((slot_name, dt))
             if len(slots) >= target_slots:

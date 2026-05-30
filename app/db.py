@@ -210,6 +210,69 @@ def get_due_posts(now_iso: str, slot: str):
     return rows
 
 
+def claim_due_posts_for_publish(now_iso: str, slot: str = "all"):
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute("BEGIN IMMEDIATE")
+
+    if slot == "all":
+        cur.execute(
+            """
+            SELECT id
+            FROM posts
+            WHERE status = 'READY'
+              AND scheduled_at <= ?
+            ORDER BY scheduled_at ASC, id ASC
+            """,
+            (now_iso,),
+        )
+    else:
+        cur.execute(
+            """
+            SELECT id
+            FROM posts
+            WHERE status = 'READY'
+              AND slot = ?
+              AND scheduled_at <= ?
+            ORDER BY scheduled_at ASC, id ASC
+            """,
+            (slot, now_iso),
+        )
+
+    post_ids = [row["id"] for row in cur.fetchall()]
+    if not post_ids:
+        conn.commit()
+        conn.close()
+        return []
+
+    placeholders = ",".join("?" for _ in post_ids)
+    cur.execute(
+        f"""
+        UPDATE posts
+        SET status = 'PUBLISHING',
+            error_message = NULL,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id IN ({placeholders})
+          AND status = 'READY'
+        """,
+        post_ids,
+    )
+    cur.execute(
+        f"""
+        SELECT *
+        FROM posts
+        WHERE id IN ({placeholders})
+          AND status = 'PUBLISHING'
+        ORDER BY scheduled_at ASC, id ASC
+        """,
+        post_ids,
+    )
+    rows = cur.fetchall()
+    conn.commit()
+    conn.close()
+    return rows
+
+
 def get_all_due_posts(now_iso: str):
     conn = get_conn()
     cur = conn.cursor()

@@ -151,7 +151,31 @@ python scripts/preview_posts.py
 ```bash
 python scripts/publish_due_posts.py all
 python scripts/publish_due_posts.py morning
-python scripts/publish_due_posts.py afternoon
+python scripts/publish_due_posts.py evening
+```
+
+Lịch sinh bài mặc định:
+
+- Thứ 2 đến Thứ 6: `08:15` và `20:30`
+- Thứ 7: `09:15` và `21:00`
+- Chủ nhật: `09:15` và `20:30`
+
+Nếu đã có bài tương lai đang dùng giờ cũ, xem trước lịch mới:
+
+```bash
+python scripts/reschedule_future_posts.py
+```
+
+Áp dụng lịch mới cho các bài tương lai chưa đăng:
+
+```bash
+python scripts/reschedule_future_posts.py --apply
+```
+
+Nếu không muốn dời bài nào vào slot còn lại của hôm nay, dùng:
+
+```bash
+python scripts/reschedule_future_posts.py --start-tomorrow --apply
 ```
 
 ## Cron VPS
@@ -300,9 +324,9 @@ Các timer được bật:
 - `fb-animal-agent-poll-batch.timer`: mỗi 6 giờ, poll ảnh batch
 - `fb-animal-agent-publish-due.timer`: mỗi 15 phút, đăng mọi bài `READY` đã đến giờ
 - `fb-animal-agent-product-comments.timer`: mỗi 5 phút, đăng các comment sản phẩm đã đến hạn
-- `fb-animal-agent-publish-morning.timer`: 10:00 mỗi ngày
-- `fb-animal-agent-publish-afternoon.timer`: 15:00 mỗi ngày
 - `fb-animal-agent-web.service`: dashboard local ở `127.0.0.1:8000`
+
+Không bật thêm timer đăng riêng lúc 10:00/15:00 nếu đã dùng `fb-animal-agent-publish-due.timer`, vì hai timer có thể cùng publish một bài ở đúng mốc giờ.
 
 Kiểm tra:
 

@@ -171,7 +171,7 @@ def create_app() -> Flask:
         if not post:
             abort(404)
         status = request.form.get("status", "").strip().upper()
-        if status not in {"READY", "FAILED", "SKIPPED", "WAITING_IMAGE", "IMAGE_FAILED"}:
+        if status not in {"READY", "FAILED", "SKIPPED", "WAITING_IMAGE", "IMAGE_FAILED", "PUBLISHING"}:
             flash("Unsupported status.", "error")
             return redirect(url_for("post_detail", post_id=post_id))
         update_status(post_id, status)
