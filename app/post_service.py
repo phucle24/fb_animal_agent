@@ -25,12 +25,11 @@ Create a finished vertical 4:5 Vietnamese infographic poster for Facebook feed, 
 SINGLE_CARD_IMAGE_TEMPLATE = """
 FINAL INFOGRAPHIC MUST CONTAIN THE EXACT TEXT BELOW.
 Create a finished vertical 4:5 Vietnamese single-subject fact poster for Facebook feed:
-- one dramatic photorealistic animal or plant hero image, large and unmistakable
-- premium dark charcoal poster style with copper/orange accents
-- bold readable Vietnamese headline at the top
-- one large metric/stat badge
-- one short hook line
-- clean editorial layout, not a ranking, not a comparison, not a list
+- exactly one dramatic photorealistic animal or plant hero image, large and unmistakable
+- premium dark charcoal editorial poster style with copper/orange accents
+- exactly three visible text groups total: headline, main fact, short hook
+- clean single-card layout with open space, not a ranking, not a comparison, not a list
+- no rows, no repeated subject thumbnails, no numbered panels, no table, no grid
 - no Python overlay will be used later; all text must be rendered by the image model now
 """.strip()
 
@@ -91,6 +90,58 @@ def compact_text(text: str, max_chars: int) -> str:
     if len(text) <= max_chars:
         return text
     return text[: max_chars - 1].rstrip() + "…"
+
+
+def concise_single_fact(fact_value: str) -> str:
+    fact = " ".join(fact_value.split()).strip()
+    normalized = fact.lower()
+    if "gần như" in normalized and "im lặng" in normalized:
+        return "GẦN IM LẶNG"
+    return compact_text(fact.upper(), 18)
+
+
+def normalize_single_card_content(topic: dict, content: dict) -> dict:
+    normalized = dict(content)
+    fact_value = topic.get("fact_value", "")
+    fact_context = " ".join(
+        [
+            fact_value,
+            topic.get("fact_detail", ""),
+            topic.get("detail_vi", ""),
+        ]
+    ).lower()
+    stat = str(normalized.get("overlay_stat") or "").strip()
+    if "tuyệt đối" in stat.lower() and any(
+        hedge in fact_context for hedge in ("gần như", "nearly", "almost", "có thể", "ước tính", "khoảng")
+    ):
+        normalized["overlay_stat"] = concise_single_fact(fact_value)
+    elif len(stat) > 22:
+        normalized["overlay_stat"] = compact_text(stat.upper(), 18)
+    return normalized
+
+
+def clean_single_scene_prompt(image_prompt: str) -> str:
+    prompt = " ".join((image_prompt or "").split()).strip()
+    forbidden_terms = (
+        "row",
+        "rows",
+        "panel",
+        "panels",
+        "list",
+        "ranking",
+        "rank",
+        "top 5",
+        "table",
+        "grid",
+        "text",
+        "typography",
+        "infographic",
+        "poster layout",
+    )
+    lowered = prompt.lower()
+    if any(term in lowered for term in forbidden_terms):
+        return ""
+    return prompt
 
 
 def comparison_item_detail(item: dict, topic: dict) -> str:
@@ -249,25 +300,30 @@ def build_model_rendered_infographic_prompt(image_prompt: str, topic: dict, cont
     stat = content.get("overlay_stat") or topic.get("fact_value", "")
     hook = content.get("overlay_hook") or ""
     visual_detail = topic.get("detail_vi") or topic.get("fact_detail", "")
+    scene_prompt = clean_single_scene_prompt(content.get("image_prompt", ""))
     return (
         f"{SINGLE_CARD_IMAGE_TEMPLATE}\n\n"
-        "Critical layout rules:\n"
-        "- This is a single-card poster, not a ranking and not a multi-panel list.\n"
-        "- Do not render rank numbers such as 01, 02, 03, 1, 2, 5.\n"
-        "- Do not render placeholder words such as Stat, data, label, lorem ipsum, UI text, or fake text.\n"
-        "- Do not add any extra captions, labels, subtitles, watermark, logo, or random symbols.\n"
-        "- Use only the exact text strings listed below.\n"
-        "- If text cannot fit, reduce font size; never invent additional text.\n\n"
-        "Text to render exactly, and only these text strings:\n"
-        f"HEADLINE: {title.upper()}\n"
-        f"STAT: {stat.upper()}\n"
-        f"HOOK: {hook}\n\n"
+        "ABSOLUTE SINGLE-CARD RULES:\n"
+        "- This poster has ONE subject and ONE scene only.\n"
+        "- Do NOT create rows, stacked panels, numbered sections, step lists, comparison blocks, ranking blocks, or repeated animal thumbnails.\n"
+        "- Do NOT render any number used as a rank: 01, 02, 03, 04, 05, 1, 2, 3, 4, 5.\n"
+        "- Do NOT render explanatory body text or sentences.\n"
+        "- Do NOT render placeholder words such as Stat, data, label, thông tin, mô tả, lorem ipsum, UI text, or fake text.\n"
+        "- Do NOT add watermark, logo, captions, brand text, random symbols, or extra subtitles.\n"
+        "- Count the visible text groups: exactly 3 groups total. If anything else would appear as text, remove it.\n"
+        "- If text cannot fit, reduce font size; never invent or paraphrase additional text.\n\n"
+        "Render exactly these 3 visible text strings, and no other text anywhere:\n"
+        f"\"{title.upper()}\"\n"
+        f"\"{stat.upper()}\"\n"
+        f"\"{hook}\"\n\n"
+        "Recommended composition:\n"
+        "- Top: the headline as one large readable Vietnamese line or two lines.\n"
+        "- Center: one large realistic hero subject occupying most of the image.\n"
+        "- Lower area: one copper/orange fact badge containing only the main fact text, plus one short hook line.\n"
+        "- Keep generous margins and make Vietnamese diacritics accurate.\n\n"
         f"Hero image: realistic {topic['subject_en']} in its natural habitat, cinematic, sharp, dramatic, visually striking.\n"
         f"Visual fact to suggest without rendering as extra text: {visual_detail}\n"
-        "Composition: top headline, large hero subject, one copper stat badge, one short hook line near the bottom.\n"
-        "Text quality: render Vietnamese diacritics carefully and keep every word readable.\n\n"
-        "Additional photo/style guidance from the text model, use only if it does not conflict with exact text rules:\n"
-        f"{image_prompt}"
+        f"{'Scene/photo guidance only: ' + scene_prompt if scene_prompt else ''}"
     )
 
 
@@ -326,7 +382,7 @@ def build_post_payload(topic: dict, scheduled_at: str, slot: str) -> dict:
         }
 
     if topic["topic_type"] == "single_card":
-        content = generate_single_card_content(topic)
+        content = normalize_single_card_content(topic, generate_single_card_content(topic))
         image_prompt = build_model_rendered_infographic_prompt(content["image_prompt"], topic, content)
         caption = build_single_caption(content["title"], content["caption"])
         return {

@@ -1,22 +1,7 @@
-from app.config import GEMINI_API_KEY, GEMINI_TEXT_MODEL
-from app.utils import safe_json_loads
-
-
-def _ensure_api_key():
-    if not GEMINI_API_KEY:
-        raise RuntimeError("Missing ANIMAL_AGENT_GEMINI_API_KEY")
-
-
-def _client_and_types():
-    from google import genai
-    from google.genai import types
-
-    return genai.Client(api_key=GEMINI_API_KEY), types
+from app.deepseek_service import generate_json
 
 
 def generate_comparison_content(topic: dict) -> dict:
-    _ensure_api_key()
-    client, types = _client_and_types()
     items_text = "\n".join(
         [
             f'{item["rank"]}. {item["name_vi"]} ({item["name_en"]}) - {item["stat"]}'
@@ -79,18 +64,13 @@ Yêu cầu:
 Chỉ trả về JSON, không giải thích thêm.
 """
 
-    response = client.models.generate_content(
-        model=GEMINI_TEXT_MODEL,
-        contents=prompt,
-        config=types.GenerateContentConfig(response_mime_type="application/json"),
+    return generate_json(
+        prompt,
+        system="Bạn chỉ trả về JSON hợp lệ, không markdown, không giải thích.",
     )
-
-    return safe_json_loads(response.text)
 
 
 def generate_single_card_content(topic: dict) -> dict:
-    _ensure_api_key()
-    client, types = _client_and_types()
     detail_vi = topic.get("detail_vi", "").strip()
     prompt = f"""
 Bạn là biên tập viên nội dung Facebook chuyên về kiến thức động vật và thực vật lạ, dễ viral.
@@ -129,6 +109,8 @@ Yêu cầu:
 - cực ngắn
 - tối đa 14 ký tự nếu có thể
 - ví dụ: "110 KM/H", "SỐC ĐIỆN", "BẤT TỬ"
+- phải đúng mức độ sự thật trong fact_value/detail_vi, không phóng đại
+- nếu fact_value có "gần như", "có thể", "ước tính", "khoảng" thì overlay_stat cũng phải giữ sắc thái đó, không viết thành tuyệt đối
 
 4. overlay_hook
 - tối đa 5 từ
@@ -144,35 +126,32 @@ Yêu cầu:
 - mở đầu bằng một câu hook khiến người đọc muốn dừng lại
 - nên có một câu hỏi ngắn để kéo bình luận, ví dụ: "Bạn nghĩ nó dùng khả năng này để làm gì?"
 - không dùng từ ngữ giật gân sai sự thật
+- không dùng từ tuyệt đối nếu dữ kiện chỉ nói "gần như", "có thể", "ước tính", hoặc "khoảng"
 - KHÔNG viết "Ảnh minh họa AI", "Ảnh minh hoạ AI", hoặc bất kỳ câu nào nói ảnh là AI
 
 6. image_prompt
 - tiếng Anh
-- single-subject wildlife/nature cinematic poster
+- chỉ mô tả cảnh ảnh, KHÔNG mô tả layout poster
+- single-subject wildlife/nature cinematic scene
 - sharp, dramatic, beautiful
 - strong subject focus
 - mô tả môi trường sống, ánh sáng, chuyển động, biểu cảm của chủ thể
 - phản ánh đúng detail_vi/fact_detail bằng hình ảnh, không cần render câu giải thích thành chữ
-- không tự viết text layout, không thêm ranking/list/panel instructions
-- no ranking, no list, no top 5, no fake text
+- không tự viết text layout, không thêm infographic, ranking, list, panel, table, grid instructions
+- no ranking, no list, no top 5, no panel, no table, no grid, no fake text, no extra typography
 - no watermark
 - suitable for educational social media poster
 
 Chỉ trả về JSON.
 """
 
-    response = client.models.generate_content(
-        model=GEMINI_TEXT_MODEL,
-        contents=prompt,
-        config=types.GenerateContentConfig(response_mime_type="application/json"),
+    return generate_json(
+        prompt,
+        system="Bạn chỉ trả về JSON hợp lệ, không markdown, không giải thích.",
     )
-
-    return safe_json_loads(response.text)
 
 
 def generate_matchup_content(topic: dict) -> dict:
-    _ensure_api_key()
-    client, types = _client_and_types()
     left = topic["left"]
     right = topic["right"]
     prompt = f"""
@@ -226,10 +205,7 @@ Yêu cầu:
 Chỉ trả về JSON, không giải thích thêm.
 """
 
-    response = client.models.generate_content(
-        model=GEMINI_TEXT_MODEL,
-        contents=prompt,
-        config=types.GenerateContentConfig(response_mime_type="application/json"),
+    return generate_json(
+        prompt,
+        system="Bạn chỉ trả về JSON hợp lệ, không markdown, không giải thích.",
     )
-
-    return safe_json_loads(response.text)

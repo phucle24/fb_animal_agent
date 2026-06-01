@@ -2,9 +2,9 @@ import json
 import unicodedata
 from copy import deepcopy
 
-from app.config import AUTO_GENERATE_TOPICS, GENERATED_TOPICS_PATH, GEMINI_TEXT_MODEL
-from app.text_service import _client_and_types, _ensure_api_key
-from app.utils import safe_json_loads, slugify
+from app.config import AUTO_GENERATE_TOPICS, GENERATED_TOPICS_PATH
+from app.deepseek_service import generate_json
+from app.utils import slugify
 
 
 ALLOWED_COMPARISON_ANGLES = {
@@ -68,9 +68,6 @@ def get_generated_topic(topic_type: str, index: int, existing_topics: list[dict]
 
 
 def generate_topic(topic_type: str, existing_topics: list[dict]) -> dict:
-    _ensure_api_key()
-    client, types = _client_and_types()
-
     existing_summary = "\n".join(
         f"- {topic.get('topic_key')}: {topic.get('subject_vi') or topic.get('subject_en')}"
         for topic in existing_topics[-80:]
@@ -189,12 +186,14 @@ Yêu cầu bắt buộc:
     rejected_candidates = []
     for attempt in range(4):
         retry_note = build_retry_note(rejected_candidates)
-        response = client.models.generate_content(
-            model=GEMINI_TEXT_MODEL,
-            contents=f"{prompt}\n{retry_note}",
-            config=types.GenerateContentConfig(response_mime_type="application/json"),
+        candidate = validate_generated_topic(
+            generate_json(
+                f"{prompt}\n{retry_note}",
+                system="Bạn chỉ trả về JSON hợp lệ, không markdown, không giải thích.",
+            ),
+            topic_type,
+            existing_topics,
         )
-        candidate = validate_generated_topic(safe_json_loads(response.text), topic_type, existing_topics)
         duplicate_reason = find_duplicate_reason(candidate, existing_topics)
         if not duplicate_reason:
             return candidate

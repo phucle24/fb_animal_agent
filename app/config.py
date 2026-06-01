@@ -30,11 +30,14 @@ for path in [DB_PATH.parent, OUTPUT_DIR, RAW_DIR, FINAL_DIR, LOG_DIR, GENERATED_
     path.mkdir(parents=True, exist_ok=True)
 
 GEMINI_API_KEY = os.getenv("ANIMAL_AGENT_GEMINI_API_KEY", "").strip()
-GEMINI_TEXT_MODEL = os.getenv("ANIMAL_AGENT_GEMINI_TEXT_MODEL", "gemini-2.5-flash").strip()
 GEMINI_IMAGE_MODEL = os.getenv(
     "ANIMAL_AGENT_GEMINI_IMAGE_MODEL",
     "gemini-2.5-flash-image",
 ).strip()
+DEEPSEEK_API_KEY = os.getenv("ANIMAL_AGENT_DEEPSEEK_API_KEY", "").strip()
+DEEPSEEK_BASE_URL = os.getenv("ANIMAL_AGENT_DEEPSEEK_BASE_URL", "https://api.deepseek.com").rstrip("/")
+DEEPSEEK_TEXT_MODEL = os.getenv("ANIMAL_AGENT_DEEPSEEK_TEXT_MODEL", "deepseek-v4-flash").strip()
+DEEPSEEK_TIMEOUT_SECONDS = int(os.getenv("ANIMAL_AGENT_DEEPSEEK_TIMEOUT_SECONDS", "120"))
 IMAGE_FALLBACK_ON_ERROR = os.getenv("ANIMAL_AGENT_IMAGE_FALLBACK_ON_ERROR", "false").lower() in {
     "1",
     "true",

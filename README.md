@@ -2,9 +2,9 @@
 
 Agent tạo bài Facebook tự động cho fanpage động vật/thực vật:
 
-- Text: `gemini-2.5-flash`
+- Text/topic/caption: `deepseek-v4-flash`
 - Image/full infographic: `gemini-2.5-flash-image`
-- Gemini image model render luôn ảnh final có chữ theo prompt
+- DeepSeek sinh nội dung và prompt; Gemini image model render ảnh final có chữ theo prompt
 - Chủ đạo topic so sánh / Top 5
 - Dashboard Flask để preview, tạo lịch tuần, đăng thủ công, reset trạng thái
 - Dùng bộ biến môi trường riêng với prefix `ANIMAL_AGENT_`
@@ -21,6 +21,7 @@ cp .env.example .env
 Điền các biến trong `.env`:
 
 - `ANIMAL_AGENT_GEMINI_API_KEY`
+- `ANIMAL_AGENT_DEEPSEEK_API_KEY`
 - `ANIMAL_AGENT_FB_PAGE_ID`
 - `ANIMAL_AGENT_FB_PAGE_TOKEN`
 - `ANIMAL_AGENT_FB_GRAPH_VERSION`
@@ -227,10 +228,14 @@ cp .env.example .env
 
 ```env
 ANIMAL_AGENT_GEMINI_API_KEY=...
-ANIMAL_AGENT_GEMINI_TEXT_MODEL=gemini-2.5-flash
 ANIMAL_AGENT_GEMINI_IMAGE_MODEL=gemini-2.5-flash-image
 ANIMAL_AGENT_IMAGE_FALLBACK_ON_ERROR=false
 ANIMAL_AGENT_IMAGE_ASPECT_RATIO=4:5
+
+ANIMAL_AGENT_DEEPSEEK_API_KEY=...
+ANIMAL_AGENT_DEEPSEEK_BASE_URL=https://api.deepseek.com
+ANIMAL_AGENT_DEEPSEEK_TEXT_MODEL=deepseek-v4-flash
+ANIMAL_AGENT_DEEPSEEK_TIMEOUT_SECONDS=120
 
 ANIMAL_AGENT_FB_PAGE_ID=...
 ANIMAL_AGENT_FB_PAGE_TOKEN=...
@@ -278,7 +283,8 @@ Lệnh này:
 - trong giai đoạn bootstrap `ANIMAL_AGENT_DIRECT_IMAGE_BOOTSTRAP_DAYS=2`, tạo/lấy ảnh trực tiếp bằng API thường để bài có ảnh ngay
 - mốc kết thúc bootstrap được lưu ở `data/direct_image_bootstrap_until.txt`; sau mốc này bot tự chuyển sang Batch API hoàn toàn
 - nếu muốn tắt direct ngay, đặt `ANIMAL_AGENT_DIRECT_IMAGE_BOOTSTRAP_DAYS=0` và xóa `data/direct_image_bootstrap_until.txt`
-- nếu topic bank cục bộ đã dùng hết, bot tự sinh topic mới bằng Gemini text và lưu vào `data/generated_topics.jsonl` để dùng lại
+- DeepSeek sinh topic/text/caption/prompt ảnh; Gemini chỉ sinh ảnh từ prompt cuối cùng
+- nếu topic bank cục bộ đã dùng hết, bot tự sinh topic mới bằng DeepSeek và lưu vào `data/generated_topics.jsonl` để dùng lại
 
 Sau đó poll batch:
 
