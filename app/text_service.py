@@ -180,25 +180,28 @@ Yêu cầu:
 - tiếng Việt
 - hấp dẫn, gây tò mò, tối đa 14 từ
 - không cổ vũ bạo lực thật
+- dùng sắc thái "so tài", "đặt lên bàn cân", "ai nổi bật hơn ở điểm nào" thay vì cổ vũ đánh nhau
 
 2. overlay_title
 - tiếng Việt, rất ngắn
-- dạng poster đối đầu, ví dụ: "NGẠO TẠNG VS HỔ BENGAL"
+- dạng poster so sánh, ví dụ: "JAGUAR VS LEOPARD", "CÁ MẬP TRẮNG VS CÁ MẬP HỔ"
 - tối đa 9 từ
 
 3. caption_intro
 - 3 đến 5 câu
 - mở đầu tươi mới, có chất tranh luận
-- giải thích rằng đây là so sánh giả định dựa trên số liệu sinh học, không cổ vũ cho động vật đối đầu thật
+- giải thích rằng đây là so sánh đặc điểm dựa trên số liệu sinh học/hành vi, không cổ vũ cho động vật đối đầu thật
+- làm rõ mỗi bên mạnh ở tiêu chí nào: thể hình, tốc độ, lực hàm, độ bền, giác quan, chiến thuật, môi trường sống
+- không kết luận kiểu một bên áp đảo tuyệt đối nếu hai loài khá ngang tầm
 - không thay đổi số liệu
 - câu cuối nên là câu hỏi kéo bình luận
 
 4. image_prompt
 - tiếng Anh
-- cinematic wildlife face-off infographic poster
-- two animals facing forward in split-screen forest/jungle scene
+- cinematic wildlife comparison infographic poster
+- two similarly sized animals facing forward in split-screen natural habitat scene
 - premium dark copper/orange style, dramatic light beams, scientific comparison mood
-- no gore, no injury, no blood, no fighting impact
+- no gore, no injury, no blood, no fighting impact, no attack pose
 - no watermark
 - do not invent extra text layout; system will build final infographic prompt
 

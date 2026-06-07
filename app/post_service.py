@@ -150,6 +150,46 @@ def comparison_item_detail(item: dict, topic: dict) -> str:
         return detail
 
     angle = topic.get("comparison_angle", "")
+    stat = item.get("stat", "").lower()
+    name_text = f"{item.get('name_vi', '')} {item.get('name_en', '')}".lower()
+
+    if angle == "toxicity":
+        toxicity_details = [
+            (("ricin", "thầu dầu", "castor"), "hạt chứa ricin, chất độc có thể ức chế tế bào tạo protein"),
+            (("aconitine", "phụ tử", "monkshood"), "aconitine tác động lên kênh natri, dễ gây rối loạn nhịp tim"),
+            (("độc tim", "trúc đào", "oleander"), "glycoside tim có thể làm rối loạn nhịp và co bóp tim"),
+            (("ảo giác", "cà độc dược", "jimsonweed"), "alkaloid tropane có thể gây mê sảng, ảo giác và tim đập nhanh"),
+            (("nhựa độc", "manchineel"), "nhựa cây gây bỏng rát da, quả và khói đốt cũng nguy hiểm"),
+        ]
+        lookup = f"{stat} {name_text}"
+        for keywords, mapped_detail in toxicity_details:
+            if any(keyword in lookup for keyword in keywords):
+                return mapped_detail
+
+    if angle == "venom":
+        venom_details = [
+            (("neurotoxin", "thần kinh"), "độc tố thần kinh có thể làm tê liệt tín hiệu giữa dây thần kinh và cơ"),
+            (("hemotoxin", "máu"), "độc tố tác động lên máu và mô, làm vết thương nguy hiểm hơn"),
+            (("cardiotoxin", "tim"), "độc tố có thể ảnh hưởng trực tiếp đến hoạt động của tim"),
+        ]
+        lookup = f"{stat} {name_text}"
+        for keywords, mapped_detail in venom_details:
+            if any(keyword in lookup for keyword in keywords):
+                return mapped_detail
+
+    if angle == "building ability":
+        building_details = [
+            (("đập", "hải ly", "beaver"), "chặt cây, xếp cành và bùn để đổi dòng chảy"),
+            (("tháp", "mối", "termite"), "xây tháp có hệ thống thông gió tự nhiên rất ổn định"),
+            (("tổ dệt", "sẻ dòng dọc", "weaver"), "đan cỏ thành tổ treo chắc chắn để thu hút bạn tình"),
+            (("lục giác", "ong mật", "honeybee"), "xây ô sáp lục giác để tiết kiệm vật liệu và diện tích"),
+            (("trang trại nấm", "kiến cắt lá", "leafcutter"), "cắt lá mang về tổ để nuôi nấm làm thức ăn"),
+        ]
+        lookup = f"{stat} {name_text}"
+        for keywords, mapped_detail in building_details:
+            if any(keyword in lookup for keyword in keywords):
+                return mapped_detail
+
     fallback_details = {
         "speed": "mốc tốc độ nổi bật khi bứt tốc trong môi trường tự nhiên",
         "height": "chiều cao nổi bật giúp nó vượt trội trong nhóm này",
@@ -158,11 +198,11 @@ def comparison_item_detail(item: dict, topic: dict) -> str:
         "special ability": "đặc điểm nổi bật giúp nó săn mồi, sinh tồn hoặc tự vệ",
         "bite force": "lực cắn ước tính rất mạnh, đủ tạo lợi thế khi săn mồi hoặc phòng thủ",
         "lifespan": "tuổi thọ ấn tượng khiến các nhà nghiên cứu đặc biệt chú ý",
-        "venom": "cơ chế độc/nọc giúp nó săn mồi hoặc tự vệ cực hiệu quả",
-        "toxicity": "độc tính tự nhiên khiến con người phải rất thận trọng",
+        "venom": "nọc độc tác động lên thần kinh, máu hoặc mô để săn mồi/tự vệ",
+        "toxicity": "chứa hợp chất độc có thể ảnh hưởng nghiêm trọng đến cơ thể",
         "camouflage": "khả năng hòa vào môi trường khiến kẻ thù hoặc con mồi khó nhận ra",
         "bioluminescence": "ánh sáng sinh học giúp giao tiếp, dụ mồi hoặc tự vệ trong bóng tối",
-        "building ability": "khả năng xây dựng nơi ở hoặc cấu trúc sống rất tinh vi",
+        "building ability": "xây cấu trúc sống bằng vật liệu tự nhiên theo cách rất chuyên biệt",
         "survival": "chiến lược sinh tồn giúp nó chịu được điều kiện khắc nghiệt",
         "parenting": "cách chăm con đặc biệt giúp thế hệ sau có cơ hội sống sót cao hơn",
     }

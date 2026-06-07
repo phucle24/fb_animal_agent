@@ -107,6 +107,8 @@ Yêu cầu bắt buộc:
 - name_vi dùng tiếng Việt dễ hiểu, viết hoa chữ cái đầu mỗi từ.
 - stat phải ngắn, dễ đọc trên ảnh, không quá 18 ký tự nếu có thể.
 - detail_vi làm rõ stat nghĩa là gì, không quá 14 từ.
+- Nếu comparison_angle là "toxicity" hoặc "venom", detail_vi phải nói rõ cơ chế/tác động cụ thể của độc/nọc, không được viết chung chung kiểu "độc tính tự nhiên khiến con người phải thận trọng".
+- Nếu comparison_angle là "building ability", detail_vi phải nói rõ loài đó xây gì, dùng vật liệu/cách xây nào, lợi ích là gì; không được viết chung chung kiểu "xây dựng cấu trúc sống tinh vi".
 - Ưu tiên chủ đề thật sự hấp dẫn: kỷ lục lạ, khả năng sinh tồn, vũ khí tự nhiên, chiến thuật săn mồi, thực vật kỳ dị, hành vi khiến người xem muốn comment.
 - Không bịa số liệu chính xác nếu không chắc; có thể dùng mô tả định tính ngắn như "Siêu độc", "Tái sinh", "Bẫy dính".
 - Không dùng lại chủ đề cũ.
@@ -142,7 +144,7 @@ Yêu cầu bắt buộc:
         prompt = f"""
 Bạn là biên tập viên nội dung Facebook về thế giới động vật theo hướng khoa học, dễ viral.
 
-Hãy sinh 1 topic mới dạng đối đầu giả định 1-vs-1 giữa hai loài động vật, thú vị, gây tranh luận, nhưng không cổ vũ bạo lực thật.
+Hãy sinh 1 topic mới dạng so sánh 1-vs-1 giữa hai loài động vật cùng nhóm hoặc gần tương đương kích cỡ, thú vị, gây tranh luận, nhưng không cổ vũ bạo lực thật.
 Không được trùng hoặc quá giống các topic đã có:
 {existing_summary}
 
@@ -174,8 +176,11 @@ Chỉ trả về JSON hợp lệ với schema:
 }}
 
 Yêu cầu bắt buộc:
-- Chọn hai loài có độ tương phản thú vị để người xem muốn tranh luận.
-- Không dùng chủ đề chó ngao Tây Tạng vs hổ Bengal nếu đã có.
+- Chọn hai loài cùng nhóm hoặc rất gần nhau về kích cỡ: 2 giống chó, 2 loài cá, 2 loài mèo lớn gần cân, 2 loài chim săn mồi, 2 loài bò sát tương đương, 2 loài linh trưởng tương đương.
+- Tránh tuyệt đối các cặp quá lệch kích cỡ/sức mạnh như chó vs hổ, chim vs báo, khỉ nhỏ vs gấu lớn, rắn nhỏ vs cá mập.
+- Mục tiêu là làm rõ đặc điểm nổi bật, điểm mạnh riêng, hành vi, môi trường sống, chiến thuật sinh tồn của mỗi loài.
+- Kết luận không được viết kiểu một bên "áp đảo tuyệt đối"; hãy nêu bên nào nhỉnh ở tiêu chí nào và bên kia mạnh ở tiêu chí nào.
+- Ưu tiên chủ đề vui và dễ bình luận: 2 giống chó bảo vệ, 2 loài cá săn mồi, 2 loài mèo lớn gần cân, 2 loài chim săn mồi, 2 loài rắn độc tương đương.
 - Các value trên ảnh phải ngắn, dễ đọc.
 - Nếu số liệu chỉ là ước tính phổ biến, viết theo dạng ngắn như "70 kg", "900 PSI", "Nọc độc".
 - Không mô tả máu me, thương tích hoặc cổ vũ cho động vật đánh nhau thật.
