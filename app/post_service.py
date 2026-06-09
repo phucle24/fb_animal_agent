@@ -190,12 +190,35 @@ def comparison_item_detail(item: dict, topic: dict) -> str:
             if any(keyword in lookup for keyword in keywords):
                 return mapped_detail
 
+    if angle == "special ability":
+        special_ability_details = [
+            (("cảm điện", "cá mập", "shark"), "cảm nhận tín hiệu điện rất yếu từ cơ thể con mồi"),
+            (("định vị âm", "dơi", "bat"), "phát sóng siêu âm rồi nghe tiếng vọng để bay trong tối"),
+            (("cảm nhiệt", "hổ lục", "pit viper"), "hố cảm nhiệt giúp phát hiện con mồi máu nóng trong bóng tối"),
+            (("mắt siêu xa", "đại bàng", "eagle"), "thị lực sắc bén giúp phát hiện con mồi từ khoảng cách xa"),
+            (("khứu giác", "chó", "dog"), "mũi có hàng trăm triệu thụ thể mùi để lần theo dấu vết"),
+            (("bẫy kẹp", "venus"), "khép lá cực nhanh khi lông cảm ứng bị chạm hai lần"),
+            (("bẫy hố", "nắp ấm", "pitcher"), "dụ côn trùng trượt xuống bình chứa dịch tiêu hóa"),
+            (("lá dính", "gọng vó", "sundew"), "giọt keo trên lá giữ con mồi rồi cuộn lại tiêu hóa"),
+            (("bẫy hút", "bladderwort"), "túi bẫy hút sinh vật nhỏ trong nước chỉ trong chớp mắt"),
+            (("lá nhớt", "butterwort"), "lá phủ chất nhầy giữ côn trùng nhỏ làm nguồn dinh dưỡng"),
+            (("mùi xác", "corpse"), "tỏa mùi thịt thối để dụ ruồi và bọ đến thụ phấn"),
+            (("hoa khổng lồ", "rafflesia"), "bông hoa ký sinh cực lớn, có thể rộng gần một mét"),
+            (("nhựa đỏ", "máu rồng", "dragon blood"), "nhựa đỏ như máu chảy ra khi thân cây bị tổn thương"),
+            (("cụp lá", "trinh nữ", "sensitive"), "lá cụp lại rất nhanh khi bị chạm hoặc rung động"),
+            (("sống lâu", "welwitschia"), "hai lá lớn tiếp tục mọc trong điều kiện sa mạc khắc nghiệt"),
+        ]
+        lookup = f"{stat} {name_text}"
+        for keywords, mapped_detail in special_ability_details:
+            if any(keyword in lookup for keyword in keywords):
+                return mapped_detail
+
     fallback_details = {
         "speed": "mốc tốc độ nổi bật khi bứt tốc trong môi trường tự nhiên",
         "height": "chiều cao nổi bật giúp nó vượt trội trong nhóm này",
         "weight": "khối lượng lớn khiến nó trở thành một trong những loài nặng nhất",
         "size": "kích thước nổi bật so với phần lớn loài cùng nhóm",
-        "special ability": "đặc điểm nổi bật giúp nó săn mồi, sinh tồn hoặc tự vệ",
+        "special ability": "khả năng đặc biệt gắn với giác quan, vận động, phòng vệ hoặc kiếm ăn",
         "bite force": "lực cắn ước tính rất mạnh, đủ tạo lợi thế khi săn mồi hoặc phòng thủ",
         "lifespan": "tuổi thọ ấn tượng khiến các nhà nghiên cứu đặc biệt chú ý",
         "venom": "nọc độc tác động lên thần kinh, máu hoặc mô để săn mồi/tự vệ",
