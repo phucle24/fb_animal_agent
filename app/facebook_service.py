@@ -102,3 +102,11 @@ def list_recent_page_videos(limit: int = 25) -> list[dict]:
         {"fields": "id,created_time,description,permalink_url", "limit": limit},
     )
     return result.get("data", [])
+
+
+def list_recent_page_reels(limit: int = 25) -> list[dict]:
+    result = graph_get(
+        f"{FB_PAGE_ID}/video_reels",
+        {"fields": "id,created_time,description,permalink_url", "limit": limit},
+    )
+    return result.get("data", [])

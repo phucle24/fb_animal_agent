@@ -3,6 +3,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from app.config import DONATE_COMMENT_URL
 from app.product_comment_service import publish_due_product_comments, schedule_recent_donate_comments
 
 
@@ -11,11 +12,16 @@ if __name__ == "__main__":
     args = [arg for arg in sys.argv[1:] if arg != "--dry-run"]
     limit = int(args[0]) if args else 5
 
-    try:
-        schedule_results = schedule_recent_donate_comments(dry_run=dry_run)
-    except Exception as exc:
+    if not DONATE_COMMENT_URL:
         schedule_results = []
-        print(f"Schedule donate comments failed: {exc}")
+        if dry_run:
+            print("Donate comment scan disabled: missing ANIMAL_AGENT_DONATE_COMMENT_URL")
+    else:
+        try:
+            schedule_results = schedule_recent_donate_comments(dry_run=dry_run)
+        except Exception as exc:
+            schedule_results = []
+            print(f"Schedule donate comments failed: {exc}")
     for result in schedule_results:
         action = "Would queue" if dry_run else ("Queued" if result["inserted"] else "Already queued")
         print(

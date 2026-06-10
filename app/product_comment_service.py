@@ -22,7 +22,13 @@ from app.db import (
     mark_product_comment_failed,
     mark_product_comment_posted,
 )
-from app.facebook_service import FacebookGraphError, list_recent_page_posts, list_recent_page_videos, publish_comment
+from app.facebook_service import (
+    FacebookGraphError,
+    list_recent_page_posts,
+    list_recent_page_reels,
+    list_recent_page_videos,
+    publish_comment,
+)
 
 
 LINK_FIELDS = ("Link ưu đãi", "Link sản phẩm", "link", "url")
@@ -159,7 +165,11 @@ def normalize_external_video_objects() -> list[dict]:
     objects = []
     seen = set()
 
-    for post in list_recent_page_posts(limit=DONATE_COMMENT_SCAN_LIMIT):
+    try:
+        posts = list_recent_page_posts(limit=DONATE_COMMENT_SCAN_LIMIT)
+    except Exception:
+        posts = []
+    for post in posts:
         if not is_reel_or_video_post(post):
             continue
         fb_post_id = post.get("id", "")
@@ -174,7 +184,11 @@ def normalize_external_video_objects() -> list[dict]:
             }
         )
 
-    for video in list_recent_page_videos(limit=DONATE_COMMENT_SCAN_LIMIT):
+    try:
+        videos = list_recent_page_videos(limit=DONATE_COMMENT_SCAN_LIMIT)
+    except Exception:
+        videos = []
+    for video in videos:
         fb_post_id = video.get("id", "")
         if not fb_post_id or fb_post_id in seen:
             continue
@@ -184,6 +198,23 @@ def normalize_external_video_objects() -> list[dict]:
                 "fb_post_id": fb_post_id,
                 "created_at": parse_facebook_time(video.get("created_time", "")),
                 "source": "videos",
+            }
+        )
+
+    try:
+        reels = list_recent_page_reels(limit=DONATE_COMMENT_SCAN_LIMIT)
+    except Exception:
+        reels = []
+    for reel in reels:
+        fb_post_id = reel.get("id", "")
+        if not fb_post_id or fb_post_id in seen:
+            continue
+        seen.add(fb_post_id)
+        objects.append(
+            {
+                "fb_post_id": fb_post_id,
+                "created_at": parse_facebook_time(reel.get("created_time", "")),
+                "source": "video_reels",
             }
         )
 
