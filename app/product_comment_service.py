@@ -1,9 +1,14 @@
 import csv
+import zlib
 from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from app.config import (
+    DONATE_COMMENT_DELAY_MINUTES,
+    DONATE_COMMENT_LOOKBACK_HOURS,
+    DONATE_COMMENT_SCAN_LIMIT,
+    DONATE_COMMENT_URL,
     PRODUCT_COMMENT_IMAGE_DELAY_MINUTES,
     PRODUCT_COMMENT_VIDEO_DELAY_MINUTES,
     PRODUCT_COMMENTS_PER_POST,
@@ -12,11 +17,12 @@ from app.config import (
 )
 from app.db import (
     insert_product_comment,
+    insert_product_comment_once,
     list_due_product_comments,
     mark_product_comment_failed,
     mark_product_comment_posted,
 )
-from app.facebook_service import FacebookGraphError, publish_comment
+from app.facebook_service import FacebookGraphError, list_recent_page_posts, list_recent_page_videos, publish_comment
 
 
 LINK_FIELDS = ("Link ưu đãi", "Link sản phẩm", "link", "url")
@@ -98,6 +104,134 @@ def build_product_comment(product: dict, comment_index: int) -> str:
     )
     template = templates[(comment_index - 1) % len(templates)]
     return template.format(product_name=product["name"], product_link=product["link"])
+
+
+DONATE_COMMENT_TEMPLATES = (
+    "Nếu thước phim này làm bạn dừng lướt 3 giây, cứu admin bằng một cú click nhẹ nha:\n{url}",
+    "Admin không xin nhiều, chỉ xin một chiếc click bé xíu để nuôi tiếp đam mê cắt video:\n{url}",
+    "Bạn xem vui, admin vui lây. Muốn tiếp sức cho kênh thì ghé chiếc link này nha:\n{url}",
+    "Góc nạp năng lượng cho admin: một cú click thôi là tinh thần dựng video tăng 200%:\n{url}",
+    "Nếu video này ổn áp, cho admin xin ly trà đá tinh thần bằng chiếc link này nha:\n{url}",
+    "Không bắt donate đâu, nhưng nếu thương admin thì link này đang ngồi chờ rất ngoan:\n{url}",
+    "Cứu ví admin khỏi cảnh mỏng như cánh chuồn bằng một cú ghé nhẹ:\n{url}",
+    "Bạn vừa xem miễn phí, admin vừa xin phép thả link tiếp tế cực văn minh ở đây:\n{url}",
+    "Nếu thấy kênh còn đáng nuôi, thả cho admin một cú tiếp sức tại đây nha:\n{url}",
+    "Một chiếc link nhỏ cho nhân loại, nhưng là động lực khá to cho admin:\n{url}",
+)
+
+
+def build_donate_comment(fb_post_id: str) -> str:
+    index = zlib.crc32(fb_post_id.encode("utf-8")) % len(DONATE_COMMENT_TEMPLATES)
+    return DONATE_COMMENT_TEMPLATES[index].format(url=DONATE_COMMENT_URL)
+
+
+def external_post_id(fb_post_id: str) -> int:
+    # Keep external/manual Facebook objects out of the positive local posts id range.
+    return -int(zlib.crc32(fb_post_id.encode("utf-8")) or 1)
+
+
+def parse_facebook_time(value: str) -> datetime | None:
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
+def is_reel_or_video_post(post: dict) -> bool:
+    permalink = (post.get("permalink_url") or "").lower()
+    if "/reel/" in permalink or "/reels/" in permalink or "/videos/" in permalink:
+        return True
+
+    attachments = ((post.get("attachments") or {}).get("data") or [])
+    for attachment in attachments:
+        attachment_type = str(attachment.get("type") or "").lower()
+        url = str(attachment.get("url") or "").lower()
+        if "reel" in attachment_type or "video" in attachment_type:
+            return True
+        if "/reel/" in url or "/reels/" in url or "/videos/" in url:
+            return True
+    return False
+
+
+def normalize_external_video_objects() -> list[dict]:
+    objects = []
+    seen = set()
+
+    for post in list_recent_page_posts(limit=DONATE_COMMENT_SCAN_LIMIT):
+        if not is_reel_or_video_post(post):
+            continue
+        fb_post_id = post.get("id", "")
+        if not fb_post_id or fb_post_id in seen:
+            continue
+        seen.add(fb_post_id)
+        objects.append(
+            {
+                "fb_post_id": fb_post_id,
+                "created_at": parse_facebook_time(post.get("created_time", "")),
+                "source": "posts",
+            }
+        )
+
+    for video in list_recent_page_videos(limit=DONATE_COMMENT_SCAN_LIMIT):
+        fb_post_id = video.get("id", "")
+        if not fb_post_id or fb_post_id in seen:
+            continue
+        seen.add(fb_post_id)
+        objects.append(
+            {
+                "fb_post_id": fb_post_id,
+                "created_at": parse_facebook_time(video.get("created_time", "")),
+                "source": "videos",
+            }
+        )
+
+    return objects
+
+
+def schedule_recent_donate_comments(now: datetime | None = None, dry_run: bool = False) -> list[dict]:
+    if not DONATE_COMMENT_URL:
+        return []
+
+    tz = ZoneInfo(TIMEZONE)
+    now = now or datetime.now(tz)
+    if now.tzinfo is None:
+        now = now.replace(tzinfo=tz)
+
+    lookback_start = now - timedelta(hours=DONATE_COMMENT_LOOKBACK_HOURS)
+    results = []
+    for item in normalize_external_video_objects():
+        created_at = item["created_at"]
+        if created_at is None:
+            continue
+        created_local = created_at.astimezone(tz)
+        if created_local < lookback_start:
+            continue
+
+        scheduled_at = created_local + timedelta(minutes=DONATE_COMMENT_DELAY_MINUTES)
+        data = {
+            "post_id": external_post_id(item["fb_post_id"]),
+            "fb_post_id": item["fb_post_id"],
+            "comment_index": 1,
+            "product_name": "Ủng hộ kênh",
+            "product_link": DONATE_COMMENT_URL,
+            "message": build_donate_comment(item["fb_post_id"]),
+            "scheduled_at": scheduled_at.strftime("%Y-%m-%d %H:%M:%S"),
+        }
+        if dry_run:
+            inserted = False
+        else:
+            inserted = insert_product_comment_once(data)
+        results.append(
+            {
+                "fb_post_id": item["fb_post_id"],
+                "scheduled_at": data["scheduled_at"],
+                "inserted": inserted,
+                "source": item["source"],
+            }
+        )
+    return results
 
 
 def schedule_product_comments_for_post(

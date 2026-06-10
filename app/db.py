@@ -440,6 +440,32 @@ def insert_product_comment(data: dict) -> bool:
     return inserted
 
 
+def insert_product_comment_once(data: dict) -> bool:
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        INSERT OR IGNORE INTO post_product_comments (
+            post_id, fb_post_id, comment_index, product_name, product_link,
+            message, scheduled_at, status
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, 'PENDING')
+        """,
+        (
+            data["post_id"],
+            data["fb_post_id"],
+            data["comment_index"],
+            data["product_name"],
+            data["product_link"],
+            data["message"],
+            data["scheduled_at"],
+        ),
+    )
+    inserted = cur.rowcount > 0
+    conn.commit()
+    conn.close()
+    return inserted
+
+
 def list_due_product_comments(now_iso: str, limit: int = 10):
     ensure_runtime_schema()
     conn = get_conn()

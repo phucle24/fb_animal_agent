@@ -263,6 +263,11 @@ ANIMAL_AGENT_PRODUCT_LINKS_CSV=data/product_links.csv
 ANIMAL_AGENT_PRODUCT_COMMENT_IMAGE_DELAY_MINUTES=15
 ANIMAL_AGENT_PRODUCT_COMMENT_VIDEO_DELAY_MINUTES=30
 ANIMAL_AGENT_PRODUCT_COMMENTS_PER_POST=2
+
+ANIMAL_AGENT_DONATE_COMMENT_URL=https://nuoieditor.io.vn/
+ANIMAL_AGENT_DONATE_COMMENT_DELAY_MINUTES=15
+ANIMAL_AGENT_DONATE_COMMENT_SCAN_LIMIT=25
+ANIMAL_AGENT_DONATE_COMMENT_LOOKBACK_HOURS=72
 ```
 
 ### 4. Init DB
@@ -317,6 +322,14 @@ Luồng comment sản phẩm:
 - bài video: tạo 2 comment sau khi bài đăng được 30 phút
 - mỗi bài chỉ tạo 1 lần, tối đa 2 comment, mỗi comment 1 link
 - comment không kèm giá, chỉ có mô tả ngắn và link ưu đãi/sản phẩm
+- link sản phẩm chỉ tự gắn cho bài do bot publish vì lúc đó bot có `fb_post_id` trong DB
+
+Luồng comment donate cho thước phim/reel:
+
+- timer comment quét Page posts/videos gần đây qua Graph API
+- nếu phát hiện reel/video đăng thủ công hoặc hàng loạt, bot queue 1 comment donate sau 15 phút
+- mỗi reel/video chỉ queue 1 lần để tránh spam
+- cần Page token có quyền đọc Page engagement và comment với tư cách Page
 
 ### 6. Bật systemd cho chạy tự động
 

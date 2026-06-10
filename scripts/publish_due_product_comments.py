@@ -3,13 +3,25 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from app.product_comment_service import publish_due_product_comments
+from app.product_comment_service import publish_due_product_comments, schedule_recent_donate_comments
 
 
 if __name__ == "__main__":
     dry_run = "--dry-run" in sys.argv[1:]
     args = [arg for arg in sys.argv[1:] if arg != "--dry-run"]
     limit = int(args[0]) if args else 5
+
+    try:
+        schedule_results = schedule_recent_donate_comments(dry_run=dry_run)
+    except Exception as exc:
+        schedule_results = []
+        print(f"Schedule donate comments failed: {exc}")
+    for result in schedule_results:
+        action = "Would queue" if dry_run else ("Queued" if result["inserted"] else "Already queued")
+        print(
+            f"{action} donate comment for fb_post_id={result['fb_post_id']} "
+            f"at {result['scheduled_at']} | source={result['source']}"
+        )
 
     results = publish_due_product_comments(limit=limit, dry_run=dry_run)
     if not results:
