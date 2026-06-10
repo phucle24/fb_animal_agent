@@ -241,8 +241,9 @@ def schedule_recent_donate_comments(now: datetime | None = None, dry_run: bool =
             continue
 
         scheduled_at = created_local + timedelta(minutes=DONATE_COMMENT_DELAY_MINUTES)
-        data = {
-            "post_id": external_post_id(item["fb_post_id"]),
+        external_id = external_post_id(item["fb_post_id"])
+        donate_data = {
+            "post_id": external_id,
             "fb_post_id": item["fb_post_id"],
             "comment_index": 1,
             "product_name": "Ủng hộ kênh",
@@ -251,17 +252,45 @@ def schedule_recent_donate_comments(now: datetime | None = None, dry_run: bool =
             "scheduled_at": scheduled_at.strftime("%Y-%m-%d %H:%M:%S"),
         }
         if dry_run:
-            inserted = False
+            donate_inserted = False
         else:
-            inserted = insert_product_comment_once(data)
+            donate_inserted = insert_product_comment_once(donate_data)
         results.append(
             {
                 "fb_post_id": item["fb_post_id"],
-                "scheduled_at": data["scheduled_at"],
-                "inserted": inserted,
+                "scheduled_at": donate_data["scheduled_at"],
+                "inserted": donate_inserted,
                 "source": item["source"],
+                "kind": "donate",
             }
         )
+
+        products = pick_products_for_post(external_id, PRODUCT_COMMENTS_PER_POST)
+        for offset, product in enumerate(products, start=1):
+            product_scheduled_at = scheduled_at + timedelta(minutes=offset * 2)
+            product_data = {
+                "post_id": external_id,
+                "fb_post_id": item["fb_post_id"],
+                "comment_index": offset + 1,
+                "product_name": product["name"],
+                "product_link": product["link"],
+                "message": build_product_comment(product, offset),
+                "scheduled_at": product_scheduled_at.strftime("%Y-%m-%d %H:%M:%S"),
+            }
+            if dry_run:
+                product_inserted = False
+            else:
+                product_inserted = insert_product_comment_once(product_data)
+            results.append(
+                {
+                    "fb_post_id": item["fb_post_id"],
+                    "scheduled_at": product_data["scheduled_at"],
+                    "inserted": product_inserted,
+                    "source": item["source"],
+                    "kind": "product",
+                    "product_name": product["name"],
+                }
+            )
     return results
 
 

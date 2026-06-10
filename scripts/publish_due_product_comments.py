@@ -24,9 +24,10 @@ if __name__ == "__main__":
             print(f"Schedule donate comments failed: {exc}")
     for result in schedule_results:
         action = "Would queue" if dry_run else ("Queued" if result["inserted"] else "Already queued")
+        detail = f" | product={result['product_name']}" if result.get("product_name") else ""
         print(
-            f"{action} donate comment for fb_post_id={result['fb_post_id']} "
-            f"at {result['scheduled_at']} | source={result['source']}"
+            f"{action} {result.get('kind', 'donate')} comment for fb_post_id={result['fb_post_id']} "
+            f"at {result['scheduled_at']} | source={result['source']}{detail}"
         )
 
     results = publish_due_product_comments(limit=limit, dry_run=dry_run)

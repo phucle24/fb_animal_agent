@@ -90,7 +90,8 @@ if __name__ == "__main__":
     if not queued:
         print("No donate comments would be queued.")
     for item in queued:
+        detail = f" | product={item['product_name']}" if item.get("product_name") else ""
         print(
-            f"Would queue donate comment for fb_post_id={item['fb_post_id']} "
-            f"at {item['scheduled_at']} | source={item['source']}"
+            f"Would queue {item.get('kind', 'donate')} comment for fb_post_id={item['fb_post_id']} "
+            f"at {item['scheduled_at']} | source={item['source']}{detail}"
         )
