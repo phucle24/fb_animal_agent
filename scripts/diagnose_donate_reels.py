@@ -68,6 +68,8 @@ if __name__ == "__main__":
             is_video_like = True if source != "posts" else is_reel_or_video_post(row)
             print_item(source, row, is_video_like=is_video_like)
             created_at = parse_facebook_time(row.get("created_time", ""))
+            if not created_at:
+                print("  missing created_time; queue logic will use current scan time as fallback")
             if created_at:
                 created_local = created_at.astimezone(tz)
                 scheduled_at = created_local + timedelta(minutes=DONATE_COMMENT_DELAY_MINUTES)

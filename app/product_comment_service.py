@@ -233,9 +233,7 @@ def schedule_recent_donate_comments(now: datetime | None = None, dry_run: bool =
     lookback_start = now - timedelta(hours=DONATE_COMMENT_LOOKBACK_HOURS)
     results = []
     for item in normalize_external_video_objects():
-        created_at = item["created_at"]
-        if created_at is None:
-            continue
+        created_at = item["created_at"] or now
         created_local = created_at.astimezone(tz)
         if created_local < lookback_start:
             continue
