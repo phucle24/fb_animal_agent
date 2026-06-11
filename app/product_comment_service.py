@@ -13,6 +13,7 @@ from app.config import (
     PRODUCT_COMMENT_VIDEO_DELAY_MINUTES,
     PRODUCT_COMMENTS_PER_POST,
     PRODUCT_LINKS_CSV,
+    REEL_PRODUCT_COMMENTS_PER_POST,
     TIMEZONE,
 )
 from app.db import (
@@ -113,16 +114,16 @@ def build_product_comment(product: dict, comment_index: int) -> str:
 
 
 DONATE_COMMENT_TEMPLATES = (
-    "Nếu thước phim này làm bạn dừng lướt 3 giây, cứu admin bằng một cú click nhẹ nha:\n{url}",
-    "Admin không xin nhiều, chỉ xin một chiếc click bé xíu để nuôi tiếp đam mê cắt video:\n{url}",
-    "Bạn xem vui, admin vui lây. Muốn tiếp sức cho kênh thì ghé chiếc link này nha:\n{url}",
-    "Góc nạp năng lượng cho admin: một cú click thôi là tinh thần dựng video tăng 200%:\n{url}",
-    "Nếu video này ổn áp, cho admin xin ly trà đá tinh thần bằng chiếc link này nha:\n{url}",
-    "Không bắt donate đâu, nhưng nếu thương admin thì link này đang ngồi chờ rất ngoan:\n{url}",
-    "Cứu ví admin khỏi cảnh mỏng như cánh chuồn bằng một cú ghé nhẹ:\n{url}",
-    "Bạn vừa xem miễn phí, admin vừa xin phép thả link tiếp tế cực văn minh ở đây:\n{url}",
-    "Nếu thấy kênh còn đáng nuôi, thả cho admin một cú tiếp sức tại đây nha:\n{url}",
-    "Một chiếc link nhỏ cho nhân loại, nhưng là động lực khá to cho admin:\n{url}",
+    "Góc hậu trường của kênh, ai tò mò thì ghé chơi ở đây:\n{url}",
+    "Khu vực bí mật của admin nằm ở đây, vào tham quan cho vui:\n{url}",
+    "Nếu bạn thích mấy chiếc video kiểu này, đây là góc nhỏ phía sau kênh:\n{url}",
+    "Đường hầm nhỏ dẫn về căn cứ của admin, đi ngang thì ghé nha:\n{url}",
+    "Một chiếc link ngoài lề cho ai muốn xem kênh vận hành phía sau màn hình:\n{url}",
+    "Góc chill của admin sau mỗi lần dựng video, để đây cho ai cần:\n{url}",
+    "Bản đồ kho báu mini của kênh nằm ở đây, mở hay không tùy tâm trạng:\n{url}",
+    "Ai đang rảnh tay thì có thể ghé căn cứ nhỏ này của admin:\n{url}",
+    "Link này không cắn, chỉ nằm đây cho video bớt cô đơn:\n{url}",
+    "Một trạm dừng chân nho nhỏ cho người xem hệ thích khám phá:\n{url}",
 )
 
 
@@ -218,7 +219,11 @@ def normalize_external_video_objects() -> list[dict]:
             }
         )
 
-    return objects
+    def sort_key(item: dict):
+        return item["created_at"] or datetime.min.replace(tzinfo=ZoneInfo(TIMEZONE))
+
+    objects.sort(key=sort_key, reverse=True)
+    return objects[:DONATE_COMMENT_SCAN_LIMIT]
 
 
 def schedule_recent_donate_comments(now: datetime | None = None, dry_run: bool = False) -> list[dict]:
@@ -263,7 +268,7 @@ def schedule_recent_donate_comments(now: datetime | None = None, dry_run: bool =
             }
         )
 
-        products = pick_products_for_post(external_id, PRODUCT_COMMENTS_PER_POST)
+        products = pick_products_for_post(external_id, REEL_PRODUCT_COMMENTS_PER_POST)
         for offset, product in enumerate(products, start=1):
             product_scheduled_at = scheduled_at + timedelta(minutes=offset * 2)
             product_data = {
