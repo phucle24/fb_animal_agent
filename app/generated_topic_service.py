@@ -109,6 +109,9 @@ Yêu cầu bắt buộc:
 - detail_vi làm rõ stat nghĩa là gì bằng thông tin cụ thể, không quá 14 từ.
 - Tuyệt đối không dùng detail_vi chung chung kiểu "đặc điểm nổi bật giúp nó săn mồi, sinh tồn hoặc tự vệ".
 - Nếu comparison_angle là "special ability", detail_vi phải nói rõ cơ chế/khoảng cách/cách dùng/lợi ích cụ thể của khả năng đó.
+- Nếu comparison_angle là "survival", detail_vi phải nói rõ cơ chế sống sót: ngủ đông, giảm trao đổi chất, giữ nước/nhiệt, sửa ADN, chịu mặn/nóng/lạnh.
+- Nếu comparison_angle là "parenting", detail_vi phải nói rõ hành vi chăm con cụ thể, không viết chung chung "chăm con tận tụy".
+- Nếu comparison_angle là "camouflage" hoặc "bioluminescence", detail_vi phải nói rõ môi trường/cách dùng/ngữ cảnh cụ thể.
 - Nếu comparison_angle là "toxicity" hoặc "venom", detail_vi phải nói rõ cơ chế/tác động cụ thể của độc/nọc, không được viết chung chung kiểu "độc tính tự nhiên khiến con người phải thận trọng".
 - Nếu comparison_angle là "building ability", detail_vi phải nói rõ loài đó xây gì, dùng vật liệu/cách xây nào, lợi ích là gì; không được viết chung chung kiểu "xây dựng cấu trúc sống tinh vi".
 - Ưu tiên chủ đề thật sự hấp dẫn: kỷ lục lạ, khả năng sinh tồn, vũ khí tự nhiên, chiến thuật săn mồi, thực vật kỳ dị, hành vi khiến người xem muốn comment.

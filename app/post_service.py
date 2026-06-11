@@ -213,6 +213,19 @@ def comparison_item_detail(item: dict, topic: dict) -> str:
             if any(keyword in lookup for keyword in keywords):
                 return mapped_detail
 
+    if angle == "survival":
+        survival_details = [
+            (("cực hạn", "gấu nước", "tardigrade"), "rút gần hết nước khỏi cơ thể rồi chuyển sang trạng thái ngủ"),
+            (("bức xạ", "deinococcus"), "sửa chữa ADN bị phá hỏng sau liều bức xạ rất cao"),
+            (("chịu khát", "lạc đà", "camel"), "giữ nước cực tốt và chịu mất nước cơ thể lâu hơn"),
+            (("ngủ bùn", "cá phổi", "lungfish"), "vùi mình trong bùn khô và giảm trao đổi chất nhiều tháng"),
+            (("băng giá", "cánh cụt", "penguin"), "tụ thành đàn giữ nhiệt qua mùa đông Nam Cực khắc nghiệt"),
+        ]
+        lookup = f"{stat} {name_text}"
+        for keywords, mapped_detail in survival_details:
+            if any(keyword in lookup for keyword in keywords):
+                return mapped_detail
+
     fallback_details = {
         "speed": "mốc tốc độ nổi bật khi bứt tốc trong môi trường tự nhiên",
         "height": "chiều cao nổi bật giúp nó vượt trội trong nhóm này",
@@ -226,7 +239,7 @@ def comparison_item_detail(item: dict, topic: dict) -> str:
         "camouflage": "khả năng hòa vào môi trường khiến kẻ thù hoặc con mồi khó nhận ra",
         "bioluminescence": "ánh sáng sinh học giúp giao tiếp, dụ mồi hoặc tự vệ trong bóng tối",
         "building ability": "xây cấu trúc sống bằng vật liệu tự nhiên theo cách rất chuyên biệt",
-        "survival": "chiến lược sinh tồn giúp nó chịu được điều kiện khắc nghiệt",
+        "survival": "giảm trao đổi chất, giữ nước/nhiệt hoặc sửa chữa cơ thể để sống sót",
         "parenting": "cách chăm con đặc biệt giúp thế hệ sau có cơ hội sống sót cao hơn",
     }
     return fallback_details.get(angle, "đặc điểm nổi bật khiến loài này rất đáng chú ý")
