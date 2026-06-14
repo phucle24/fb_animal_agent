@@ -320,9 +320,10 @@ venv/bin/python scripts/publish_due_product_comments.py --dry-run
 Luồng comment sản phẩm:
 
 - bài ảnh: tạo 2 comment sau khi bài đăng được 15 phút
-- bài video: tạo 2 comment sau khi bài đăng được 30 phút
-- mỗi bài chỉ tạo 1 lần, tối đa 2 comment, mỗi comment 1 link
-- comment không kèm giá, chỉ có mô tả ngắn và link ưu đãi/sản phẩm
+- bài video/reel thủ công: số comment theo `ANIMAL_AGENT_REEL_PRODUCT_COMMENTS_PER_POST`
+- mỗi bài chỉ tạo 1 lần
+- comment sản phẩm đầu tiên có lời kêu gọi like/share/follow và giải thích link Shopee hỗ trợ kênh
+- các comment sản phẩm còn lại chỉ gồm tên sản phẩm ngắn gọn và link
 - link sản phẩm chỉ tự gắn cho bài do bot publish vì lúc đó bot có `fb_post_id` trong DB
 
 Luồng comment donate cho thước phim/reel:

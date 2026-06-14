@@ -102,15 +102,29 @@ def pick_products_for_post(post_id: int, count: int) -> list[dict]:
 
 
 def build_product_comment(product: dict, comment_index: int) -> str:
-    templates = (
-        "Cứu vớt admin khỏi cảnh nói chuyện một mình bằng một cú click nhẹ:\n{product_name}\n{product_link}",
-        "Một món nhỏ xinh đi ngang qua, ai thương admin thì ghé xem thử:\n{product_name}\n{product_link}",
-        "Không bắt mua đâu, chỉ xin một ánh nhìn cho admin có động lực nuôi page:\n{product_name}\n{product_link}",
-        "Nếu bài này làm bạn cười 1 chút, cho admin gửi ké món này nha:\n{product_name}\n{product_link}",
-        "Góc tự cứu lấy ví content của admin, xem vui cũng được:\n{product_name}\n{product_link}",
-    )
-    template = templates[(comment_index - 1) % len(templates)]
-    return template.format(product_name=product["name"], product_link=product["link"])
+    if comment_index == 1:
+        return (
+            "Nếu mọi người thấy nội dung này hữu ích, hãy cho mình xin một like, share và theo dõi kênh nhé! "
+            "Mỗi lượt click vào link Shopee của các bạn là một chút hoa hồng giúp team editor mua "
+            '"bản quyền phần mềm" và duy trì kênh. Cảm ơn cả nhà yêu rất nhiều! ❤️\n'
+            f'{product["name"]}\n'
+            f'{product["link"]}'
+        )
+    return f'{product["name"]}\n{product["link"]}'
+
+
+VIEWER_REPLY_TEMPLATES = (
+    "Cảm ơn bạn đã ghé xem. Follow kênh để khỏi lạc mất mấy thước phim vui vui tiếp theo nha!",
+    "Xem tới đây là có gu rồi đó. Bấm follow để lần sau thuật toán khỏi giấu video của tụi mình nha.",
+    "Cảm ơn bạn đã dừng chân ở chiếc video này. Follow kênh để còn gặp lại nhau ở tập sau nha!",
+    "Nếu video này làm bạn nhướng mày nhẹ, follow kênh để nhận thêm mấy pha thiên nhiên khó tin nha.",
+    "Đội xem vui vẻ điểm danh. Follow kênh để lần sau khỏi đi tìm trong vô vọng nha!",
+    "Cảm ơn bạn đã xem. Kênh còn nhiều cú twist của tự nhiên lắm, follow để không bỏ lỡ nha!",
+    "Bạn vừa mở khóa một mẩu chuyện nhỏ của thế giới tự nhiên. Follow để nhặt tiếp mấy mẩu hay ho nha!",
+    "Video này hết nhưng drama thiên nhiên còn dài. Follow kênh để xem tiếp phần sau nha!",
+    "Cảm ơn bạn đã ở lại tới đây. Follow một cái cho thuật toán biết mình còn gặp nhau nha!",
+    "Nếu thấy vui vui, follow kênh để lần sau video tự tìm tới bạn, khỏi mất công săn lùng nha!",
+)
 
 
 DONATE_COMMENT_TEMPLATES = (
@@ -125,6 +139,11 @@ DONATE_COMMENT_TEMPLATES = (
     "Link này không cắn, chỉ nằm đây cho video bớt cô đơn:\n{url}",
     "Một trạm dừng chân nho nhỏ cho người xem hệ thích khám phá:\n{url}",
 )
+
+
+def build_viewer_reply_comment(comment_id: str) -> str:
+    index = zlib.crc32(comment_id.encode("utf-8")) % len(VIEWER_REPLY_TEMPLATES)
+    return VIEWER_REPLY_TEMPLATES[index]
 
 
 def build_donate_comment(fb_post_id: str) -> str:
