@@ -1,4 +1,5 @@
 import csv
+import re
 import zlib
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -17,6 +18,7 @@ from app.config import (
     TIMEZONE,
 )
 from app.db import (
+    claim_due_product_comments,
     insert_product_comment,
     insert_product_comment_once,
     list_due_product_comments,
@@ -181,6 +183,34 @@ def is_reel_or_video_post(post: dict) -> bool:
     return False
 
 
+def extract_video_id_from_url(url: str) -> str:
+    if not url:
+        return ""
+    match = re.search(r"/(?:reel|reels|videos)/(\d+)", url)
+    if match:
+        return match.group(1)
+    match = re.search(r"[?&](?:v|video_id|story_fbid)=(\d+)", url)
+    if match:
+        return match.group(1)
+    return ""
+
+
+def canonical_video_object_id(item: dict) -> str:
+    permalink_id = extract_video_id_from_url(str(item.get("permalink_url") or ""))
+    if permalink_id:
+        return permalink_id
+
+    for attachment in ((item.get("attachments") or {}).get("data") or []):
+        target_id = str((attachment.get("target") or {}).get("id") or "")
+        if target_id:
+            return target_id
+        attachment_id = extract_video_id_from_url(str(attachment.get("url") or ""))
+        if attachment_id:
+            return attachment_id
+
+    return str(item.get("id") or "")
+
+
 def normalize_external_video_objects() -> list[dict]:
     objects = []
     seen = set()
@@ -192,7 +222,7 @@ def normalize_external_video_objects() -> list[dict]:
     for post in posts:
         if not is_reel_or_video_post(post):
             continue
-        fb_post_id = post.get("id", "")
+        fb_post_id = canonical_video_object_id(post)
         if not fb_post_id or fb_post_id in seen:
             continue
         seen.add(fb_post_id)
@@ -209,7 +239,7 @@ def normalize_external_video_objects() -> list[dict]:
     except Exception:
         videos = []
     for video in videos:
-        fb_post_id = video.get("id", "")
+        fb_post_id = canonical_video_object_id(video)
         if not fb_post_id or fb_post_id in seen:
             continue
         seen.add(fb_post_id)
@@ -226,7 +256,7 @@ def normalize_external_video_objects() -> list[dict]:
     except Exception:
         reels = []
     for reel in reels:
-        fb_post_id = reel.get("id", "")
+        fb_post_id = canonical_video_object_id(reel)
         if not fb_post_id or fb_post_id in seen:
             continue
         seen.add(fb_post_id)
@@ -389,7 +419,12 @@ def publish_due_product_comments(now: datetime | None = None, limit: int = 5, dr
     if now.tzinfo is None:
         now = now.replace(tzinfo=tz)
 
-    rows = list_due_product_comments(now.strftime("%Y-%m-%d %H:%M:%S"), limit=limit)
+    now_iso = now.strftime("%Y-%m-%d %H:%M:%S")
+    if dry_run:
+        rows = list_due_product_comments(now_iso, limit=limit)
+    else:
+        rows = claim_due_product_comments(now_iso, limit=limit)
+
     results = []
     for row in rows:
         if dry_run:

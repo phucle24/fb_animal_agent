@@ -445,6 +445,20 @@ def insert_product_comment_once(data: dict) -> bool:
     cur = conn.cursor()
     cur.execute(
         """
+        SELECT 1
+        FROM post_product_comments
+        WHERE comment_index = ?
+          AND (post_id = ? OR fb_post_id = ?)
+        LIMIT 1
+        """,
+        (data["comment_index"], data["post_id"], data["fb_post_id"]),
+    )
+    if cur.fetchone():
+        conn.close()
+        return False
+
+    cur.execute(
+        """
         INSERT OR IGNORE INTO post_product_comments (
             post_id, fb_post_id, comment_index, product_name, product_link,
             message, scheduled_at, status
@@ -464,6 +478,57 @@ def insert_product_comment_once(data: dict) -> bool:
     conn.commit()
     conn.close()
     return inserted
+
+
+def claim_due_product_comments(now_iso: str, limit: int = 10):
+    ensure_runtime_schema()
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute("BEGIN IMMEDIATE")
+    cur.execute(
+        """
+        SELECT id
+        FROM post_product_comments
+        WHERE (
+            status = 'PENDING'
+            OR (status = 'PUBLISHING' AND updated_at <= datetime('now', '-30 minutes'))
+        )
+          AND scheduled_at <= ?
+        ORDER BY scheduled_at ASC, id ASC
+        LIMIT ?
+        """,
+        (now_iso, limit),
+    )
+    ids = [row["id"] for row in cur.fetchall()]
+    if not ids:
+        conn.commit()
+        conn.close()
+        return []
+
+    placeholders = ",".join("?" for _ in ids)
+    cur.execute(
+        f"""
+        UPDATE post_product_comments
+        SET status = 'PUBLISHING',
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id IN ({placeholders})
+        """,
+        ids,
+    )
+    cur.execute(
+        f"""
+        SELECT c.*, p.fb_photo_id AS fb_photo_id
+        FROM post_product_comments c
+        LEFT JOIN posts p ON p.id = c.post_id
+        WHERE c.id IN ({placeholders})
+        ORDER BY c.scheduled_at ASC, c.id ASC
+        """,
+        ids,
+    )
+    rows = cur.fetchall()
+    conn.commit()
+    conn.close()
+    return rows
 
 
 def list_due_product_comments(now_iso: str, limit: int = 10):
