@@ -116,16 +116,16 @@ def build_product_comment(product: dict, comment_index: int) -> str:
 
 
 VIEWER_REPLY_TEMPLATES = (
-    "Cảm ơn bạn đã ghé xem. Follow kênh để khỏi lạc mất mấy thước phim vui vui tiếp theo nha!",
-    "Xem tới đây là có gu rồi đó. Bấm follow để lần sau thuật toán khỏi giấu video của tụi mình nha.",
-    "Cảm ơn bạn đã dừng chân ở chiếc video này. Follow kênh để còn gặp lại nhau ở tập sau nha!",
-    "Nếu video này làm bạn nhướng mày nhẹ, follow kênh để nhận thêm mấy pha thiên nhiên khó tin nha.",
-    "Đội xem vui vẻ điểm danh. Follow kênh để lần sau khỏi đi tìm trong vô vọng nha!",
-    "Cảm ơn bạn đã xem. Kênh còn nhiều cú twist của tự nhiên lắm, follow để không bỏ lỡ nha!",
-    "Bạn vừa mở khóa một mẩu chuyện nhỏ của thế giới tự nhiên. Follow để nhặt tiếp mấy mẩu hay ho nha!",
-    "Video này hết nhưng drama thiên nhiên còn dài. Follow kênh để xem tiếp phần sau nha!",
-    "Cảm ơn bạn đã ở lại tới đây. Follow một cái cho thuật toán biết mình còn gặp nhau nha!",
-    "Nếu thấy vui vui, follow kênh để lần sau video tự tìm tới bạn, khỏi mất công săn lùng nha!",
+    "Người đâu mà vừa dễ thương lại còn chăm tương tác. Cảm ơn {viewer_name} nhiều nha! Tiện tay bấm Follow kênh và chia sẻ video cho hội bạn cùng xem nhé! 😍",
+    "Cảm ơn {viewer_name} đã ghé chơi và để lại bình luận nha! Follow kênh rồi rủ thêm bạn bè vào khám phá thế giới tự nhiên cùng tụi mình nhé!",
+    "Bắt gặp một người xem có tâm là {viewer_name} rồi nha! Bấm Follow kênh và chia sẻ cho đứa bạn mê động vật cùng xem nhé! 😄",
+    "Bình luận của {viewer_name} làm admin có thêm năng lượng dựng video rồi đó! Follow kênh và gửi video này cho hội bạn thân nha!",
+    "Cảm ơn {viewer_name} đã góp vui cho chiếc video này! Nhớ Follow kênh và chia sẻ cho bạn bè để lần sau mình lại gặp nhau nhé!",
+    "{viewer_name} tương tác nhiệt tình thế này làm admin vui cả ngày luôn! Follow kênh và kéo thêm đồng đội vào xem chung nha!",
+    "Cảm ơn {viewer_name} nhiều nha! Video còn nhiều chuyện thú vị phía sau lắm, Follow kênh rồi chia sẻ cho bạn bè cùng hóng nhé!",
+    "Đã ghi nhận một chiếc bình luận siêu có tâm từ {viewer_name}! Follow kênh và gửi ngay cho người bạn hay tò mò của bạn nha!",
+    "{viewer_name} xem video lại còn để lại bình luận, quý quá trời! Follow kênh và chia sẻ nhẹ cho hội bạn cùng vui nha! 🥰",
+    "Cảm ơn {viewer_name} đã đồng hành cùng kênh! Bấm Follow và chia sẻ video cho bạn bè để không ai bỏ lỡ tập tiếp theo nhé!",
 )
 
 
@@ -143,9 +143,10 @@ DONATE_COMMENT_TEMPLATES = (
 )
 
 
-def build_viewer_reply_comment(comment_id: str) -> str:
+def build_viewer_reply_comment(comment_id: str, viewer_name: str = "bạn") -> str:
     index = zlib.crc32(comment_id.encode("utf-8")) % len(VIEWER_REPLY_TEMPLATES)
-    return VIEWER_REPLY_TEMPLATES[index]
+    display_name = " ".join((viewer_name or "bạn").split())
+    return VIEWER_REPLY_TEMPLATES[index].format(viewer_name=display_name)
 
 
 def build_donate_comment(fb_post_id: str) -> str:
