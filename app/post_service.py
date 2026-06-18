@@ -5,7 +5,7 @@ from app.db import insert_post
 from app.image_service import generate_image
 from app.overlay_service import overlay_comparison_top5, overlay_single_card
 from app.text_service import generate_comparison_content, generate_matchup_content, generate_single_card_content
-from app.utils import slugify
+from app.utils import matchup_measure_label, matchup_measure_value, slugify
 
 
 INFOGRAPHIC_IMAGE_TEMPLATE = """
@@ -27,8 +27,9 @@ FINAL INFOGRAPHIC MUST CONTAIN THE EXACT TEXT BELOW.
 Create a finished vertical 4:5 Vietnamese single-subject fact poster for Facebook feed:
 - exactly one dramatic photorealistic animal or plant hero image, large and unmistakable
 - premium dark charcoal editorial poster style with copper/orange accents
-- exactly three visible text groups total: headline, main fact, short hook
+- exactly three visible text groups total: headline, main metric, micro-fact hook
 - clean single-card layout with open space, not a ranking, not a comparison, not a list
+- the main metric and micro-fact hook are the clickable information core; make them visually prominent
 - no rows, no repeated subject thumbnails, no numbered panels, no table, no grid
 - no Python overlay will be used later; all text must be rendered by the image model now
 """.strip()
@@ -280,8 +281,10 @@ def comparison_prompt_rows(topic: dict) -> str:
 
 
 def matchup_stat_lines(animal: dict) -> list[str]:
+    measure_label = matchup_measure_label(animal)
+    measure_value = matchup_measure_value(animal)
     return [
-        f"Chiều cao: {animal['height']}",
+        f"{measure_label}: {measure_value}",
         f"Trọng lượng: {animal['weight']}",
         f"Lực cắn: {animal['bite_force']}",
         f"Lợi thế: {animal['edge_vi']}",
@@ -297,13 +300,13 @@ def matchup_caption(topic: dict, content: dict) -> str:
         content["caption_intro"].strip(),
         "",
         f"{left['name_vi']} ({left['name_en']})",
-        f"- Chiều cao: {left['height']}",
+        f"- {matchup_measure_label(left)}: {matchup_measure_value(left)}",
         f"- Trọng lượng: {left['weight']}",
         f"- Lực cắn: {left['bite_force']}",
         f"- Lợi thế: {left['edge_vi']}",
         "",
         f"{right['name_vi']} ({right['name_en']})",
-        f"- Chiều cao: {right['height']}",
+        f"- {matchup_measure_label(right)}: {matchup_measure_value(right)}",
         f"- Trọng lượng: {right['weight']}",
         f"- Lực cắn: {right['bite_force']}",
         f"- Lợi thế: {right['edge_vi']}",
@@ -383,7 +386,7 @@ def build_model_rendered_infographic_prompt(image_prompt: str, topic: dict, cont
         "- This poster has ONE subject and ONE scene only.\n"
         "- Do NOT create rows, stacked panels, numbered sections, step lists, comparison blocks, ranking blocks, or repeated animal thumbnails.\n"
         "- Do NOT render any number used as a rank: 01, 02, 03, 04, 05, 1, 2, 3, 4, 5.\n"
-        "- Do NOT render explanatory body text or sentences.\n"
+        "- Do NOT render long explanatory body text or full sentences beyond the exact hook string.\n"
         "- Do NOT render placeholder words such as Stat, data, label, thông tin, mô tả, lorem ipsum, UI text, or fake text.\n"
         "- Do NOT add watermark, logo, captions, brand text, random symbols, or extra subtitles.\n"
         "- Count the visible text groups: exactly 3 groups total. If anything else would appear as text, remove it.\n"
@@ -394,11 +397,13 @@ def build_model_rendered_infographic_prompt(image_prompt: str, topic: dict, cont
         f"\"{hook}\"\n\n"
         "Recommended composition:\n"
         "- Top: the headline as one large readable Vietnamese line or two lines.\n"
-        "- Center: one large realistic hero subject occupying most of the image.\n"
-        "- Lower area: one copper/orange fact badge containing only the main fact text, plus one short hook line.\n"
+        "- Center: one dramatic realistic hero subject occupying most of the image, showing the unusual fact clearly.\n"
+        "- Lower area: one oversized copper/orange fact badge containing only the main fact text.\n"
+        "- Put the hook as a readable micro-fact line near the badge; it should explain why the metric matters, not feel like a generic slogan.\n"
         "- Keep generous margins and make Vietnamese diacritics accurate.\n\n"
         f"Hero image: realistic {topic['subject_en']} in its natural habitat, cinematic, sharp, dramatic, visually striking.\n"
-        f"Visual fact to suggest without rendering as extra text: {visual_detail}\n"
+        f"Visual fact to make obvious without rendering as extra text: {visual_detail}\n"
+        "- Make the viewer immediately understand the scale, mechanism, behavior, or biological trick behind the fact.\n"
         f"{'Scene/photo guidance only: ' + scene_prompt if scene_prompt else ''}"
     )
 

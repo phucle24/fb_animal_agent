@@ -75,7 +75,7 @@ def generate_topic(topic_type: str, existing_topics: list[dict]) -> dict:
 
     if topic_type == "comparison_top5":
         prompt = f"""
-Bạn là biên tập viên nội dung Facebook về thế giới động vật và thực vật.
+Bạn là biên tập viên nội dung Facebook về thế giới động vật và thực vật, ưu tiên topic có "điểm wow" rõ ràng.
 
 Hãy sinh 1 topic mới dạng Top 5, dễ viral, dễ gây bình luận, thú vị nhưng không sai sự thật.
 Không được trùng hoặc quá giống các topic đã có:
@@ -107,6 +107,7 @@ Yêu cầu bắt buộc:
 - name_vi dùng tiếng Việt dễ hiểu, viết hoa chữ cái đầu mỗi từ.
 - stat phải ngắn, dễ đọc trên ảnh, không quá 18 ký tự nếu có thể.
 - detail_vi làm rõ stat nghĩa là gì bằng thông tin cụ thể, không quá 14 từ.
+- detail_vi phải giúp người xem hiểu ngay vì sao item đó đáng kinh ngạc, có cơ chế/quy mô/hành vi cụ thể.
 - Tuyệt đối không dùng detail_vi chung chung kiểu "đặc điểm nổi bật giúp nó săn mồi, sinh tồn hoặc tự vệ".
 - Nếu comparison_angle là "special ability", detail_vi phải nói rõ cơ chế/khoảng cách/cách dùng/lợi ích cụ thể của khả năng đó.
 - Nếu comparison_angle là "survival", detail_vi phải nói rõ cơ chế sống sót: ngủ đông, giảm trao đổi chất, giữ nước/nhiệt, sửa ADN, chịu mặn/nóng/lạnh.
@@ -114,13 +115,13 @@ Yêu cầu bắt buộc:
 - Nếu comparison_angle là "camouflage" hoặc "bioluminescence", detail_vi phải nói rõ môi trường/cách dùng/ngữ cảnh cụ thể.
 - Nếu comparison_angle là "toxicity" hoặc "venom", detail_vi phải nói rõ cơ chế/tác động cụ thể của độc/nọc, không được viết chung chung kiểu "độc tính tự nhiên khiến con người phải thận trọng".
 - Nếu comparison_angle là "building ability", detail_vi phải nói rõ loài đó xây gì, dùng vật liệu/cách xây nào, lợi ích là gì; không được viết chung chung kiểu "xây dựng cấu trúc sống tinh vi".
-- Ưu tiên chủ đề thật sự hấp dẫn: kỷ lục lạ, khả năng sinh tồn, vũ khí tự nhiên, chiến thuật săn mồi, thực vật kỳ dị, hành vi khiến người xem muốn comment.
+- Ưu tiên chủ đề thật sự hấp dẫn: kỷ lục lạ, khả năng sinh tồn, vũ khí tự nhiên, chiến thuật săn mồi, thực vật kỳ dị, hành vi khiến người xem muốn comment hoặc bấm vào ảnh để đọc kỹ.
 - Không bịa số liệu chính xác nếu không chắc; có thể dùng mô tả định tính ngắn như "Siêu độc", "Tái sinh", "Bẫy dính".
 - Không dùng lại chủ đề cũ.
 """
     elif topic_type == "single_card":
         prompt = f"""
-Bạn là biên tập viên nội dung Facebook về thế giới động vật và thực vật.
+Bạn là biên tập viên nội dung Facebook về thế giới động vật và thực vật, ưu tiên các fact có hình ảnh rất "wow".
 
 Hãy sinh 1 topic single-card mới, dễ viral, lạ, thú vị và có khả năng kéo bình luận.
 Không được trùng hoặc quá giống các topic đã có:
@@ -140,9 +141,11 @@ Chỉ trả về JSON hợp lệ với schema:
 
 Yêu cầu bắt buộc:
 - subject nên là động vật hoặc thực vật rất thú vị, ít nhàm chán.
-- fact_value tối đa 18 ký tự nếu có thể.
-- fact_detail phải thật, dễ hiểu, không giật gân sai sự thật.
-- detail_vi giải thích cụ thể fact_value nghĩa là gì, dùng tiếng Việt tự nhiên.
+- fact_value tối đa 18 ký tự nếu có thể, nên là số liệu/hành vi/khả năng đủ mạnh để làm text lớn trên ảnh.
+- fact_detail phải thật, dễ hiểu, không giật gân sai sự thật, và phải nêu được cơ chế/quy mô/hành vi đặc biệt.
+- detail_vi giải thích cụ thể fact_value nghĩa là gì, dùng tiếng Việt tự nhiên, tối đa 16 từ.
+- detail_vi không được chung chung kiểu "khả năng đặc biệt", "rất thú vị", "giúp sinh tồn"; phải nói rõ đặc biệt ở đâu.
+- Ưu tiên fact có thể tạo hình ảnh ấn tượng: phát sáng, trong suốt, kích thước lạ, chiến thuật săn mồi, cấu trúc cơ thể, cộng sinh, ngụy trang, tái sinh, siêu giác quan.
 - Không dùng lại chủ đề cũ.
 """
     elif topic_type == "matchup_versus":
@@ -162,7 +165,8 @@ Chỉ trả về JSON hợp lệ với schema:
   "left": {{
     "name_vi": "Tên Tiếng Việt",
     "name_en": "English common name",
-    "height": "short value",
+    "measure_label": "Chiều cao vai | Chiều dài | Sải cánh | Chiều cao",
+    "height": "short numeric value only, without label",
     "weight": "short value",
     "bite_force": "short value or key weapon",
     "edge_vi": "lợi thế ngắn bằng tiếng Việt"
@@ -170,7 +174,8 @@ Chỉ trả về JSON hợp lệ với schema:
   "right": {{
     "name_vi": "Tên Tiếng Việt",
     "name_en": "English common name",
-    "height": "short value",
+    "measure_label": "Chiều cao vai | Chiều dài | Sải cánh | Chiều cao",
+    "height": "short numeric value only, without label",
     "weight": "short value",
     "bite_force": "short value or key weapon",
     "edge_vi": "lợi thế ngắn bằng tiếng Việt"
@@ -186,6 +191,8 @@ Yêu cầu bắt buộc:
 - Mục tiêu là làm rõ đặc điểm nổi bật, điểm mạnh riêng, hành vi, môi trường sống, chiến thuật sinh tồn của mỗi loài.
 - Kết luận không được viết kiểu một bên "áp đảo tuyệt đối"; hãy nêu bên nào nhỉnh ở tiêu chí nào và bên kia mạnh ở tiêu chí nào.
 - Ưu tiên chủ đề vui và dễ bình luận: 2 giống chó bảo vệ, 2 loài cá săn mồi, 2 loài mèo lớn gần cân, 2 loài chim săn mồi, 2 loài rắn độc tương đương.
+- measure_label phải phù hợp với cơ thể loài: rắn/cá/cá mập/cá voi/mực/cá sấu/thằn lằn dùng "Chiều dài"; chim săn mồi dùng "Sải cánh"; chó/mèo lớn/gấu/thú bốn chân dùng "Chiều cao vai"; linh trưởng hoặc loài đứng thẳng có thể dùng "Chiều cao".
+- height chỉ chứa giá trị ngắn như "2.5 m", "76 cm", "1.8 m"; không viết lặp nhãn như "Dài 2.5 m" nếu đã có measure_label.
 - Các value trên ảnh phải ngắn, dễ đọc.
 - Nếu số liệu chỉ là ước tính phổ biến, viết theo dạng ngắn như "70 kg", "900 PSI", "Nọc độc".
 - Không mô tả máu me, thương tích hoặc cổ vũ cho động vật đánh nhau thật.
@@ -429,5 +436,7 @@ def validate_generated_topic(topic: dict, expected_type: str, existing_topics: l
                 if not value:
                     raise ValueError(f"Generated matchup {side} missing {key}.")
                 animal[key] = value
+            if animal.get("measure_label"):
+                animal["measure_label"] = str(animal["measure_label"]).strip()
 
     return topic

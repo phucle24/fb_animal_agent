@@ -48,3 +48,95 @@ def chunk_lines(text: str, max_chars: int = 20) -> list[str]:
 
     return lines
 
+
+def matchup_measure_label(animal: dict) -> str:
+    explicit_label = str(animal.get("measure_label") or "").strip()
+    if explicit_label:
+        return explicit_label
+
+    name_text = f"{animal.get('name_vi', '')} {animal.get('name_en', '')}".lower()
+    value_text = str(animal.get("height", "")).lower()
+
+    if "sải cánh" in value_text:
+        return "Sải cánh"
+    if any(word in value_text for word in ("dài", "chiều dài")):
+        return "Chiều dài"
+    if any(word in value_text for word in ("cao vai", "vai")):
+        return "Chiều cao vai"
+
+    wingspan_keywords = (
+        "chim",
+        "đại bàng",
+        "ưng",
+        "cắt",
+        "falcon",
+        "eagle",
+        "hawk",
+        "condor",
+        "owl",
+        "vulture",
+    )
+    length_keywords = (
+        "rắn",
+        "trăn",
+        "snake",
+        "python",
+        "anaconda",
+        "cobra",
+        "viper",
+        "cá",
+        "fish",
+        "shark",
+        "whale",
+        "dolphin",
+        "mực",
+        "squid",
+        "octopus",
+        "cá sấu",
+        "alligator",
+        "crocodile",
+        "thằn lằn",
+        "kỳ đà",
+        "komodo",
+        "lizard",
+        "eel",
+    )
+    shoulder_height_keywords = (
+        "chó",
+        "sói",
+        "dingo",
+        "coyote",
+        "báo",
+        "sư tử",
+        "hổ",
+        "mèo",
+        "gấu",
+        "linh cẩu",
+        "hyena",
+        "dog",
+        "wolf",
+        "leopard",
+        "jaguar",
+        "lion",
+        "tiger",
+        "bear",
+        "cat",
+    )
+
+    if any(keyword in name_text for keyword in wingspan_keywords):
+        return "Sải cánh"
+    if any(keyword in name_text for keyword in length_keywords):
+        return "Chiều dài"
+    if any(keyword in name_text for keyword in shoulder_height_keywords):
+        return "Chiều cao vai"
+    return "Chiều cao"
+
+
+def matchup_measure_value(animal: dict) -> str:
+    value = " ".join(str(animal.get("height", "")).split()).strip()
+    return re.sub(
+        r"^(chiều\s+dài|chiều\s+cao\s+vai|chiều\s+cao|sải\s+cánh|dài|cao)\s*[:：-]?\s*",
+        "",
+        value,
+        flags=re.IGNORECASE,
+    ).strip()

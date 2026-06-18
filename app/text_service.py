@@ -1,4 +1,5 @@
 from app.deepseek_service import generate_json
+from app.utils import matchup_measure_label, matchup_measure_value
 
 
 def generate_comparison_content(topic: dict) -> dict:
@@ -10,7 +11,7 @@ def generate_comparison_content(topic: dict) -> dict:
     )
 
     prompt = f"""
-Bạn là biên tập viên nội dung Facebook chuyên về kiến thức động vật và thực vật.
+Bạn là biên tập viên nội dung Facebook chuyên về kiến thức động vật và thực vật, giọng vui, dễ hiểu, giàu thông tin.
 
 Hãy tạo output JSON hợp lệ với đúng các key sau:
 - title
@@ -46,17 +47,20 @@ Yêu cầu:
 - ví dụ: "Con vật chạy nhanh nhất trên cạn"
 
 4. caption_intro
-- 2 đến 3 câu ngắn
-- gần gũi, dễ hiểu
-- không dài dòng
+- 3 đến 4 câu ngắn
+- gần gũi, dễ hiểu, vui nhẹ nhưng không nhảm
+- mở đầu bằng hook thật sự đặc biệt khiến người đọc muốn dừng lại
+- phải nêu rõ vì sao số liệu/hành vi này đáng "wow", không chỉ nói chung chung
 - không cần liệt kê 5 mục vì hệ thống sẽ tự thêm phần đó
 - nếu nhắc tên loài cụ thể, ưu tiên tên tiếng Việt đã cho
+- có thể dùng một câu hỏi ngắn cuối đoạn để kéo bình luận
 
 5. image_prompt
 - tiếng Anh
 - mô tả phong cách ảnh động vật hoang dã thực tế cho infographic ranking
 - cinematic, sharp, visually striking
 - mô tả môi trường sống, ánh sáng, chuyển động, biểu cảm của các sinh vật
+- nhấn mạnh khoảnh khắc "wow" hoặc đặc điểm khiến người xem muốn bấm vào ảnh đọc tiếp
 - không cần tự viết layout chữ vì hệ thống sẽ dựng prompt infographic cuối cùng
 - no watermark
 - suitable for ranking infographic
@@ -113,17 +117,20 @@ Yêu cầu:
 - nếu fact_value có "gần như", "có thể", "ước tính", "khoảng" thì overlay_stat cũng phải giữ sắc thái đó, không viết thành tuyệt đối
 
 4. overlay_hook
-- tối đa 5 từ
-- tạo tò mò
-- dễ đọc trên ảnh
-- ví dụ: "Vua tốc độ", "Cú đấm sấm sét"
+- 6 đến 10 từ nếu cần, tối đa 44 ký tự
+- phải giàu thông tin hơn một nickname chung chung
+- nên nói rõ cơ chế, quy mô, hành vi hoặc lợi ích đặc biệt
+- ví dụ tốt: "Cả đàn nối nhau lọc phù du", "Săn trong bóng tối gần im lặng"
+- ví dụ không tốt: "Vua tốc độ", "Vua lọc sinh vật", "Kẻ bí ẩn"
 
 5. caption
 - 3 đến 5 câu
-- gần gũi, dễ hiểu
+- gần gũi, dễ hiểu, vui nhẹ, có một chút dí dỏm tự nhiên
 - có kiến thức thật từ detail_vi và fact_detail
 - ưu tiên dùng detail_vi để giải thích bằng tiếng Việt rõ ràng
-- mở đầu bằng một câu hook khiến người đọc muốn dừng lại
+- mở đầu bằng một câu hook nêu điểm lạ nhất/khó tin nhất, tránh mở đầu kiểu sách giáo khoa
+- phải giải thích "vì sao điều này đặc biệt" bằng cơ chế, quy mô, môi trường sống, hoặc lợi ích sinh tồn
+- nếu có số liệu như chiều dài/tốc độ/độc tính/thời gian, hãy đặt nó vào ngữ cảnh dễ hình dung
 - nên có một câu hỏi ngắn để kéo bình luận, ví dụ: "Bạn nghĩ nó dùng khả năng này để làm gì?"
 - không dùng từ ngữ giật gân sai sự thật
 - không dùng từ tuyệt đối nếu dữ kiện chỉ nói "gần như", "có thể", "ước tính", hoặc "khoảng"
@@ -136,7 +143,8 @@ Yêu cầu:
 - sharp, dramatic, beautiful
 - strong subject focus
 - mô tả môi trường sống, ánh sáng, chuyển động, biểu cảm của chủ thể
-- phản ánh đúng detail_vi/fact_detail bằng hình ảnh, không cần render câu giải thích thành chữ
+- phản ánh đúng detail_vi/fact_detail bằng hình ảnh, làm rõ quy mô/cơ chế/hành vi đặc biệt để người xem "wow"
+- ưu tiên cảnh có chiều sâu, tương phản, scale cue, motion trail, glow, macro detail hoặc môi trường sống đặc trưng nếu phù hợp
 - không tự viết text layout, không thêm infographic, ranking, list, panel, table, grid instructions
 - no ranking, no list, no top 5, no panel, no table, no grid, no fake text, no extra typography
 - no watermark
@@ -154,6 +162,10 @@ Chỉ trả về JSON.
 def generate_matchup_content(topic: dict) -> dict:
     left = topic["left"]
     right = topic["right"]
+    left_measure_label = matchup_measure_label(left).lower()
+    right_measure_label = matchup_measure_label(right).lower()
+    left_measure_value = matchup_measure_value(left)
+    right_measure_value = matchup_measure_value(right)
     prompt = f"""
 Bạn là biên tập viên nội dung Facebook chuyên về kiến thức động vật theo hướng khoa học, dễ viral.
 
@@ -172,8 +184,8 @@ Thông tin bài viết:
 - Câu hỏi kéo bình luận: {topic["debate_question_vi"]}
 
 Số liệu cố định, KHÔNG thay đổi:
-- {left["name_vi"]}: chiều cao {left["height"]}, trọng lượng {left["weight"]}, lực cắn {left["bite_force"]}, lợi thế {left["edge_vi"]}
-- {right["name_vi"]}: chiều cao {right["height"]}, trọng lượng {right["weight"]}, lực cắn {right["bite_force"]}, lợi thế {right["edge_vi"]}
+- {left["name_vi"]}: {left_measure_label} {left_measure_value}, trọng lượng {left["weight"]}, lực cắn/vũ khí chính {left["bite_force"]}, lợi thế {left["edge_vi"]}
+- {right["name_vi"]}: {right_measure_label} {right_measure_value}, trọng lượng {right["weight"]}, lực cắn/vũ khí chính {right["bite_force"]}, lợi thế {right["edge_vi"]}
 
 Yêu cầu:
 1. title
@@ -194,6 +206,7 @@ Yêu cầu:
 - làm rõ mỗi bên mạnh ở tiêu chí nào: thể hình, tốc độ, lực hàm, độ bền, giác quan, chiến thuật, môi trường sống
 - không kết luận kiểu một bên áp đảo tuyệt đối nếu hai loài khá ngang tầm
 - không thay đổi số liệu
+- dùng nhãn đo hình thái phù hợp với từng loài: rắn/cá/cá mập/cá voi/mực/cá sấu/thằn lằn dùng "chiều dài"; chim săn mồi dùng "sải cánh"; chó/mèo lớn/gấu/thú bốn chân dùng "chiều cao vai"; linh trưởng hoặc loài đứng thẳng có thể dùng "chiều cao"
 - câu cuối nên là câu hỏi kéo bình luận
 
 4. image_prompt
