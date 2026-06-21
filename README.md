@@ -317,13 +317,19 @@ cp /path/to/products.csv data/product_links.csv
 venv/bin/python scripts/publish_due_product_comments.py --dry-run
 ```
 
+CSV sản phẩm nên có các cột:
+
+- `Tên sản phẩm`
+- `Link ưu đãi`
+- `Doanh thu` hoặc `Lượt bán` nếu muốn comment hiện dạng `sản phẩm với hơn {giá trị} lượt bán`
+
 Luồng comment sản phẩm:
 
 - bài ảnh: tạo 2 comment sau khi bài đăng được 15 phút
 - bài video/reel thủ công: số comment theo `ANIMAL_AGENT_REEL_PRODUCT_COMMENTS_PER_POST`
 - mỗi bài chỉ tạo 1 lần
 - comment sản phẩm đầu tiên có lời kêu gọi like/share/follow và giải thích link Shopee hỗ trợ kênh
-- các comment sản phẩm còn lại chỉ gồm tên sản phẩm ngắn gọn và link
+- các comment sản phẩm còn lại chỉ gồm tên sản phẩm ngắn gọn, lượt bán nếu có, và link
 - link sản phẩm chỉ tự gắn cho bài do bot publish vì lúc đó bot có `fb_post_id` trong DB
 
 Luồng comment donate cho thước phim/reel:

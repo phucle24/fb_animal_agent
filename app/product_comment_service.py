@@ -36,6 +36,18 @@ from app.facebook_service import (
 
 LINK_FIELDS = ("Link ưu đãi", "Link sản phẩm", "link", "url")
 NAME_FIELDS = ("Tên sản phẩm", "name", "title")
+SOLD_FIELDS = (
+    "Doanh thu",
+    "doanh thu",
+    "Lượt bán",
+    "lượt bán",
+    "Da ban",
+    "Đã bán",
+    "đã bán",
+    "sold",
+    "sales",
+    "sold_count",
+)
 
 
 def load_products() -> list[dict]:
@@ -58,6 +70,7 @@ def load_products() -> list[dict]:
                 {
                     "name": compact_product_name(name),
                     "link": link.strip(),
+                    "sold": compact_sold_count(first_value(row, SOLD_FIELDS)),
                 }
             )
     return products
@@ -76,6 +89,19 @@ def compact_product_name(name: str, max_chars: int = 72) -> str:
     if len(cleaned) <= max_chars:
         return cleaned
     return cleaned[: max_chars - 1].rstrip() + "…"
+
+
+def compact_sold_count(value: str) -> str:
+    cleaned = " ".join((value or "").replace("+", "").split()).strip()
+    cleaned = cleaned.replace("đã bán", "").replace("Đã bán", "").replace("lượt bán", "").replace("Lượt bán", "")
+    return cleaned.strip(" :-–—")
+
+
+def product_comment_line(product: dict) -> str:
+    sold = product.get("sold", "").strip()
+    if sold:
+        return f'{product["name"]} với hơn {sold} lượt bán\n{product["link"]}'
+    return f'{product["name"]}\n{product["link"]}'
 
 
 def infer_media_type(final_image_path: str | None) -> str:
@@ -104,15 +130,15 @@ def pick_products_for_post(post_id: int, count: int) -> list[dict]:
 
 
 def build_product_comment(product: dict, comment_index: int) -> str:
+    product_line = product_comment_line(product)
     if comment_index == 1:
         return (
             "Nếu mọi người thấy nội dung này hữu ích, hãy cho mình xin một like, share và theo dõi kênh nhé! "
             "Mỗi lượt click vào link Shopee của các bạn là một chút hoa hồng giúp team editor mua "
             '"bản quyền phần mềm" và duy trì kênh. Cảm ơn cả nhà yêu rất nhiều! ❤️\n'
-            f'{product["name"]}\n'
-            f'{product["link"]}'
+            f"{product_line}"
         )
-    return f'{product["name"]}\n{product["link"]}'
+    return product_line
 
 
 VIEWER_REPLY_TEMPLATES = (
