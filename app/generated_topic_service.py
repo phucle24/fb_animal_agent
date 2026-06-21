@@ -24,6 +24,15 @@ ALLOWED_COMPARISON_ANGLES = {
     "parenting",
 }
 
+ENGAGEMENT_TOPIC_TYPES = {"myth_vs_fact", "guess_quiz", "one_story", "before_after"}
+
+ENGAGEMENT_TOPIC_GUIDES = {
+    "myth_vs_fact": "Myth vs Fact: phá hiểu lầm phổ biến bằng sự thật bất ngờ, dễ khiến người xem bình luận 'hóa ra là vậy'.",
+    "guess_quiz": "Guess / Quiz: đố viewer đoán loài hoặc hiện tượng trước khi đọc đáp án, ưu tiên hình ảnh bí ẩn.",
+    "one_story": "One Story: kể một mẩu chuyện tự nhiên học ngắn, có hook, twist và chi tiết đáng nhớ.",
+    "before_after": "Before / After: nhấn mạnh biến đổi trước-sau, vòng đời, lột xác, biến thái hoặc đổi trạng thái sinh tồn.",
+}
+
 
 def load_generated_topics() -> list[dict]:
     if not GENERATED_TOPICS_PATH.exists():
@@ -147,6 +156,38 @@ Yêu cầu bắt buộc:
 - detail_vi không được chung chung kiểu "khả năng đặc biệt", "rất thú vị", "giúp sinh tồn"; phải nói rõ đặc biệt ở đâu.
 - Ưu tiên fact có thể tạo hình ảnh ấn tượng: phát sáng, trong suốt, kích thước lạ, chiến thuật săn mồi, cấu trúc cơ thể, cộng sinh, ngụy trang, tái sinh, siêu giác quan.
 - Không dùng lại chủ đề cũ.
+"""
+    elif topic_type in ENGAGEMENT_TOPIC_TYPES:
+        prompt = f"""
+Bạn là biên tập viên nội dung Facebook về thế giới động vật và thực vật, chuyên tạo format mới lạ, dễ kéo comment.
+
+Hãy sinh 1 topic mới cho format: {topic_type}
+Định hướng format: {ENGAGEMENT_TOPIC_GUIDES[topic_type]}
+Không được trùng hoặc quá giống các topic đã có:
+{existing_summary}
+
+Chỉ trả về JSON hợp lệ với schema:
+{{
+  "topic_type": "{topic_type}",
+  "topic_key": "snake_case_english_unique_key",
+  "subject_vi": "Tiêu đề/chủ đề tiếng Việt",
+  "subject_en": "English subject",
+  "visual_subject_en": "English visual subject for image generation",
+  "hook_vi": "hook chính bằng tiếng Việt, cụ thể và gây tò mò",
+  "main_fact_vi": "fact chính bằng tiếng Việt, đúng sự thật, giàu thông tin",
+  "twist_vi": "twist/cơ chế/chi tiết phụ khiến câu chuyện đáng nhớ",
+  "question_vi": "câu hỏi kéo bình luận"
+}}
+
+Yêu cầu bắt buộc:
+- Chủ đề phải thật, không bịa số liệu chính xác nếu không chắc.
+- Ưu tiên động vật/thực vật có hình ảnh mạnh: biển sâu, phát sáng, trong suốt, biến hình, cộng sinh, ngụy trang, săn mồi lạ, cây lừa côn trùng, vòng đời kỳ dị.
+- hook_vi không được chung chung; phải chứa mâu thuẫn, hành vi lạ, cơ chế hiếm hoặc số liệu dễ hình dung.
+- main_fact_vi phải giải thích rõ điểm đặc biệt bằng ngôn ngữ dễ hiểu.
+- twist_vi phải bổ sung cơ chế/quy mô/ngữ cảnh, không lặp lại main_fact_vi.
+- question_vi ngắn, tự nhiên, làm người xem muốn trả lời.
+- Không dùng lại chủ thể/góc nội dung cũ.
+- Không mô tả máu me, tra tấn, cổ vũ động vật đánh nhau thật.
 """
     elif topic_type == "matchup_versus":
         prompt = f"""
@@ -285,6 +326,11 @@ def topic_text(topic: dict) -> str:
         topic.get("fact_value", ""),
         topic.get("fact_detail", ""),
         topic.get("detail_vi", ""),
+        topic.get("hook_vi", ""),
+        topic.get("main_fact_vi", ""),
+        topic.get("twist_vi", ""),
+        topic.get("question_vi", ""),
+        topic.get("visual_subject_en", ""),
     ]
     for item in topic.get("items", []):
         parts.extend(
@@ -380,6 +426,14 @@ def find_duplicate_reason(candidate: dict, existing_topics: list[dict]) -> str |
             if content_similarity >= 0.45:
                 return f"kèo đối đầu quá giống {existing.get('topic_key')}"
 
+        elif candidate["topic_type"] in ENGAGEMENT_TOPIC_TYPES:
+            subject_similarity = jaccard(token_set(candidate.get("subject_vi", "") + " " + candidate.get("subject_en", "")), token_set(existing.get("subject_vi", "") + " " + existing.get("subject_en", "")))
+            content_similarity = jaccard(token_set(topic_text(candidate)), token_set(topic_text(existing)))
+            if subject_similarity >= 0.45:
+                return f"trùng/giống chủ đề với {existing.get('topic_key')}"
+            if content_similarity >= 0.42:
+                return f"nội dung format mới quá giống {existing.get('topic_key')}"
+
     return None
 
 
@@ -421,6 +475,20 @@ def validate_generated_topic(topic: dict, expected_type: str, existing_topics: l
                 raise ValueError(f"Generated single topic missing {key}.")
             topic[key] = value
         topic["detail_vi"] = str(topic.get("detail_vi") or topic["fact_detail"]).strip()
+    elif expected_type in ENGAGEMENT_TOPIC_TYPES:
+        for key in (
+            "subject_vi",
+            "subject_en",
+            "visual_subject_en",
+            "hook_vi",
+            "main_fact_vi",
+            "twist_vi",
+            "question_vi",
+        ):
+            value = str(topic.get(key, "")).strip()
+            if not value:
+                raise ValueError(f"Generated {expected_type} topic missing {key}.")
+            topic[key] = value
     else:
         for key in ("subject_vi", "subject_en", "verdict_vi", "reality_note_vi", "debate_question_vi"):
             value = str(topic.get(key, "")).strip()

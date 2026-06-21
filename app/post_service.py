@@ -4,7 +4,12 @@ from app.config import FINAL_DIR, RAW_DIR
 from app.db import insert_post
 from app.image_service import generate_image
 from app.overlay_service import overlay_comparison_top5, overlay_single_card
-from app.text_service import generate_comparison_content, generate_matchup_content, generate_single_card_content
+from app.text_service import (
+    generate_comparison_content,
+    generate_engagement_format_content,
+    generate_matchup_content,
+    generate_single_card_content,
+)
 from app.utils import matchup_measure_label, matchup_measure_value, slugify
 
 
@@ -45,6 +50,19 @@ Create a finished vertical 4:5 Vietnamese scientific animal face-off infographic
 - no gore, no blood, no injury, no violent impact
 - no Python overlay will be used later; all text must be rendered by the image model now
 """.strip()
+
+ENGAGEMENT_IMAGE_TEMPLATE = """
+FINAL INFOGRAPHIC MUST CONTAIN THE EXACT TEXT BELOW.
+Create a finished vertical 4:5 Vietnamese social poster for Facebook feed:
+- premium dark charcoal editorial style with copper/orange accents
+- one dramatic photorealistic animal/plant/nature hero image
+- bold condensed Vietnamese typography, clean and highly readable
+- exactly three visible text groups total: title, primary hook, secondary hook
+- no extra paragraphs, no random labels, no fake UI text
+- no Python overlay will be used later; all text must be rendered by the image model now
+""".strip()
+
+ENGAGEMENT_TOPIC_TYPES = {"myth_vs_fact", "guess_quiz", "one_story", "before_after"}
 
 CAPTION_HASHTAGS = "#thegioimuonloai #topdongbat #reivewthegioidongvat #khamphatunhien"
 MODEL_RENDERED_TEXT_MARKER = "FINAL INFOGRAPHIC MUST CONTAIN THE EXACT TEXT BELOW."
@@ -431,6 +449,34 @@ def build_single_caption(title: str, caption: str) -> str:
     return append_caption_hashtags(remove_ai_disclaimer(f"{title}\n\n{caption.strip()}"))
 
 
+def build_engagement_caption(content: dict) -> str:
+    return append_caption_hashtags(remove_ai_disclaimer(f"{content['title']}\n\n{content['caption'].strip()}"))
+
+
+def build_engagement_image_prompt(topic: dict, content: dict) -> str:
+    title = compact_text(content.get("overlay_title") or topic["subject_vi"], 32).upper()
+    primary = compact_text(content.get("overlay_primary") or topic["hook_vi"], 52)
+    secondary = compact_text(content.get("overlay_secondary") or topic["main_fact_vi"], 58)
+    visual_subject = topic.get("visual_subject_en") or topic["subject_en"]
+    scene_prompt = " ".join((content.get("image_prompt") or "").split()).strip()
+    return (
+        f"{ENGAGEMENT_IMAGE_TEMPLATE}\n\n"
+        "Render exactly these 3 visible text strings, and no other text anywhere:\n"
+        f"\"{title}\"\n"
+        f"\"{primary}\"\n"
+        f"\"{secondary}\"\n\n"
+        "Format direction:\n"
+        f"- Topic type: {topic['topic_type']}.\n"
+        "- Make the primary and secondary hooks large enough to be readable on mobile.\n"
+        "- Create a poster people want to tap: strong mystery, clear scale, unusual behavior, or visual twist.\n"
+        "- Do not add watermark, logo, brand text, decorative random symbols, or extra captions.\n"
+        "- If text cannot fit, reduce font size or split line breaks; never paraphrase or crop text.\n\n"
+        f"Hero visual subject: realistic {visual_subject}, cinematic, sharp, dramatic, visually striking.\n"
+        f"Visual hook to make obvious without extra text: {topic['hook_vi']} | {topic['main_fact_vi']} | {topic['twist_vi']}.\n"
+        f"{'Scene/photo guidance only: ' + scene_prompt if scene_prompt else ''}"
+    )
+
+
 def build_post_payload(topic: dict, scheduled_at: str, slot: str) -> dict:
     base_name = slugify(f"{scheduled_at}_{slot}_{topic['topic_key']}")
     final_path = str(FINAL_DIR / f"{base_name}.jpg")
@@ -506,6 +552,28 @@ def build_post_payload(topic: dict, scheduled_at: str, slot: str) -> dict:
             "status": "READY",
         }
 
+    if topic["topic_type"] in ENGAGEMENT_TOPIC_TYPES:
+        content = generate_engagement_format_content(topic)
+        image_prompt = build_engagement_image_prompt(topic, content)
+        caption = build_engagement_caption(content)
+        return {
+            "scheduled_at": scheduled_at,
+            "slot": slot,
+            "topic_type": topic["topic_type"],
+            "topic_key": topic["topic_key"],
+            "title": content["title"],
+            "overlay_title": content["overlay_title"],
+            "overlay_subtitle": content["overlay_primary"],
+            "overlay_stat": content["overlay_secondary"],
+            "overlay_hook": None,
+            "caption": caption,
+            "image_prompt": image_prompt,
+            "topic_payload": json.dumps(topic, ensure_ascii=False),
+            "raw_image_path": final_path,
+            "final_image_path": final_path,
+            "status": "READY",
+        }
+
     raise ValueError(f"Unsupported topic_type: {topic['topic_type']}")
 
 
@@ -530,6 +598,9 @@ def overlay_post_image(post_data: dict) -> str:
         )
 
     if post_data["topic_type"] == "matchup_versus":
+        return post_data["final_image_path"]
+
+    if post_data["topic_type"] in ENGAGEMENT_TOPIC_TYPES:
         return post_data["final_image_path"]
 
     raise ValueError(f"Unsupported topic_type: {post_data['topic_type']}")

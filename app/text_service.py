@@ -2,6 +2,107 @@ from app.deepseek_service import generate_json
 from app.utils import matchup_measure_label, matchup_measure_value
 
 
+ENGAGEMENT_FORMAT_GUIDES = {
+    "myth_vs_fact": """
+Format: Myth vs Fact.
+- Giọng vui, phá hiểu lầm phổ biến.
+- caption phải làm rõ lời đồn sai/chưa đủ và sự thật thú vị.
+- overlay_primary nên bắt đầu bằng "LỜI ĐỒN:".
+- overlay_secondary nên bắt đầu bằng "SỰ THẬT:".
+""",
+    "guess_quiz": """
+Format: Guess / Quiz.
+- Giọng đố vui, kích thích viewer comment đáp án.
+- caption có thể tiết lộ đáp án sau 1-2 câu dẫn, không quá khô.
+- overlay_primary là câu đố ngắn.
+- overlay_secondary nên là "ĐÁP ÁN Ở CAPTION" hoặc một clue cực ngắn.
+""",
+    "one_story": """
+Format: One Story / Mini Case.
+- Giọng kể chuyện ngắn, có mở đầu gây tò mò và một cú twist.
+- caption phải giống một mẩu chuyện tự nhiên học, không phải bài encyclopedia.
+- overlay_primary là sự kiện/cú twist chính.
+- overlay_secondary là vì sao chuyện đó đặc biệt.
+""",
+    "before_after": """
+Format: Before / After.
+- Giọng biến hình, trước-sau rõ ràng.
+- caption phải giải thích quá trình chuyển đổi hoặc khác biệt sinh học.
+- overlay_primary nên bắt đầu bằng "TRƯỚC:".
+- overlay_secondary nên bắt đầu bằng "SAU:".
+""",
+}
+
+
+def generate_engagement_format_content(topic: dict) -> dict:
+    format_guide = ENGAGEMENT_FORMAT_GUIDES[topic["topic_type"]]
+    prompt = f"""
+Bạn là biên tập viên Facebook về thế giới động vật và thực vật, chuyên làm nội dung lạ, vui nhẹ, giàu thông tin, dễ kéo bình luận.
+
+Hãy tạo output JSON hợp lệ với đúng các key sau:
+- title
+- overlay_title
+- overlay_primary
+- overlay_secondary
+- caption
+- image_prompt
+
+Thông tin topic:
+- topic_type: {topic["topic_type"]}
+- Chủ đề tiếng Việt: {topic["subject_vi"]}
+- Chủ đề tiếng Anh: {topic["subject_en"]}
+- Chủ thể hình ảnh tiếng Anh: {topic.get("visual_subject_en", topic["subject_en"])}
+- Hook: {topic["hook_vi"]}
+- Fact chính: {topic["main_fact_vi"]}
+- Twist/chi tiết phụ: {topic["twist_vi"]}
+- Câu hỏi kéo bình luận: {topic["question_vi"]}
+
+{format_guide}
+
+Yêu cầu:
+1. title
+- tiếng Việt, tối đa 14 từ
+- có tính tò mò, không giật gân sai sự thật
+
+2. overlay_title
+- 2 đến 6 từ
+- cực dễ đọc trên ảnh
+- phải nói rõ format hoặc hook chính, ví dụ: "LỜI ĐỒN HAY SỰ THẬT?", "ĐOÁN XEM?", "CHUYỆN LẠ TỰ NHIÊN", "TRƯỚC VÀ SAU"
+
+3. overlay_primary
+- tối đa 42 ký tự nếu có thể
+- là thông tin chính khiến người xem dừng lại
+- không dùng câu chung chung kiểu "đặc điểm thú vị"
+
+4. overlay_secondary
+- tối đa 48 ký tự nếu có thể
+- bổ sung cơ chế/quy mô/twist thật sự đặc biệt
+- nếu quá dài, tách thành cụm ngắn dễ đọc
+
+5. caption
+- 4 đến 6 câu ngắn
+- mở đầu vui, có điểm lạ rõ ràng
+- giải thích bằng thông tin thật từ topic
+- có một chút dí dỏm tự nhiên, không nhảm
+- câu cuối là câu hỏi kéo bình luận
+- KHÔNG viết "Ảnh minh họa AI" hoặc nói ảnh là AI
+
+6. image_prompt
+- tiếng Anh
+- chỉ mô tả cảnh ảnh, không tự mô tả layout chữ
+- visually striking, cinematic, high contrast, strong subject focus
+- phải làm nổi bật cơ chế/quy mô/hành vi đặc biệt của topic
+- dùng scale cue, glow, motion trail, macro detail, split transformation, silhouette, mystery lighting nếu phù hợp
+- no watermark, no logo, no fake text
+
+Chỉ trả về JSON, không markdown, không giải thích.
+"""
+    return generate_json(
+        prompt,
+        system="Bạn chỉ trả về JSON hợp lệ, không markdown, không giải thích.",
+    )
+
+
 def generate_comparison_content(topic: dict) -> dict:
     items_text = "\n".join(
         [
