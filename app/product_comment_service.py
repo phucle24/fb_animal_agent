@@ -1,5 +1,7 @@
 import csv
+import json
 import re
+import unicodedata
 import zlib
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -49,6 +51,158 @@ SOLD_FIELDS = (
     "sold_count",
 )
 
+IMPORTANT_SHORT_TOKENS = {"ca", "ga", "bo", "de", "oc"}
+PRODUCT_STOPWORDS = {
+    "ban",
+    "bao",
+    "bang",
+    "bo",
+    "cac",
+    "cao",
+    "cap",
+    "cat",
+    "cho",
+    "chinh",
+    "combo",
+    "cua",
+    "danh",
+    "dong",
+    "duoc",
+    "dung",
+    "goi",
+    "hang",
+    "kem",
+    "khong",
+    "loai",
+    "mau",
+    "moi",
+    "nhieu",
+    "san",
+    "set",
+    "si",
+    "sieu",
+    "tang",
+    "theo",
+    "thich",
+    "thuong",
+    "tien",
+    "tot",
+    "tu",
+    "va",
+    "voi",
+}
+
+CATEGORY_KEYWORDS = {
+    "cat": (
+        "tiger",
+        "su tu",
+        "lion",
+        "leopard",
+        "cheetah",
+        "jaguar",
+        "lynx",
+        "felid",
+    ),
+    "dog": (
+        "cun",
+        "dog",
+        "soi",
+        "wolf",
+        "coyote",
+        "jackal",
+        "mastiff",
+        "husky",
+        "canid",
+    ),
+    "pet": ("thu cung", "pet", "cham soc meo", "cham soc cho", "cho meo", "meo cho"),
+    "bird": (
+        "chim",
+        "bird",
+        "dai bang",
+        "eagle",
+        "cu meo",
+        "owl",
+        "canh cut",
+        "penguin",
+        "falcon",
+        "da dieu",
+        "ostrich",
+        "weaverbird",
+    ),
+    "sea": (
+        "bien",
+        "dai duong",
+        "hai san",
+        "rong bien",
+        "fish",
+        "ca map",
+        "shark",
+        "squid",
+        "octopus",
+        "bach tuot",
+        "shrimp",
+        "crab",
+        "turtle",
+        "jellyfish",
+        "seahorse",
+        "salmon",
+        "arowana",
+    ),
+    "plant": (
+        "plant",
+        "flower",
+        "oc cho",
+        "macca",
+        "sachi",
+        "oliu",
+        "venus",
+        "rafflesia",
+        "nap am",
+    ),
+    "insect": (
+        "con trung",
+        "insect",
+        "ant",
+        "bee",
+        "beetle",
+        "fly",
+        "worm",
+        "termite",
+    ),
+    "reptile_amphibian": (
+        "snake",
+        "ran ho mang",
+        "crocodile",
+        "alligator",
+        "frog",
+        "thằn lan",
+        "than lan",
+        "lizard",
+        "turtle",
+    ),
+    "animal_toy": (
+        "thu bong",
+        "gau bong",
+        "do choi",
+        "mo hinh",
+        "lap rap",
+        "xep hinh",
+        "khung long",
+    ),
+}
+
+RELATED_CATEGORY_BONUS = {
+    "cat": {"pet": 8, "animal_toy": 5},
+    "dog": {"pet": 8, "animal_toy": 5},
+    "pet": {"cat": 8, "dog": 8, "animal_toy": 4},
+    "bird": {"animal_toy": 5},
+    "sea": {"animal_toy": 4},
+    "plant": {},
+    "insect": {"animal_toy": 5},
+    "reptile_amphibian": {"sea": 3, "animal_toy": 5},
+    "animal_toy": {"cat": 2, "dog": 2, "bird": 2, "sea": 2, "insect": 2, "reptile_amphibian": 2},
+}
+
 
 def load_products() -> list[dict]:
     if not PRODUCT_LINKS_CSV:
@@ -69,10 +223,13 @@ def load_products() -> list[dict]:
             products.append(
                 {
                     "name": compact_product_name(name),
+                    "raw_name": " ".join(name.split()),
                     "link": link.strip(),
                     "sold": compact_sold_count(first_value(row, SOLD_FIELDS)),
                 }
             )
+    for product in products:
+        enrich_product_for_matching(product)
     return products
 
 
@@ -97,6 +254,190 @@ def compact_sold_count(value: str) -> str:
     return cleaned.strip(" :-–—")
 
 
+def normalize_search_text(text: str) -> str:
+    text = (text or "").lower().replace("đ", "d")
+    text = unicodedata.normalize("NFKD", text)
+    text = "".join(char for char in text if not unicodedata.combining(char))
+    text = re.sub(r"[^a-z0-9]+", " ", text)
+    return " ".join(text.split())
+
+
+def search_tokens(text: str) -> set[str]:
+    tokens = set()
+    for token in normalize_search_text(text).split():
+        if token in PRODUCT_STOPWORDS:
+            continue
+        if len(token) >= 3 or token in IMPORTANT_SHORT_TOKENS:
+            tokens.add(token)
+    return tokens
+
+
+def contains_keyword(normalized_text: str, keyword: str) -> bool:
+    keyword = normalize_search_text(keyword)
+    if not keyword:
+        return False
+    return f" {keyword} " in f" {normalized_text} "
+
+
+def raw_has_word(text: str, word: str) -> bool:
+    return re.search(rf"(?<!\w){re.escape(word)}(?!\w)", text, flags=re.IGNORECASE) is not None
+
+
+def infer_categories(text: str, product_context: bool = False) -> set[str]:
+    raw_lower = (text or "").lower()
+    normalized = normalize_search_text(text)
+    categories = set()
+    for category, keywords in CATEGORY_KEYWORDS.items():
+        if any(contains_keyword(normalized, keyword) for keyword in keywords):
+            categories.add(category)
+
+    # Accented Vietnamese words such as "chó", "mèo", "cây", "mối" collide with
+    # common unaccented words after normalization, so handle them before scoring.
+    if "mèo" in raw_lower or raw_has_word(raw_lower, "cat"):
+        categories.add("cat")
+    if "cú mèo" in raw_lower and not any(word in raw_lower for word in ("hổ", "báo", "sư tử")):
+        categories.discard("cat")
+        categories.add("bird")
+    if "chó" in raw_lower or "cún" in raw_lower:
+        categories.add("dog")
+    if not product_context and "cây" in raw_lower:
+        categories.add("plant")
+    if any(word in raw_lower for word in ("hổ", "báo", "sư tử")):
+        categories.add("cat")
+    sea_raw_words = (
+        "cá",
+        "ca",
+        "mực",
+        "muc",
+        "tôm",
+        "tom",
+        "cua",
+        "rùa",
+        "rua",
+        "sứa",
+        "sua",
+        "bạch tuộc",
+        "hải sản",
+        "rong biển",
+        "cá hồi",
+        "cá ngừ",
+    )
+    if any(raw_has_word(raw_lower, word) for word in sea_raw_words):
+        categories.add("sea")
+    plant_raw_words = (
+        "hạt",
+        "hoa",
+        "quả",
+        "rau củ",
+        "ngũ cốc",
+        "đậu",
+        "trái cây",
+        "thực vật",
+        "dầu oliu",
+        "dầu óc chó",
+    )
+    if not product_context:
+        plant_raw_words = (*plant_raw_words, "cây")
+    if any(raw_has_word(raw_lower, word) for word in plant_raw_words):
+        categories.add("plant")
+    insect_words = ("bọ", "mối", "ong", "ruồi", "gián")
+    if any(raw_has_word(raw_lower, word) for word in insect_words) or (
+        raw_has_word(raw_lower, "kiến") and not raw_has_word(raw_lower, "kiến trúc")
+    ):
+        categories.add("insect")
+    reptile_words = ("rắn", "ếch", "cá sấu", "thằn lằn")
+    if any(raw_has_word(raw_lower, word) for word in reptile_words):
+        categories.add("reptile_amphibian")
+
+    if categories & {"cat", "dog"}:
+        categories.add("pet")
+    return categories
+
+
+def sold_count_value(value: str) -> int:
+    normalized = normalize_search_text(value)
+    match = re.search(r"(\d+(?:[.,]\d+)?)\s*(tr|m|k)?", normalized)
+    if not match:
+        return 0
+    number = float(match.group(1).replace(",", "."))
+    unit = match.group(2) or ""
+    if unit in {"tr", "m"}:
+        number *= 1_000_000
+    elif unit == "k":
+        number *= 1_000
+    return int(number)
+
+
+def enrich_product_for_matching(product: dict) -> dict:
+    match_text = product.get("raw_name") or product.get("name") or ""
+    product["match_text"] = normalize_search_text(match_text)
+    product["match_tokens"] = search_tokens(match_text)
+    product["categories"] = infer_categories(match_text, product_context=True)
+    product["sold_value"] = sold_count_value(product.get("sold", ""))
+    return product
+
+
+def flatten_payload_text(value) -> str:
+    if not value:
+        return ""
+    if isinstance(value, str):
+        try:
+            parsed = json.loads(value)
+        except (TypeError, ValueError):
+            return value
+        return flatten_payload_text(parsed)
+    if isinstance(value, dict):
+        return " ".join(flatten_payload_text(item) for item in value.values())
+    if isinstance(value, list):
+        return " ".join(flatten_payload_text(item) for item in value)
+    return str(value)
+
+
+def category_overlap_score(content_categories: set[str], product_categories: set[str]) -> int:
+    score = 0
+    for category in content_categories:
+        if category in product_categories:
+            score += 12
+        for related_category, bonus in RELATED_CATEGORY_BONUS.get(category, {}).items():
+            if related_category in product_categories:
+                score += bonus
+    return score
+
+
+def text_match_score(text: str, product: dict, token_weight: int, category_weight: int) -> int:
+    tokens = search_tokens(text)
+    token_score = len(tokens & product.get("match_tokens", set())) * token_weight
+    categories = infer_categories(text)
+    category_score = category_overlap_score(categories, product.get("categories", set())) * category_weight
+    return token_score + category_score
+
+
+def rank_products_for_context(
+    products: list[dict],
+    seed: int | str,
+    title: str = "",
+    caption: str = "",
+    topic_type: str = "",
+    topic_payload: str = "",
+) -> list[tuple[int, dict]]:
+    topic_text = " ".join([topic_type or "", flatten_payload_text(topic_payload)])
+    ranked = []
+    for product in products:
+        title_score = text_match_score(title, product, token_weight=14, category_weight=2)
+        caption_score = text_match_score(caption, product, token_weight=5, category_weight=1)
+        topic_score = text_match_score(topic_text, product, token_weight=3, category_weight=1)
+        score = title_score or caption_score or topic_score
+        ranked.append((score, product))
+
+    def sort_key(item):
+        score, product = item
+        stable = zlib.crc32(f"{seed}:{product.get('link', '')}".encode("utf-8"))
+        return (-score, -int(product.get("sold_value") or 0), stable)
+
+    ranked.sort(key=sort_key)
+    return ranked
+
+
 def product_comment_line(product: dict) -> str:
     sold = product.get("sold", "").strip()
     if sold:
@@ -117,16 +458,78 @@ def product_comment_delay_minutes(media_type: str) -> int:
     return PRODUCT_COMMENT_IMAGE_DELAY_MINUTES
 
 
-def pick_products_for_post(post_id: int, count: int) -> list[dict]:
-    products = load_products()
+def fallback_pick_products(products: list[dict], seed: int | str, count: int) -> list[dict]:
     if not products:
         return []
 
-    start = (post_id * count) % len(products)
+    seed_value = seed if isinstance(seed, int) else zlib.crc32(str(seed).encode("utf-8"))
+    start = (seed_value * count) % len(products)
     selected = []
     for offset in range(min(count, len(products))):
         selected.append(products[(start + offset) % len(products)])
     return selected
+
+
+def pick_products_for_context(
+    seed: int | str,
+    count: int,
+    title: str = "",
+    caption: str = "",
+    topic_type: str = "",
+    topic_payload: str = "",
+) -> list[dict]:
+    products = load_products()
+    if not products:
+        return []
+
+    ranked = rank_products_for_context(
+        products,
+        seed=seed,
+        title=title,
+        caption=caption,
+        topic_type=topic_type,
+        topic_payload=topic_payload,
+    )
+
+    if not ranked or ranked[0][0] <= 0:
+        return fallback_pick_products(products, seed, count)
+
+    selected = []
+    seen_links = set()
+    for score, product in ranked:
+        if score <= 0:
+            break
+        link = product.get("link", "")
+        if link in seen_links:
+            continue
+        seen_links.add(link)
+        selected.append(product)
+        if len(selected) >= count:
+            break
+
+    if len(selected) < count:
+        for product in fallback_pick_products(products, seed, count):
+            link = product.get("link", "")
+            if link in seen_links:
+                continue
+            selected.append(product)
+            seen_links.add(link)
+            if len(selected) >= count:
+                break
+
+    return selected
+
+
+def pick_products_for_post(post_id: int, count: int) -> list[dict]:
+    return pick_products_for_context(post_id, count)
+
+
+def first_nonempty_line(text: str) -> str:
+    for line in (text or "").splitlines():
+        line = line.strip()
+        if line:
+            return line
+    return ""
 
 
 def build_product_comment(product: dict, comment_index: int) -> str:
@@ -252,12 +655,15 @@ def normalize_external_video_objects() -> list[dict]:
         fb_post_id = canonical_video_object_id(post)
         if not fb_post_id or fb_post_id in seen:
             continue
+        caption = post.get("message") or ""
         seen.add(fb_post_id)
         objects.append(
             {
                 "fb_post_id": fb_post_id,
                 "created_at": parse_facebook_time(post.get("created_time", "")),
                 "source": "posts",
+                "title": first_nonempty_line(caption),
+                "caption": caption,
             }
         )
 
@@ -269,12 +675,15 @@ def normalize_external_video_objects() -> list[dict]:
         fb_post_id = canonical_video_object_id(video)
         if not fb_post_id or fb_post_id in seen:
             continue
+        caption = video.get("description") or ""
         seen.add(fb_post_id)
         objects.append(
             {
                 "fb_post_id": fb_post_id,
                 "created_at": parse_facebook_time(video.get("created_time", "")),
                 "source": "videos",
+                "title": first_nonempty_line(caption),
+                "caption": caption,
             }
         )
 
@@ -286,12 +695,15 @@ def normalize_external_video_objects() -> list[dict]:
         fb_post_id = canonical_video_object_id(reel)
         if not fb_post_id or fb_post_id in seen:
             continue
+        caption = reel.get("description") or ""
         seen.add(fb_post_id)
         objects.append(
             {
                 "fb_post_id": fb_post_id,
                 "created_at": parse_facebook_time(reel.get("created_time", "")),
                 "source": "video_reels",
+                "title": first_nonempty_line(caption),
+                "caption": caption,
             }
         )
 
@@ -344,7 +756,12 @@ def schedule_recent_donate_comments(now: datetime | None = None, dry_run: bool =
             }
         )
 
-        products = pick_products_for_post(external_id, REEL_PRODUCT_COMMENTS_PER_POST)
+        products = pick_products_for_context(
+            external_id,
+            REEL_PRODUCT_COMMENTS_PER_POST,
+            title=item.get("title", ""),
+            caption=item.get("caption", ""),
+        )
         for offset, product in enumerate(products, start=1):
             product_scheduled_at = scheduled_at + timedelta(minutes=offset * 2)
             product_data = {
@@ -382,7 +799,14 @@ def schedule_product_comments_for_post(
     if not fb_post_id:
         return 0
 
-    products = pick_products_for_post(post["id"], PRODUCT_COMMENTS_PER_POST)
+    products = pick_products_for_context(
+        post["id"],
+        PRODUCT_COMMENTS_PER_POST,
+        title=post["title"],
+        caption=post["caption"],
+        topic_type=post["topic_type"],
+        topic_payload=post["topic_payload"],
+    )
     if not products:
         return 0
 

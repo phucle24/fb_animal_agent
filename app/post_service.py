@@ -64,7 +64,7 @@ Create a finished vertical 4:5 Vietnamese social poster for Facebook feed:
 
 ENGAGEMENT_TOPIC_TYPES = {"myth_vs_fact", "guess_quiz", "one_story", "before_after"}
 
-CAPTION_HASHTAGS = "#thegioimuonloai #topdongbat #reivewthegioidongvat #khamphatunhien"
+CAPTION_HASHTAGS = "#thegioimuonloai #topdongbat #reivewthegioidongvat #khamphatunhien #thegioidongvat #thucvatdongvat"
 MODEL_RENDERED_TEXT_MARKER = "FINAL INFOGRAPHIC MUST CONTAIN THE EXACT TEXT BELOW."
 AI_DISCLAIMERS = (
     "Ảnh minh họa AI.",
