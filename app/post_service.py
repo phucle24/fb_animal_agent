@@ -23,6 +23,7 @@ Create a finished vertical 4:5 Vietnamese infographic poster for Facebook feed, 
 - stacked horizontal ranking panels
 - left black text block, right realistic wildlife photo block
 - dramatic photorealistic animal images, sharp eyes, motion, cinematic lighting
+- every panel should feel like a tiny visual story, showing the animal/plant doing the behavior or revealing the survival trick behind the data
 - vertical 4:5 layout with enough height for a header and five stacked panels, all text readable without cropping
 - no Python overlay will be used later; all text must be rendered by the image model now
 """.strip()
@@ -31,6 +32,7 @@ SINGLE_CARD_IMAGE_TEMPLATE = """
 FINAL INFOGRAPHIC MUST CONTAIN THE EXACT TEXT BELOW.
 Create a finished vertical 4:5 Vietnamese single-subject fact poster for Facebook feed:
 - exactly one dramatic photorealistic animal or plant hero image, large and unmistakable
+- the hero image must tell a mini-story: the subject is doing something, hiding from something, hunting, defending, transforming, glowing, or revealing the biological trick
 - premium dark charcoal editorial poster style with copper/orange accents
 - exactly three visible text groups total: headline, main metric, micro-fact hook
 - clean single-card layout with open space, not a ranking, not a comparison, not a list
@@ -46,6 +48,7 @@ Create a finished vertical 4:5 Vietnamese scientific animal face-off infographic
 - dark forest/jungle background, copper/orange accents, cinematic shafts of light
 - bold condensed Vietnamese typography, clean science infographic mood
 - two realistic full-body or half-body animal portraits facing forward, separated by a thin vertical divider
+- make it feel like a scientific story of two different survival strategies, not a static ID card
 - data cards under each animal with concise measurements
 - no gore, no blood, no injury, no violent impact
 - no Python overlay will be used later; all text must be rendered by the image model now
@@ -56,6 +59,7 @@ FINAL INFOGRAPHIC MUST CONTAIN THE EXACT TEXT BELOW.
 Create a finished vertical 4:5 Vietnamese social poster for Facebook feed:
 - premium dark charcoal editorial style with copper/orange accents
 - one dramatic photorealistic animal/plant/nature hero image
+- the image must create curiosity like a story frame: a hidden danger, surprising behavior, transformation, camouflage, scale reveal, or visual twist
 - bold condensed Vietnamese typography, clean and highly readable
 - exactly three visible text groups total: title, primary hook, secondary hook
 - no extra paragraphs, no random labels, no fake UI text
@@ -72,6 +76,23 @@ AI_DISCLAIMERS = (
     "Ảnh AI minh họa.",
     "Ảnh AI minh hoạ.",
     "AI illustration.",
+)
+GENERIC_ENGAGEMENT_TITLES = {
+    "LỜI ĐỒN HAY SỰ THẬT?",
+    "LỜI ĐỒN HAY SỰ THẬT",
+    "SỰ THẬT THÚ VỊ",
+    "BẠN CÓ BIẾT?",
+    "BẠN CÓ BIẾT",
+}
+ENGAGEMENT_TEXT_LABELS = (
+    "LỜI ĐỒN:",
+    "LỜI ĐỒN",
+    "SỰ THẬT:",
+    "SỰ THẬT",
+    "THÔNG TIN:",
+    "THÔNG TIN",
+    "FACT:",
+    "MYTH:",
 )
 
 
@@ -109,6 +130,72 @@ def compact_text(text: str, max_chars: int) -> str:
     if len(text) <= max_chars:
         return text
     return text[: max_chars - 1].rstrip() + "…"
+
+
+def strip_engagement_label(text: str) -> str:
+    cleaned = " ".join((text or "").split()).strip()
+    upper = cleaned.upper()
+    for label in ENGAGEMENT_TEXT_LABELS:
+        if upper.startswith(label):
+            return cleaned[len(label) :].strip(" :-–—")
+    return cleaned
+
+
+def text_signature(text: str, words: int = 4) -> str:
+    normalized = " ".join((text or "").lower().split())
+    return " ".join(normalized.split()[:words])
+
+
+def myth_title_fallback(topic: dict) -> str:
+    combined = " ".join(
+        [
+            topic.get("subject_vi", ""),
+            topic.get("hook_vi", ""),
+            topic.get("main_fact_vi", ""),
+            topic.get("twist_vi", ""),
+        ]
+    ).lower()
+    if any(word in combined for word in ("cute", "dễ thương")) and any(
+        word in combined for word in ("ngụy trang", "tàng hình", "lẫn vào", "trốn")
+    ):
+        return "CUTE ĐỂ TÀNG HÌNH?"
+    if any(word in combined for word in ("ngụy trang", "tàng hình", "lẫn vào", "trốn")):
+        return "BẬC THẦY TÀNG HÌNH?"
+    if any(word in combined for word in ("phát sáng", "ánh sáng", "glow")):
+        return "SÁNG LÊN ĐỂ LÀM GÌ?"
+    if any(word in combined for word in ("trong suốt", "xuyên thấu")):
+        return "TÀNG HÌNH THẬT À?"
+    return compact_text(topic["subject_vi"], 32)
+
+
+def normalize_engagement_content(topic: dict, content: dict) -> dict:
+    normalized = dict(content)
+    topic_type = topic.get("topic_type")
+
+    normalized["overlay_title"] = compact_text(str(normalized.get("overlay_title") or topic["subject_vi"]), 32)
+    normalized["overlay_primary"] = compact_text(str(normalized.get("overlay_primary") or topic["hook_vi"]), 52)
+    normalized["overlay_secondary"] = compact_text(str(normalized.get("overlay_secondary") or topic["main_fact_vi"]), 58)
+
+    if topic_type == "myth_vs_fact":
+        title = normalized["overlay_title"].strip()
+        primary = strip_engagement_label(normalized["overlay_primary"])
+        secondary = strip_engagement_label(normalized["overlay_secondary"])
+
+        if title.upper() in GENERIC_ENGAGEMENT_TITLES:
+            title = myth_title_fallback(topic)
+
+        primary_sig = text_signature(primary)
+        secondary_sig = text_signature(secondary)
+        if not primary or primary_sig == secondary_sig or primary.lower() in secondary.lower():
+            primary = compact_text(topic["hook_vi"], 36)
+        if not secondary or text_signature(primary) == text_signature(secondary) or secondary.lower() in primary.lower():
+            secondary = compact_text(topic["main_fact_vi"], 42)
+
+        normalized["overlay_title"] = compact_text(title, 32)
+        normalized["overlay_primary"] = compact_text(primary, 36)
+        normalized["overlay_secondary"] = compact_text(secondary, 42)
+
+    return normalized
 
 
 def concise_single_fact(fact_value: str) -> str:
@@ -459,18 +546,32 @@ def build_engagement_image_prompt(topic: dict, content: dict) -> str:
     secondary = compact_text(content.get("overlay_secondary") or topic["main_fact_vi"], 58)
     visual_subject = topic.get("visual_subject_en") or topic["subject_en"]
     scene_prompt = " ".join((content.get("image_prompt") or "").split()).strip()
+    if topic["topic_type"] == "myth_vs_fact":
+        format_direction = (
+            "- Use a visual twist composition: the subject looks cute at first glance, but the environment reveals the hidden survival function.\n"
+            "- Show the story visually through camouflage, threat silhouette, habitat contrast, scale cue, or behavior; do not explain with extra text.\n"
+            "- Do not render labels like LỜI ĐỒN, SỰ THẬT, FACT, MYTH unless they appear in the exact strings above.\n"
+        )
+    else:
+        format_direction = ""
     return (
         f"{ENGAGEMENT_IMAGE_TEMPLATE}\n\n"
         "Render exactly these 3 visible text strings, and no other text anywhere:\n"
         f"\"{title}\"\n"
         f"\"{primary}\"\n"
         f"\"{secondary}\"\n\n"
+        "Strict text repetition rules:\n"
+        "- Each exact text string above may appear ONCE only.\n"
+        "- Do not repeat, duplicate, mirror, paraphrase, translate, or restate any text string.\n"
+        "- Do not add category labels such as LỜI ĐỒN, SỰ THẬT, THÔNG TIN, FACT, MYTH, STAT, DATA.\n"
+        "- If the design needs visual balance, use shapes, shadows, image crops, arrows, or empty space instead of extra text.\n\n"
         "Format direction:\n"
         f"- Topic type: {topic['topic_type']}.\n"
         "- Make the primary and secondary hooks large enough to be readable on mobile.\n"
         "- Create a poster people want to tap: strong mystery, clear scale, unusual behavior, or visual twist.\n"
         "- Do not add watermark, logo, brand text, decorative random symbols, or extra captions.\n"
         "- If text cannot fit, reduce font size or split line breaks; never paraphrase or crop text.\n\n"
+        f"{format_direction}"
         f"Hero visual subject: realistic {visual_subject}, cinematic, sharp, dramatic, visually striking.\n"
         f"Visual hook to make obvious without extra text: {topic['hook_vi']} | {topic['main_fact_vi']} | {topic['twist_vi']}.\n"
         f"{'Scene/photo guidance only: ' + scene_prompt if scene_prompt else ''}"
@@ -553,7 +654,7 @@ def build_post_payload(topic: dict, scheduled_at: str, slot: str) -> dict:
         }
 
     if topic["topic_type"] in ENGAGEMENT_TOPIC_TYPES:
-        content = generate_engagement_format_content(topic)
+        content = normalize_engagement_content(topic, generate_engagement_format_content(topic))
         image_prompt = build_engagement_image_prompt(topic, content)
         caption = build_engagement_caption(content)
         return {

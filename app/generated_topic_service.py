@@ -33,6 +33,15 @@ ENGAGEMENT_TOPIC_GUIDES = {
     "before_after": "Before / After: nhấn mạnh biến đổi trước-sau, vòng đời, lột xác, biến thái hoặc đổi trạng thái sinh tồn.",
 }
 
+STORY_TOPIC_RULES = """
+Nguyên tắc chọn topic bắt buộc:
+- Topic phải có "mầm câu chuyện": một cảnh nhỏ, mâu thuẫn, hiểu lầm, cú twist, hành vi lạ, hoặc khoảnh khắc khiến viewer muốn bấm vào ảnh.
+- Ưu tiên các góc có thể kể như mini-story: tưởng vô hại nhưng nguy hiểm, nhìn dễ thương nhưng là chiến thuật sinh tồn, nhỏ bé nhưng có vũ khí, chậm chạp nhưng sống dai, cây đứng yên nhưng biết lừa.
+- Tránh topic chỉ là danh sách khô hoặc fact rời rạc; mỗi topic phải gợi được câu hỏi "Ủa vì sao nó làm được vậy?".
+- Nội dung phải vừa thật vừa có tính wow: có cơ chế, môi trường sống, kẻ săn mồi/con mồi, quy mô, hoặc lợi ích sinh tồn cụ thể.
+- Giọng định hướng hóm hỉnh, duyên, dễ comment; không nhảm, không sai sự thật.
+"""
+
 
 def load_generated_topics() -> list[dict]:
     if not GENERATED_TOPICS_PATH.exists():
@@ -84,7 +93,7 @@ def generate_topic(topic_type: str, existing_topics: list[dict]) -> dict:
 
     if topic_type == "comparison_top5":
         prompt = f"""
-Bạn là biên tập viên nội dung Facebook về thế giới động vật và thực vật, ưu tiên topic có "điểm wow" rõ ràng.
+Bạn là biên tập viên nội dung Facebook về thế giới động vật và thực vật, ưu tiên topic có "điểm wow" rõ ràng và có thể kể thành một câu chuyện cuốn hút.
 
 Hãy sinh 1 topic mới dạng Top 5, dễ viral, dễ gây bình luận, thú vị nhưng không sai sự thật.
 Không được trùng hoặc quá giống các topic đã có:
@@ -111,12 +120,16 @@ Chỉ trả về JSON hợp lệ với schema:
 Allowed comparison_angle values:
 {", ".join(sorted(ALLOWED_COMPARISON_ANGLES))}
 
+{STORY_TOPIC_RULES}
+
 Yêu cầu bắt buộc:
 - Đúng 5 items, rank từ 1 đến 5.
 - name_vi dùng tiếng Việt dễ hiểu, viết hoa chữ cái đầu mỗi từ.
 - stat phải ngắn, dễ đọc trên ảnh, không quá 18 ký tự nếu có thể.
 - detail_vi làm rõ stat nghĩa là gì bằng thông tin cụ thể, không quá 14 từ.
 - detail_vi phải giúp người xem hiểu ngay vì sao item đó đáng kinh ngạc, có cơ chế/quy mô/hành vi cụ thể.
+- subject_vi phải gợi cảm giác muốn đọc tiếp, không chỉ là nhãn phân loại khô; ví dụ "Top 5 sinh vật nhìn hiền nhưng có chiêu cực gắt" tốt hơn "Top 5 sinh vật đặc biệt".
+- Các item nên cùng tạo thành một "mạch chuyện" hoặc một cú tò mò chung: ai cũng có chiêu riêng, ai cũng có cơ chế wow riêng.
 - Tuyệt đối không dùng detail_vi chung chung kiểu "đặc điểm nổi bật giúp nó săn mồi, sinh tồn hoặc tự vệ".
 - Nếu comparison_angle là "special ability", detail_vi phải nói rõ cơ chế/khoảng cách/cách dùng/lợi ích cụ thể của khả năng đó.
 - Nếu comparison_angle là "survival", detail_vi phải nói rõ cơ chế sống sót: ngủ đông, giảm trao đổi chất, giữ nước/nhiệt, sửa ADN, chịu mặn/nóng/lạnh.
@@ -130,7 +143,7 @@ Yêu cầu bắt buộc:
 """
     elif topic_type == "single_card":
         prompt = f"""
-Bạn là biên tập viên nội dung Facebook về thế giới động vật và thực vật, ưu tiên các fact có hình ảnh rất "wow".
+Bạn là biên tập viên nội dung Facebook về thế giới động vật và thực vật, ưu tiên các fact có hình ảnh rất "wow" và kể được thành một mẩu chuyện ngắn.
 
 Hãy sinh 1 topic single-card mới, dễ viral, lạ, thú vị và có khả năng kéo bình luận.
 Không được trùng hoặc quá giống các topic đã có:
@@ -148,18 +161,22 @@ Chỉ trả về JSON hợp lệ với schema:
   "detail_vi": "giải thích ngắn bằng tiếng Việt, tối đa 16 từ"
 }}
 
+{STORY_TOPIC_RULES}
+
 Yêu cầu bắt buộc:
 - subject nên là động vật hoặc thực vật rất thú vị, ít nhàm chán.
 - fact_value tối đa 18 ký tự nếu có thể, nên là số liệu/hành vi/khả năng đủ mạnh để làm text lớn trên ảnh.
 - fact_detail phải thật, dễ hiểu, không giật gân sai sự thật, và phải nêu được cơ chế/quy mô/hành vi đặc biệt.
 - detail_vi giải thích cụ thể fact_value nghĩa là gì, dùng tiếng Việt tự nhiên, tối đa 16 từ.
+- fact_value/detail_vi phải đủ tạo cú twist khi kể chuyện: nhìn vậy nhưng hóa ra có vũ khí/cơ chế/sinh tồn/cạm bẫy/kỹ năng kỳ lạ.
+- Tránh fact quá phẳng kiểu "rất thông minh", "rất nhanh", "rất đặc biệt" nếu không có cơ chế cụ thể.
 - detail_vi không được chung chung kiểu "khả năng đặc biệt", "rất thú vị", "giúp sinh tồn"; phải nói rõ đặc biệt ở đâu.
 - Ưu tiên fact có thể tạo hình ảnh ấn tượng: phát sáng, trong suốt, kích thước lạ, chiến thuật săn mồi, cấu trúc cơ thể, cộng sinh, ngụy trang, tái sinh, siêu giác quan.
 - Không dùng lại chủ đề cũ.
 """
     elif topic_type in ENGAGEMENT_TOPIC_TYPES:
         prompt = f"""
-Bạn là biên tập viên nội dung Facebook về thế giới động vật và thực vật, chuyên tạo format mới lạ, dễ kéo comment.
+Bạn là biên tập viên nội dung Facebook về thế giới động vật và thực vật, chuyên tạo format mới lạ, dễ kéo comment, mở đầu từ một câu chuyện khiến viewer tò mò.
 
 Hãy sinh 1 topic mới cho format: {topic_type}
 Định hướng format: {ENGAGEMENT_TOPIC_GUIDES[topic_type]}
@@ -179,6 +196,8 @@ Chỉ trả về JSON hợp lệ với schema:
   "question_vi": "câu hỏi kéo bình luận"
 }}
 
+{STORY_TOPIC_RULES}
+
 Yêu cầu bắt buộc:
 - Chủ đề phải thật, không bịa số liệu chính xác nếu không chắc.
 - Ưu tiên động vật/thực vật có hình ảnh mạnh: biển sâu, phát sáng, trong suốt, biến hình, cộng sinh, ngụy trang, săn mồi lạ, cây lừa côn trùng, vòng đời kỳ dị.
@@ -186,12 +205,16 @@ Yêu cầu bắt buộc:
 - main_fact_vi phải giải thích rõ điểm đặc biệt bằng ngôn ngữ dễ hiểu.
 - twist_vi phải bổ sung cơ chế/quy mô/ngữ cảnh, không lặp lại main_fact_vi.
 - question_vi ngắn, tự nhiên, làm người xem muốn trả lời.
+- subject_vi/hook_vi phải có cảm giác như mở cảnh: viewer nhìn thấy gì trước, hiểu lầm gì, hoặc chi tiết nào làm họ muốn xem tiếp.
+- hook_vi + main_fact_vi + twist_vi khi ghép lại phải thành một mini-story rõ ràng: mở cảnh -> sự thật -> cú wow.
+- Với myth_vs_fact: hook_vi phải là hiểu lầm/cú nhìn đầu tiên cụ thể, main_fact_vi là sự thật đảo chiều, twist_vi là cơ chế sinh tồn hoặc ngữ cảnh làm người xem "ồ".
+- Với myth_vs_fact: tránh các câu khô kiểu "loài này có đặc điểm thú vị"; hãy tạo cảm giác như một cảnh phim ngắn: ai tưởng gì, tự nhiên đang giấu bí mật gì, vì sao đáng bấm vào ảnh.
 - Không dùng lại chủ thể/góc nội dung cũ.
 - Không mô tả máu me, tra tấn, cổ vũ động vật đánh nhau thật.
 """
     elif topic_type == "matchup_versus":
         prompt = f"""
-Bạn là biên tập viên nội dung Facebook về thế giới động vật theo hướng khoa học, dễ viral.
+Bạn là biên tập viên nội dung Facebook về thế giới động vật theo hướng khoa học, dễ viral, biến so sánh thành một câu chuyện đặt lên bàn cân.
 
 Hãy sinh 1 topic mới dạng so sánh 1-vs-1 giữa hai loài động vật cùng nhóm hoặc gần tương đương kích cỡ, thú vị, gây tranh luận, nhưng không cổ vũ bạo lực thật.
 Không được trùng hoặc quá giống các topic đã có:
@@ -226,10 +249,14 @@ Chỉ trả về JSON hợp lệ với schema:
   "debate_question_vi": "câu hỏi kéo bình luận"
 }}
 
+{STORY_TOPIC_RULES}
+
 Yêu cầu bắt buộc:
 - Chọn hai loài cùng nhóm hoặc rất gần nhau về kích cỡ: 2 giống chó, 2 loài cá, 2 loài mèo lớn gần cân, 2 loài chim săn mồi, 2 loài bò sát tương đương, 2 loài linh trưởng tương đương.
 - Tránh tuyệt đối các cặp quá lệch kích cỡ/sức mạnh như chó vs hổ, chim vs báo, khỉ nhỏ vs gấu lớn, rắn nhỏ vs cá mập.
 - Mục tiêu là làm rõ đặc điểm nổi bật, điểm mạnh riêng, hành vi, môi trường sống, chiến thuật sinh tồn của mỗi loài.
+- Cặp so sánh phải có "câu chuyện tranh luận" rõ: hai loài nhìn có vẻ ngang nhau nhưng mỗi bên có chiêu khác nhau khiến viewer muốn chọn phe.
+- edge_vi của mỗi bên phải là lợi thế cụ thể, giàu hình ảnh, không viết chung chung kiểu "mạnh mẽ", "nhanh nhẹn".
 - Kết luận không được viết kiểu một bên "áp đảo tuyệt đối"; hãy nêu bên nào nhỉnh ở tiêu chí nào và bên kia mạnh ở tiêu chí nào.
 - Ưu tiên chủ đề vui và dễ bình luận: 2 giống chó bảo vệ, 2 loài cá săn mồi, 2 loài mèo lớn gần cân, 2 loài chim săn mồi, 2 loài rắn độc tương đương.
 - measure_label phải phù hợp với cơ thể loài: rắn/cá/cá mập/cá voi/mực/cá sấu/thằn lằn dùng "Chiều dài"; chim săn mồi dùng "Sải cánh"; chó/mèo lớn/gấu/thú bốn chân dùng "Chiều cao vai"; linh trưởng hoặc loài đứng thẳng có thể dùng "Chiều cao".
