@@ -342,9 +342,12 @@ Yêu cầu:
 - phải dẫn dắt viewer tò mò: bên nào có lợi thế gì, bên nào khiến ta bất ngờ ở điểm nào
 - giải thích rằng đây là so sánh đặc điểm dựa trên số liệu sinh học/hành vi, không cổ vũ cho động vật đối đầu thật
 - làm rõ mỗi bên mạnh ở tiêu chí nào: thể hình, tốc độ, lực hàm, độ bền, giác quan, chiến thuật, môi trường sống
+- CHỈ dùng tiếng Việt trong caption_intro; không chèn tên tiếng Anh nếu đã có tên tiếng Việt
+- Dịch thuật ngữ môi trường/hành vi sang tiếng Việt tự nhiên, ví dụ "savanna" -> "thảo nguyên", "urban" -> "đô thị", "canid" -> "họ chó"
 - không kết luận kiểu một bên áp đảo tuyệt đối nếu hai loài khá ngang tầm
 - không thay đổi số liệu
 - dùng nhãn đo hình thái phù hợp với từng loài: rắn/cá/cá mập/cá voi/mực/cá sấu/thằn lằn dùng "chiều dài"; chim săn mồi dùng "sải cánh"; chó/mèo lớn/gấu/thú bốn chân dùng "chiều cao vai"; linh trưởng hoặc loài đứng thẳng có thể dùng "chiều cao"
+- Chó, sói, chó rừng, cáo, linh cẩu và các loài thú bốn chân KHÔNG BAO GIỜ dùng "sải cánh"; dùng "chiều cao vai" hoặc "chiều dài" nếu số liệu là chiều dài thân.
 - câu cuối nên là câu hỏi kéo bình luận
 
 4. image_prompt

@@ -51,24 +51,12 @@ def chunk_lines(text: str, max_chars: int = 20) -> list[str]:
 
 def matchup_measure_label(animal: dict) -> str:
     explicit_label = str(animal.get("measure_label") or "").strip()
-    if explicit_label:
-        return explicit_label
-
     name_text = f"{animal.get('name_vi', '')} {animal.get('name_en', '')}".lower()
     value_text = str(animal.get("height", "")).lower()
-
-    if "sải cánh" in value_text:
-        return "Sải cánh"
-    if any(word in value_text for word in ("dài", "chiều dài")):
-        return "Chiều dài"
-    if any(word in value_text for word in ("cao vai", "vai")):
-        return "Chiều cao vai"
 
     wingspan_keywords = (
         "chim",
         "đại bàng",
-        "ưng",
-        "cắt",
         "falcon",
         "eagle",
         "hawk",
@@ -121,7 +109,30 @@ def matchup_measure_label(animal: dict) -> str:
         "tiger",
         "bear",
         "cat",
+        "jackal",
     )
+
+    is_wingspan = any(keyword in name_text for keyword in wingspan_keywords)
+    is_length = any(keyword in name_text for keyword in length_keywords)
+    is_shoulder_height = any(keyword in name_text for keyword in shoulder_height_keywords)
+
+    if explicit_label:
+        normalized_label = explicit_label.lower()
+        if normalized_label == "sải cánh" and not is_wingspan:
+            explicit_label = ""
+        elif normalized_label == "chiều dài" and not is_length:
+            explicit_label = ""
+        elif normalized_label == "chiều cao vai" and not is_shoulder_height:
+            explicit_label = ""
+        if explicit_label:
+            return explicit_label
+
+    if "sải cánh" in value_text and is_wingspan:
+        return "Sải cánh"
+    if any(word in value_text for word in ("dài", "chiều dài")):
+        return "Chiều dài"
+    if any(word in value_text for word in ("cao vai", "vai")):
+        return "Chiều cao vai"
 
     if any(keyword in name_text for keyword in wingspan_keywords):
         return "Sải cánh"
@@ -140,3 +151,30 @@ def matchup_measure_value(animal: dict) -> str:
         value,
         flags=re.IGNORECASE,
     ).strip()
+
+
+COMMON_VI_TERM_REPLACEMENTS = (
+    ("Black-backed jackal", "Chó rừng lưng đen"),
+    ("black-backed jackal", "chó rừng lưng đen"),
+    ("Jackal", "Chó rừng"),
+    ("jackal", "chó rừng"),
+    ("Coyote", "Sói đồng cỏ"),
+    ("coyote", "sói đồng cỏ"),
+    (" vs ", " so tài "),
+    (" VS ", " so tài "),
+    ("savanna", "thảo nguyên"),
+    ("Savanna", "thảo nguyên"),
+    ("canid", "họ chó"),
+    ("Canid", "họ chó"),
+    ("urban", "đô thị"),
+    ("Urban", "đô thị"),
+    ("wildlife", "động vật hoang dã"),
+    ("Wildlife", "động vật hoang dã"),
+)
+
+
+def vietnamize_common_terms(text: str) -> str:
+    cleaned = str(text or "")
+    for source, target in COMMON_VI_TERM_REPLACEMENTS:
+        cleaned = cleaned.replace(source, target)
+    return cleaned

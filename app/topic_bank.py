@@ -1203,8 +1203,8 @@ MATCHUP_TOPICS = [
             "bite_force": "Nhanh nhẹn",
             "edge_vi": "linh hoạt, thích nghi tốt, di chuyển khéo trong địa hình mở",
         },
-        "verdict_vi": "Dingo và sói đồng cỏ khá ngang tầm; dingo nhỉnh ở sức bền, coyote nổi bật ở độ lanh lợi.",
-        "reality_note_vi": "Đây là so sánh đặc điểm giữa hai loài canid cỡ trung, không cổ vũ đối đầu thật.",
+        "verdict_vi": "Chó dingo và sói đồng cỏ khá ngang tầm; dingo nhỉnh ở sức bền, sói đồng cỏ nổi bật ở độ lanh lợi.",
+        "reality_note_vi": "Đây là so sánh đặc điểm giữa hai loài họ chó cỡ trung, không cổ vũ đối đầu thật.",
         "debate_question_vi": "Bạn chọn sức bền của dingo hay sự khôn lanh của sói đồng cỏ?",
     },
     {
@@ -1463,11 +1463,11 @@ MATCHUP_TOPICS = [
             "height": "45 cm",
             "weight": "10 kg",
             "bite_force": "Nhanh nhẹn",
-            "edge_vi": "rất lanh lợi, sống tốt ở savanna và vùng khô hạn",
+            "edge_vi": "rất lanh lợi, sống tốt ở thảo nguyên và vùng khô hạn",
         },
-        "verdict_vi": "Coyote nhỉnh ở sức bền và thích nghi đô thị, chó rừng lưng đen nổi bật ở sự nhanh nhẹn.",
-        "reality_note_vi": "Đây là so sánh hai loài canid cỡ trung, không cổ vũ đối đầu thật.",
-        "debate_question_vi": "Bạn chọn kẻ thích nghi đô thị hay tay săn savanna?",
+        "verdict_vi": "Sói đồng cỏ nhỉnh ở sức bền và thích nghi đô thị, chó rừng lưng đen nổi bật ở sự nhanh nhẹn.",
+        "reality_note_vi": "Đây là so sánh hai loài họ chó cỡ trung, không cổ vũ đối đầu thật.",
+        "debate_question_vi": "Bạn chọn kẻ thích nghi đô thị hay tay săn thảo nguyên?",
     },
 ]
 

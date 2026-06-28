@@ -4,7 +4,7 @@ from copy import deepcopy
 
 from app.config import AUTO_GENERATE_TOPICS, GENERATED_TOPICS_PATH
 from app.deepseek_service import generate_json
-from app.utils import slugify
+from app.utils import matchup_measure_label, slugify, vietnamize_common_terms
 
 
 ALLOWED_COMPARISON_ANGLES = {
@@ -260,6 +260,8 @@ Yêu cầu bắt buộc:
 - Kết luận không được viết kiểu một bên "áp đảo tuyệt đối"; hãy nêu bên nào nhỉnh ở tiêu chí nào và bên kia mạnh ở tiêu chí nào.
 - Ưu tiên chủ đề vui và dễ bình luận: 2 giống chó bảo vệ, 2 loài cá săn mồi, 2 loài mèo lớn gần cân, 2 loài chim săn mồi, 2 loài rắn độc tương đương.
 - measure_label phải phù hợp với cơ thể loài: rắn/cá/cá mập/cá voi/mực/cá sấu/thằn lằn dùng "Chiều dài"; chim săn mồi dùng "Sải cánh"; chó/mèo lớn/gấu/thú bốn chân dùng "Chiều cao vai"; linh trưởng hoặc loài đứng thẳng có thể dùng "Chiều cao".
+- Chó, sói, chó rừng, cáo, linh cẩu và các loài thú bốn chân KHÔNG BAO GIỜ dùng "Sải cánh"; dùng "Chiều cao vai" hoặc "Chiều dài" nếu số liệu là chiều dài thân.
+- Các field tiếng Việt như subject_vi, edge_vi, verdict_vi, reality_note_vi, debate_question_vi phải dùng tiếng Việt tự nhiên; không chèn thuật ngữ tiếng Anh như "savanna", "urban", "canid", "Coyote" khi đã có tên Việt.
 - height chỉ chứa giá trị ngắn như "2.5 m", "76 cm", "1.8 m"; không viết lặp nhãn như "Dài 2.5 m" nếu đã có measure_label.
 - Các value trên ảnh phải ngắn, dễ đọc.
 - Nếu số liệu chỉ là ước tính phổ biến, viết theo dạng ngắn như "70 kg", "900 PSI", "Nọc độc".
@@ -521,6 +523,8 @@ def validate_generated_topic(topic: dict, expected_type: str, existing_topics: l
             value = str(topic.get(key, "")).strip()
             if not value:
                 raise ValueError(f"Generated matchup topic missing {key}.")
+            if key != "subject_en":
+                value = vietnamize_common_terms(value)
             topic[key] = value
         for side in ("left", "right"):
             animal = topic.get(side)
@@ -530,8 +534,9 @@ def validate_generated_topic(topic: dict, expected_type: str, existing_topics: l
                 value = str(animal.get(key, "")).strip()
                 if not value:
                     raise ValueError(f"Generated matchup {side} missing {key}.")
+                if key not in {"name_en"}:
+                    value = vietnamize_common_terms(value)
                 animal[key] = value
-            if animal.get("measure_label"):
-                animal["measure_label"] = str(animal["measure_label"]).strip()
+            animal["measure_label"] = matchup_measure_label(animal)
 
     return topic

@@ -10,7 +10,7 @@ from app.text_service import (
     generate_matchup_content,
     generate_single_card_content,
 )
-from app.utils import matchup_measure_label, matchup_measure_value, slugify
+from app.utils import matchup_measure_label, matchup_measure_value, slugify, vietnamize_common_terms
 
 
 INFOGRAPHIC_IMAGE_TEMPLATE = """
@@ -400,25 +400,25 @@ def matchup_caption(topic: dict, content: dict) -> str:
     left = topic["left"]
     right = topic["right"]
     lines = [
-        content["title"],
+        vietnamize_common_terms(content["title"]),
         "",
-        content["caption_intro"].strip(),
+        vietnamize_common_terms(content["caption_intro"]).strip(),
         "",
-        f"{left['name_vi']} ({left['name_en']})",
+        left["name_vi"],
         f"- {matchup_measure_label(left)}: {matchup_measure_value(left)}",
-        f"- Trọng lượng: {left['weight']}",
-        f"- Lực cắn: {left['bite_force']}",
-        f"- Lợi thế: {left['edge_vi']}",
+        f"- Trọng lượng: {vietnamize_common_terms(left['weight'])}",
+        f"- Lực cắn: {vietnamize_common_terms(left['bite_force'])}",
+        f"- Lợi thế: {vietnamize_common_terms(left['edge_vi'])}",
         "",
-        f"{right['name_vi']} ({right['name_en']})",
+        right["name_vi"],
         f"- {matchup_measure_label(right)}: {matchup_measure_value(right)}",
-        f"- Trọng lượng: {right['weight']}",
-        f"- Lực cắn: {right['bite_force']}",
-        f"- Lợi thế: {right['edge_vi']}",
+        f"- Trọng lượng: {vietnamize_common_terms(right['weight'])}",
+        f"- Lực cắn: {vietnamize_common_terms(right['bite_force'])}",
+        f"- Lợi thế: {vietnamize_common_terms(right['edge_vi'])}",
         "",
-        f"Kết luận: {topic['verdict_vi']}",
-        topic["reality_note_vi"],
-        topic["debate_question_vi"],
+        f"Kết luận: {vietnamize_common_terms(topic['verdict_vi'])}",
+        vietnamize_common_terms(topic["reality_note_vi"]),
+        vietnamize_common_terms(topic["debate_question_vi"]),
     ]
     return append_caption_hashtags(remove_ai_disclaimer("\n".join(lines)))
 
@@ -633,6 +633,9 @@ def build_post_payload(topic: dict, scheduled_at: str, slot: str) -> dict:
 
     if topic["topic_type"] == "matchup_versus":
         content = generate_matchup_content(topic)
+        content["title"] = vietnamize_common_terms(content["title"])
+        content["caption_intro"] = vietnamize_common_terms(content["caption_intro"])
+        content["overlay_title"] = vietnamize_common_terms(content["overlay_title"])
         image_prompt = build_model_rendered_infographic_prompt(content["image_prompt"], topic, content)
         caption = matchup_caption(topic, content)
         return {
