@@ -13,6 +13,22 @@ Nguyên tắc kể chuyện bắt buộc cho mọi caption:
 """
 
 
+CAPTION_STYLE_RULES = """
+Khung caption bắt buộc:
+- Độ dài phần caption/caption_intro do bạn viết: khoảng 120-180 chữ, không tính danh sách item cố định mà hệ thống sẽ tự ghép sau đó.
+- Cấu trúc: Hook 1-2 câu -> Story/Wow 2-3 câu -> Value 1-2 câu -> CTA 1 câu.
+- Hook phải mở bằng một cảnh, tình huống hoặc hiểu lầm cụ thể; KHÔNG mở bằng "Bạn có biết rằng", "Trong thế giới động vật", "Trong thế giới tự nhiên", "Thiên nhiên luôn...".
+- Story/Wow phải có một cú twist sinh học rõ: cơ chế, môi trường sống, kẻ săn mồi/con mồi, quy mô, hoặc lợi ích sinh tồn.
+- Value phải giúp viewer học được điều gì đó bằng ngôn ngữ dễ hiểu, không giống sách giáo khoa.
+- CTA là một câu hỏi tự nhiên, không ép like/share/comment lộ liễu.
+- Chỉ dùng dữ kiện có trong topic, items, detail_vi, fact_detail, main_fact_vi, twist_vi, verdict_vi; KHÔNG tự thêm số liệu, địa danh, hành vi, kẻ thù, hoặc kết luận nếu prompt không cung cấp.
+- Nếu dữ kiện không chắc tuyệt đối, dùng wording mềm như "thường", "có thể", "ước tính", "được ghi nhận", tùy đúng dữ liệu đã có.
+- Tránh cụm AI/khuôn mẫu: "đặc điểm thú vị", "khả năng đặc biệt", "vô cùng", "khiến ai cũng", "thiên nhiên kỳ diệu".
+- Ưu tiên tiếng Việt tự nhiên; không chèn tiếng Anh trong caption nếu đã có tên/thuật ngữ tiếng Việt phổ biến.
+- Giọng văn chân thật, duyên nhẹ, có chút hóm hỉnh; không Gen Z quá mạnh, không giật gân sai sự thật.
+"""
+
+
 ENGAGEMENT_FORMAT_GUIDES = {
     "myth_vs_fact": """
 Format: Myth vs Fact.
@@ -73,6 +89,7 @@ Thông tin topic:
 {format_guide}
 
 {STORYTELLING_RULES}
+{CAPTION_STYLE_RULES}
 
 Yêu cầu:
 1. title
@@ -101,10 +118,10 @@ Yêu cầu:
 - KHÔNG bắt đầu bằng label chung như "LỜI ĐỒN:", "SỰ THẬT:", "THÔNG TIN:"
 
 5. caption
-- 5 đến 7 câu ngắn
+- 5 đến 8 câu ngắn, khoảng 120-180 chữ
 - viết như đang kể một câu chuyện nhỏ, không phải đoạn encyclopedia
-- câu 1 phải tạo tình huống/hiểu lầm khiến người xem tò mò
-- câu 2-4 mở cú twist bằng thông tin thật từ topic
+- câu 1-2 phải tạo tình huống/hiểu lầm khiến người xem tò mò
+- câu 3-5 mở cú twist bằng thông tin thật từ topic
 - phải nói rõ cơ chế/quy mô/ngữ cảnh: nó dùng khả năng đó ở đâu, để tránh ai, dụ ai, hoặc sinh tồn ra sao
 - có một chút dí dỏm tự nhiên, không nhảm
 - câu cuối là câu hỏi kéo bình luận
@@ -156,6 +173,7 @@ Danh sách xếp hạng cố định (KHÔNG thay đổi thứ tự, KHÔNG thay
 {items_text}
 
 {STORYTELLING_RULES}
+{CAPTION_STYLE_RULES}
 
 Yêu cầu:
 1. title
@@ -175,7 +193,7 @@ Yêu cầu:
 - ví dụ: "Con vật chạy nhanh nhất trên cạn"
 
 4. caption_intro
-- 4 đến 6 câu ngắn
+- 5 đến 8 câu ngắn, khoảng 120-180 chữ
 - gần gũi, dễ hiểu, vui nhẹ nhưng không nhảm
 - mở đầu bằng một cảnh nhỏ/tình huống hài nhẹ khiến người đọc muốn dừng lại
 - phải có một cú twist kiểu "tưởng vậy mà không phải vậy" hoặc "nhìn nhỏ/hiền/lạ nhưng hóa ra..."
@@ -227,6 +245,7 @@ Thông tin bài viết:
 - detail_vi: {detail_vi}
 
 {STORYTELLING_RULES}
+{CAPTION_STYLE_RULES}
 
 Yêu cầu:
 1. title
@@ -257,7 +276,7 @@ Yêu cầu:
 - ví dụ không tốt: "Vua tốc độ", "Vua lọc sinh vật", "Kẻ bí ẩn"
 
 5. caption
-- 4 đến 6 câu
+- 5 đến 8 câu, khoảng 120-180 chữ
 - gần gũi, dễ hiểu, vui nhẹ, có một chút dí dỏm tự nhiên
 - có kiến thức thật từ detail_vi và fact_detail
 - ưu tiên dùng detail_vi để giải thích bằng tiếng Việt rõ ràng
@@ -323,6 +342,7 @@ Số liệu cố định, KHÔNG thay đổi:
 - {right["name_vi"]}: {right_measure_label} {right_measure_value}, trọng lượng {right["weight"]}, lực cắn/vũ khí chính {right["bite_force"]}, lợi thế {right["edge_vi"]}
 
 {STORYTELLING_RULES}
+{CAPTION_STYLE_RULES}
 
 Yêu cầu:
 1. title
@@ -337,7 +357,7 @@ Yêu cầu:
 - tối đa 9 từ
 
 3. caption_intro
-- 4 đến 6 câu
+- 5 đến 8 câu, khoảng 120-180 chữ
 - mở đầu bằng một cảnh giả định vui/đời thường như "nếu đặt hai cao thủ này lên bàn cân..." nhưng không cổ vũ đánh nhau
 - phải dẫn dắt viewer tò mò: bên nào có lợi thế gì, bên nào khiến ta bất ngờ ở điểm nào
 - giải thích rằng đây là so sánh đặc điểm dựa trên số liệu sinh học/hành vi, không cổ vũ cho động vật đối đầu thật

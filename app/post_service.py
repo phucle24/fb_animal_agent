@@ -1,4 +1,5 @@
 import json
+import re
 
 from app.config import FINAL_DIR, RAW_DIR
 from app.db import insert_post
@@ -87,6 +88,43 @@ AI_DISCLAIMERS = (
     "Ảnh AI minh hoạ.",
     "AI illustration.",
 )
+DRY_CAPTION_OPENERS = (
+    r"^\s*Bạn\s+có\s+biết\s+rằng\s*[,:\-–—]?\s*",
+    r"^\s*Bạn\s+có\s+biết\s*[,:\-–—]?\s*",
+    r"^\s*Trong\s+thế\s+giới\s+động\s+vật\s*[,:\-–—]?\s*",
+    r"^\s*Trong\s+thế\s+giới\s+tự\s+nhiên\s*[,:\-–—]?\s*",
+    r"^\s*Thiên\s+nhiên\s+luôn\s+ẩn\s+chứa\s+những\s+điều\s+kỳ\s+diệu\s*[,.\-–—]?\s*",
+    r"^\s*Thiên\s+nhiên\s+luôn\s*[,:\-–—]?\s*",
+)
+CAPTION_CLICHE_REPLACEMENTS = (
+    ("là một khả năng đặc biệt", "là một chi tiết"),
+    ("Là một khả năng đặc biệt", "Là một chi tiết"),
+    ("một khả năng này", "một chi tiết"),
+    ("Một khả năng này", "Một chi tiết"),
+    ("đặc điểm thú vị", "chi tiết này"),
+    ("Đặc điểm thú vị", "Chi tiết này"),
+    ("khả năng đặc biệt", "khả năng này"),
+    ("Khả năng đặc biệt", "Khả năng này"),
+    ("rất thú vị", "đáng chú ý"),
+    ("Rất thú vị", "Đáng chú ý"),
+    ("đặc điểm nổi bật giúp nó săn mồi, sinh tồn hoặc tự vệ", "chi tiết sinh học gắn với cách nó sống sót"),
+    ("Đặc điểm nổi bật giúp nó săn mồi, sinh tồn hoặc tự vệ", "Chi tiết sinh học gắn với cách nó sống sót"),
+    (
+        "chiến lược sinh tồn giúp nó chịu được điều kiện khắc nghiệt",
+        "cách sinh tồn riêng giúp nó vượt qua môi trường khắc nghiệt",
+    ),
+    (
+        "Chiến lược sinh tồn giúp nó chịu được điều kiện khắc nghiệt",
+        "Cách sinh tồn riêng giúp nó vượt qua môi trường khắc nghiệt",
+    ),
+    ("vô cùng", "rất"),
+    ("Vô cùng", "Rất"),
+    ("khiến ai cũng", "dễ khiến người xem"),
+    ("Khiến ai cũng", "Dễ khiến người xem"),
+    ("thiên nhiên kỳ diệu", "tự nhiên"),
+    ("Thiên nhiên kỳ diệu", "Tự nhiên"),
+)
+GENERATED_CAPTION_MAX_WORDS = 180
 GENERIC_ENGAGEMENT_TITLES = {
     "LỜI ĐỒN HAY SỰ THẬT?",
     "LỜI ĐỒN HAY SỰ THẬT",
@@ -140,6 +178,75 @@ def compact_text(text: str, max_chars: int) -> str:
     if len(text) <= max_chars:
         return text
     return text[: max_chars - 1].rstrip() + "…"
+
+
+def capitalize_first_letter(text: str) -> str:
+    for index, char in enumerate(text):
+        if char.isalpha():
+            return text[:index] + char.upper() + text[index + 1 :]
+    return text
+
+
+def strip_generated_hashtags(text: str) -> str:
+    return re.sub(r"(?:^|\s)#\S+", "", text).strip()
+
+
+def normalize_caption_opening(text: str) -> str:
+    cleaned = text.strip()
+    for pattern in DRY_CAPTION_OPENERS:
+        next_cleaned = re.sub(pattern, "", cleaned, count=1, flags=re.IGNORECASE).lstrip(" ,.:;-–—")
+        if next_cleaned != cleaned:
+            return capitalize_first_letter(next_cleaned.strip())
+    return cleaned
+
+
+def replace_caption_cliches(text: str) -> str:
+    cleaned = text
+    for _ in range(2):
+        for source, target in CAPTION_CLICHE_REPLACEMENTS:
+            cleaned = cleaned.replace(source, target)
+    return cleaned
+
+
+def soft_trim_caption_text(text: str, max_words: int = GENERATED_CAPTION_MAX_WORDS) -> str:
+    words = text.split()
+    if len(words) <= max_words:
+        return text
+
+    sentences = re.split(r"(?<=[.!?…])\s+", text)
+    kept: list[str] = []
+    kept_words = 0
+    for sentence in sentences:
+        sentence_words = sentence.split()
+        if not sentence_words:
+            continue
+        if kept and kept_words + len(sentence_words) > max_words:
+            break
+        kept.append(sentence.strip())
+        kept_words += len(sentence_words)
+
+    if kept:
+        return " ".join(kept).strip()
+    return " ".join(words[:max_words]).rstrip(" ,;:") + "…"
+
+
+def normalize_generated_caption_text(text: str) -> str:
+    cleaned = remove_ai_disclaimer(text)
+    cleaned = strip_generated_hashtags(cleaned)
+    cleaned = vietnamize_common_terms(cleaned)
+    cleaned = "\n".join(" ".join(line.split()) for line in cleaned.splitlines()).strip()
+    cleaned = normalize_caption_opening(cleaned)
+    cleaned = replace_caption_cliches(cleaned)
+    cleaned = soft_trim_caption_text(cleaned)
+    return cleaned.strip()
+
+
+def finalize_caption(caption: str) -> str:
+    cleaned = remove_ai_disclaimer(caption)
+    cleaned = vietnamize_common_terms(cleaned)
+    cleaned = replace_caption_cliches(cleaned)
+    cleaned = "\n".join(line.rstrip() for line in cleaned.splitlines()).strip()
+    return append_caption_hashtags(cleaned)
 
 
 def strip_engagement_label(text: str) -> str:
@@ -409,10 +516,11 @@ def matchup_stat_lines(animal: dict) -> list[str]:
 def matchup_caption(topic: dict, content: dict) -> str:
     left = topic["left"]
     right = topic["right"]
+    caption_intro = normalize_generated_caption_text(content["caption_intro"])
     lines = [
         vietnamize_common_terms(content["title"]),
         "",
-        vietnamize_common_terms(content["caption_intro"]).strip(),
+        caption_intro,
         "",
         left["name_vi"],
         f"- {matchup_measure_label(left)}: {matchup_measure_value(left)}",
@@ -430,7 +538,7 @@ def matchup_caption(topic: dict, content: dict) -> str:
         vietnamize_common_terms(topic["reality_note_vi"]),
         vietnamize_common_terms(topic["debate_question_vi"]),
     ]
-    return append_caption_hashtags(remove_ai_disclaimer("\n".join(lines)))
+    return finalize_caption("\n".join(lines))
 
 
 def build_model_rendered_infographic_prompt(image_prompt: str, topic: dict, content: dict) -> str:
@@ -532,6 +640,7 @@ def image_prompt_renders_final_text(image_prompt: str) -> bool:
 
 def build_comparison_caption(title: str, caption_intro: str, items: list, topic: dict | None = None) -> str:
     topic = topic or {}
+    caption_intro = normalize_generated_caption_text(caption_intro)
     lines = [
         title,
         "",
@@ -542,15 +651,15 @@ def build_comparison_caption(title: str, caption_intro: str, items: list, topic:
     for item in items:
         lines.append(comparison_caption_line(item, topic))
 
-    return append_caption_hashtags(remove_ai_disclaimer("\n".join(lines)))
+    return finalize_caption("\n".join(lines))
 
 
 def build_single_caption(title: str, caption: str) -> str:
-    return append_caption_hashtags(remove_ai_disclaimer(f"{title}\n\n{caption.strip()}"))
+    return finalize_caption(f"{title}\n\n{normalize_generated_caption_text(caption)}")
 
 
 def build_engagement_caption(content: dict) -> str:
-    return append_caption_hashtags(remove_ai_disclaimer(f"{content['title']}\n\n{content['caption'].strip()}"))
+    return finalize_caption(f"{content['title']}\n\n{normalize_generated_caption_text(content['caption'])}")
 
 
 def build_engagement_image_prompt(topic: dict, content: dict) -> str:
