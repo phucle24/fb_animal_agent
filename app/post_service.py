@@ -66,6 +66,16 @@ Create a finished vertical 4:5 Vietnamese social poster for Facebook feed:
 - no Python overlay will be used later; all text must be rendered by the image model now
 """.strip()
 
+TEXT_DEDUP_RULES = """
+Global text safety rules:
+- Render each requested text string exactly once.
+- Never duplicate a headline as a second header, background word, watermark, badge, shadow caption, footer, or decorative echo.
+- Never repeat the same words in another location just to balance the layout.
+- Never add extra labels, subtitles, explanations, UI text, fake text, lorem ipsum, brand text, or watermark.
+- If the poster feels empty, use image composition, lighting, borders, shapes, arrows, empty space, texture, or visual contrast instead of extra text.
+- Final self-check before output: count visible text groups and remove every duplicate or unrequested text element.
+""".strip()
+
 ENGAGEMENT_TOPIC_TYPES = {"myth_vs_fact", "guess_quiz", "one_story", "before_after"}
 
 CAPTION_HASHTAGS = "#thegioimuonloai #topdongbat #reivewthegioidongvat #khamphatunhien #thegioidongvat #thucvatdongvat"
@@ -442,6 +452,7 @@ def build_model_rendered_infographic_prompt(image_prompt: str, topic: dict, cont
             "Strict text rules:\n"
             "- Render Vietnamese diacritics correctly.\n"
             "- Use the exact text strings above, no extra words, no English labels, no fake text.\n"
+            f"{TEXT_DEDUP_RULES}\n"
             "- Never render generic labels or placeholder labels.\n"
             "- Do not add watermark, logo, captions, brand text, or random symbols.\n"
             "- If text cannot fit inside a panel, reduce font size, tighten spacing, or split into two short lines.\n"
@@ -469,6 +480,7 @@ def build_model_rendered_infographic_prompt(image_prompt: str, topic: dict, cont
             "Strict text rules:\n"
             "- Render Vietnamese diacritics correctly.\n"
             "- Use the exact text strings above, no extra words, no English labels, no fake text.\n"
+            f"{TEXT_DEDUP_RULES}\n"
             "- Keep labels and values readable; reduce font size or split into two lines if needed.\n"
             "- Never crop, truncate, overlap, or replace the listed text.\n"
             "- Do not add watermark, logo, captions, brand text, random symbols, blood, or injury.\n\n"
@@ -494,6 +506,7 @@ def build_model_rendered_infographic_prompt(image_prompt: str, topic: dict, cont
         "- Do NOT render long explanatory body text or full sentences beyond the exact hook string.\n"
         "- Do NOT render placeholder words such as Stat, data, label, thông tin, mô tả, lorem ipsum, UI text, or fake text.\n"
         "- Do NOT add watermark, logo, captions, brand text, random symbols, or extra subtitles.\n"
+        f"{TEXT_DEDUP_RULES}\n"
         "- Count the visible text groups: exactly 3 groups total. If anything else would appear as text, remove it.\n"
         "- If text cannot fit, reduce font size; never invent or paraphrase additional text.\n\n"
         "Render exactly these 3 visible text strings, and no other text anywhere:\n"
@@ -560,10 +573,19 @@ def build_engagement_image_prompt(topic: dict, content: dict) -> str:
         f"\"{title}\"\n"
         f"\"{primary}\"\n"
         f"\"{secondary}\"\n\n"
+        "Fixed text placement map:\n"
+        "- TEXT GROUP 1 / TITLE: top area only, one copy, large bold headline.\n"
+        "- TEXT GROUP 2 / PRIMARY HOOK: middle or lower-left callout only, one copy.\n"
+        "- TEXT GROUP 3 / SECONDARY HOOK: bottom callout or badge only, one copy.\n"
+        "- The hero image area must not contain any additional text, duplicated headline, small caption, label, or decorative word.\n\n"
         "Strict text repetition rules:\n"
         "- Each exact text string above may appear ONCE only.\n"
         "- Do not repeat, duplicate, mirror, paraphrase, translate, or restate any text string.\n"
+        "- The title must appear only in TEXT GROUP 1 and nowhere else.\n"
+        "- The primary hook must appear only in TEXT GROUP 2 and nowhere else.\n"
+        "- The secondary hook must appear only in TEXT GROUP 3 and nowhere else.\n"
         "- Do not add category labels such as LỜI ĐỒN, SỰ THẬT, THÔNG TIN, FACT, MYTH, STAT, DATA.\n"
+        f"{TEXT_DEDUP_RULES}\n"
         "- If the design needs visual balance, use shapes, shadows, image crops, arrows, or empty space instead of extra text.\n\n"
         "Format direction:\n"
         f"- Topic type: {topic['topic_type']}.\n"
@@ -573,7 +595,10 @@ def build_engagement_image_prompt(topic: dict, content: dict) -> str:
         "- If text cannot fit, reduce font size or split line breaks; never paraphrase or crop text.\n\n"
         f"{format_direction}"
         f"Hero visual subject: realistic {visual_subject}, cinematic, sharp, dramatic, visually striking.\n"
-        f"Visual hook to make obvious without extra text: {topic['hook_vi']} | {topic['main_fact_vi']} | {topic['twist_vi']}.\n"
+        "PRIVATE VISUAL GUIDANCE ONLY - DO NOT RENDER THIS GUIDANCE AS TEXT:\n"
+        f"- Story hook for image planning only: {topic['hook_vi']}.\n"
+        f"- Biological fact for image planning only: {topic['main_fact_vi']}.\n"
+        f"- Visual twist for image planning only: {topic['twist_vi']}.\n"
         f"{'Scene/photo guidance only: ' + scene_prompt if scene_prompt else ''}"
     )
 
