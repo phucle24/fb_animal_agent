@@ -892,6 +892,274 @@ COMPARISON_TOPICS = [
     },
 ]
 
+ANATOMY_TOPICS = [
+    {
+        "topic_type": "anatomy_infographic",
+        "topic_key": "crab_anatomy_infographic",
+        "subject_vi": "Giải phẫu con cua: bộ giáp mini dưới đáy nước",
+        "subject_en": "Crab anatomy educational infographic",
+        "animal_vi": "con cua",
+        "animal_en": "crab",
+        "hook_vi": "Nhìn con cua như một chiếc xe tăng tí hon, nhưng bên trong là cả bộ máy sống rất gọn.",
+        "main_fact_vi": "Cua có mai cứng, càng khỏe, mang nằm dưới giáp và phần bụng gập sát dưới cơ thể.",
+        "question_vi": "Bạn thấy bộ phận nào của cua giống thiết kế robot nhất?",
+        "composition_en": "side view with slight top angle, large crab centered and filling most of the image, claws visible, legs spread naturally",
+        "transparency_en": "slightly semi-transparent shell around the chest and abdomen so gills and internal organs can be seen while the crab remains realistic",
+        "background_en": "simple light grey-blue background, clean and minimal, no texture, no decoration",
+        "labels": [
+            {
+                "label_vi": "mắt cua",
+                "target_en": "the small eyes on short stalks",
+                "description_vi": "mắt nằm trên cuống ngắn để quan sát rộng",
+            },
+            {
+                "label_vi": "râu cua",
+                "target_en": "the short antennae near the mouth",
+                "description_vi": "râu ngắn giúp cảm nhận môi trường xung quanh",
+            },
+            {
+                "label_vi": "miệng",
+                "target_en": "the mouthparts under the front shell",
+                "description_vi": "vùng miệng nằm dưới phần trước của mai",
+            },
+            {
+                "label_vi": "càng cua",
+                "target_en": "the large front claws",
+                "description_vi": "cặp càng dùng để kẹp, tự vệ và lấy thức ăn",
+            },
+            {
+                "label_vi": "mang",
+                "target_en": "the gill area under the side of the carapace",
+                "description_vi": "mang nằm dưới mai giúp cua hô hấp trong nước",
+            },
+            {
+                "label_vi": "chân bò",
+                "target_en": "the walking legs on both sides of the body",
+                "description_vi": "các chân bên giúp cua bò ngang rất linh hoạt",
+            },
+            {
+                "label_vi": "mai cua",
+                "target_en": "the hard carapace covering the body",
+                "description_vi": "lớp giáp cứng bảo vệ phần thân bên trong",
+            },
+            {
+                "label_vi": "gan tụy",
+                "target_en": "the yellow digestive gland inside the body",
+                "description_vi": "cơ quan tiêu hóa màu vàng nằm dưới mai",
+            },
+            {
+                "label_vi": "đường ruột",
+                "target_en": "the dark intestine running toward the folded abdomen",
+                "description_vi": "đường ruột sẫm chạy về phía bụng gập",
+            },
+            {
+                "label_vi": "bụng gập",
+                "target_en": "the folded abdomen tucked under the body",
+                "description_vi": "phần bụng gập sát dưới thân cua",
+            },
+        ],
+    },
+    {
+        "topic_type": "anatomy_infographic",
+        "topic_key": "squid_anatomy_infographic",
+        "subject_vi": "Giải phẫu con mực: chiếc phản lực mềm dưới biển",
+        "subject_en": "Squid anatomy educational infographic",
+        "animal_vi": "con mực",
+        "animal_en": "squid",
+        "hook_vi": "Con mực không chỉ có nhiều tay; nó còn bơi như một chiếc phản lực mini.",
+        "main_fact_vi": "Mực dùng phễu nước để phun nước di chuyển, có túi mực để đánh lạc hướng và mang nằm trong áo mực.",
+        "question_vi": "Bạn tò mò nhất về túi mực hay phễu nước?",
+        "composition_en": "side view, streamlined squid body centered diagonally, head and arms visible on one side, fins and mantle clearly shown",
+        "transparency_en": "slightly semi-transparent mantle so gills, ink sac, stomach, heart, and digestive tract are visible without looking artificial",
+        "background_en": "simple light grey-blue background, clean and minimal, no texture, no decoration",
+        "labels": [
+            {
+                "label_vi": "mắt mực",
+                "target_en": "the large eye on the side of the head",
+                "description_vi": "mắt lớn giúp quan sát trong môi trường nước",
+            },
+            {
+                "label_vi": "tay mực",
+                "target_en": "the shorter arms around the mouth",
+                "description_vi": "các tay ngắn giữ và kéo con mồi",
+            },
+            {
+                "label_vi": "tua dài",
+                "target_en": "the two long feeding tentacles",
+                "description_vi": "hai tua dài dùng để chộp mồi từ xa",
+            },
+            {
+                "label_vi": "miệng mỏ",
+                "target_en": "the beak-like mouth at the center of the arms",
+                "description_vi": "miệng dạng mỏ cứng nằm giữa vòng tay",
+            },
+            {
+                "label_vi": "phễu nước",
+                "target_en": "the siphon funnel below the head",
+                "description_vi": "phễu phun nước giúp mực đổi hướng và tăng tốc",
+            },
+            {
+                "label_vi": "áo mực",
+                "target_en": "the mantle body",
+                "description_vi": "phần thân chính bao bọc nhiều cơ quan bên trong",
+            },
+            {
+                "label_vi": "mang",
+                "target_en": "the pair of gills inside the mantle",
+                "description_vi": "mang nằm trong áo mực để lấy oxy từ nước",
+            },
+            {
+                "label_vi": "túi mực",
+                "target_en": "the dark ink sac inside the mantle",
+                "description_vi": "túi chứa mực đen để tạo màn che khi nguy hiểm",
+            },
+            {
+                "label_vi": "tim",
+                "target_en": "the heart area near the gills",
+                "description_vi": "tim bơm máu qua hệ tuần hoàn của mực",
+            },
+            {
+                "label_vi": "vây mực",
+                "target_en": "the side fins on the mantle",
+                "description_vi": "vây giúp mực giữ thăng bằng khi bơi chậm",
+            },
+        ],
+    },
+    {
+        "topic_type": "anatomy_infographic",
+        "topic_key": "honeybee_anatomy_infographic",
+        "subject_vi": "Giải phẫu ong mật: cỗ máy bay mang phấn",
+        "subject_en": "Honeybee anatomy educational infographic",
+        "animal_vi": "ong mật",
+        "animal_en": "honeybee",
+        "hook_vi": "Một con ong bé xíu nhưng mang theo cả bộ đồ nghề lấy mật, gom phấn và tự vệ.",
+        "main_fact_vi": "Ong mật có mắt kép, vòi hút mật, cánh mỏng, giỏ phấn ở chân sau và ngòi chích ở cuối bụng.",
+        "question_vi": "Bạn bất ngờ nhất với giỏ phấn hay vòi hút mật?",
+        "composition_en": "side view macro honeybee, body centered and filling most of the image, wings visible, legs and abdomen clearly separated",
+        "transparency_en": "mostly realistic external anatomy with slight semi-transparent abdomen where digestive organs and honey stomach are indicated",
+        "background_en": "simple light grey-blue background, clean and minimal, no texture, no decoration",
+        "labels": [
+            {
+                "label_vi": "mắt kép",
+                "target_en": "the large compound eye on the head",
+                "description_vi": "mắt ghép từ nhiều ô nhỏ để quan sát rộng",
+            },
+            {
+                "label_vi": "râu ong",
+                "target_en": "the antennae on the head",
+                "description_vi": "râu giúp ong ngửi mùi và cảm nhận tín hiệu",
+            },
+            {
+                "label_vi": "vòi hút",
+                "target_en": "the proboscis mouthpart",
+                "description_vi": "vòi dùng để hút mật hoa",
+            },
+            {
+                "label_vi": "cánh trước",
+                "target_en": "the larger front wing",
+                "description_vi": "cánh trước tạo lực nâng chính khi bay",
+            },
+            {
+                "label_vi": "cánh sau",
+                "target_en": "the smaller hind wing",
+                "description_vi": "cánh sau móc cùng cánh trước khi bay",
+            },
+            {
+                "label_vi": "ngực ong",
+                "target_en": "the thorax where wings and legs attach",
+                "description_vi": "khoang ngực gắn cánh và ba cặp chân",
+            },
+            {
+                "label_vi": "chân sau",
+                "target_en": "the hind leg",
+                "description_vi": "chân sau hỗ trợ gom và giữ phấn hoa",
+            },
+            {
+                "label_vi": "giỏ phấn",
+                "target_en": "the pollen basket on the hind leg",
+                "description_vi": "vùng giữ phấn trên chân sau của ong thợ",
+            },
+            {
+                "label_vi": "dạ dày mật",
+                "target_en": "the honey stomach inside the abdomen",
+                "description_vi": "túi chứa mật hoa trước khi mang về tổ",
+            },
+            {
+                "label_vi": "ngòi chích",
+                "target_en": "the stinger at the tip of the abdomen",
+                "description_vi": "ngòi ở cuối bụng dùng để tự vệ",
+            },
+        ],
+    },
+    {
+        "topic_type": "anatomy_infographic",
+        "topic_key": "frog_anatomy_infographic",
+        "subject_vi": "Giải phẫu con ếch: chuyên gia nhảy và thở bằng da",
+        "subject_en": "Frog anatomy educational infographic",
+        "animal_vi": "con ếch",
+        "animal_en": "frog",
+        "hook_vi": "Con ếch nhìn ngồi im vậy thôi, nhưng cơ thể nó là bộ máy nhảy, nuốt và thở rất lạ.",
+        "main_fact_vi": "Ếch có chân sau khỏe để bật nhảy, da ẩm hỗ trợ hô hấp, lưỡi dính và phổi nằm trong khoang thân.",
+        "question_vi": "Bạn thấy lưỡi ếch hay da ếch kỳ lạ hơn?",
+        "composition_en": "side view frog in a natural crouching pose, centered and filling most of the image, legs visible and body slightly translucent",
+        "transparency_en": "semi-transparent torso so heart, lungs, stomach, and intestines are visible while external skin and legs remain realistic",
+        "background_en": "simple light grey-blue background, clean and minimal, no texture, no decoration",
+        "labels": [
+            {
+                "label_vi": "mắt ếch",
+                "target_en": "the raised eye on top of the head",
+                "description_vi": "mắt nhô cao giúp quan sát khi nổi trên mặt nước",
+            },
+            {
+                "label_vi": "màng nhĩ",
+                "target_en": "the round tympanum behind the eye",
+                "description_vi": "màng tròn sau mắt giúp tiếp nhận âm thanh",
+            },
+            {
+                "label_vi": "lưỡi dính",
+                "target_en": "the sticky tongue inside the mouth",
+                "description_vi": "lưỡi dính bật ra để bắt côn trùng",
+            },
+            {
+                "label_vi": "da ẩm",
+                "target_en": "the moist skin surface",
+                "description_vi": "da ẩm hỗ trợ trao đổi khí ngoài phổi",
+            },
+            {
+                "label_vi": "phổi",
+                "target_en": "the lungs inside the chest cavity",
+                "description_vi": "phổi giúp ếch hô hấp khi ở trên cạn",
+            },
+            {
+                "label_vi": "tim",
+                "target_en": "the heart area between the lungs",
+                "description_vi": "tim nằm trong khoang ngực giữa hai phổi",
+            },
+            {
+                "label_vi": "dạ dày",
+                "target_en": "the stomach inside the abdomen",
+                "description_vi": "dạ dày tiêu hóa con mồi sau khi nuốt",
+            },
+            {
+                "label_vi": "ruột",
+                "target_en": "the coiled intestine in the abdomen",
+                "description_vi": "ruột cuộn trong bụng để hấp thụ dinh dưỡng",
+            },
+            {
+                "label_vi": "chân trước",
+                "target_en": "the front leg",
+                "description_vi": "chân trước đỡ cơ thể khi tiếp đất",
+            },
+            {
+                "label_vi": "chân sau",
+                "target_en": "the long muscular hind leg",
+                "description_vi": "chân sau dài và khỏe để bật nhảy",
+            },
+        ],
+    },
+]
+
+
 SINGLE_TOPICS = [
     {
         "topic_type": "single_card",
@@ -1623,7 +1891,7 @@ BEFORE_AFTER_TOPICS = [
 def get_topic_by_index(index: int) -> dict:
     """Rotate evenly across all content formats."""
     topic_banks = [
-        ("comparison_top5", COMPARISON_TOPICS),
+        ("anatomy_infographic", ANATOMY_TOPICS),
         ("single_card", SINGLE_TOPICS),
         ("matchup_versus", MATCHUP_TOPICS),
         ("myth_vs_fact", MYTH_VS_FACT_TOPICS),
@@ -1643,4 +1911,5 @@ def get_topic_by_index(index: int) -> dict:
     existing_topics = []
     for _, bank in topic_banks:
         existing_topics.extend(bank)
+    existing_topics.extend(COMPARISON_TOPICS)
     return get_generated_topic(topic_type, group_index - len(topics), existing_topics)

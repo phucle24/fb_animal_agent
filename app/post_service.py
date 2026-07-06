@@ -6,6 +6,7 @@ from app.db import insert_post
 from app.image_service import generate_image
 from app.overlay_service import overlay_comparison_top5, overlay_single_card
 from app.text_service import (
+    generate_anatomy_content,
     generate_comparison_content,
     generate_engagement_format_content,
     generate_matchup_content,
@@ -67,6 +68,20 @@ Create a finished vertical 4:5 Vietnamese social poster for Facebook feed:
 - no Python overlay will be used later; all text must be rendered by the image model now
 """.strip()
 
+ANATOMY_IMAGE_TEMPLATE = """
+FINAL INFOGRAPHIC MUST CONTAIN THE EXACT TEXT BELOW.
+Create a realistic educational anatomy infographic, vertical 4:5 portrait layout, clean scientific style.
+- one large realistic subject in side view, centered and filling most of the image
+- the body should be highly detailed and slightly semi-transparent where needed so important internal parts can be seen
+- simple light grey-blue background, clean and minimal, no texture, no decoration
+- thin black pointer lines from each label to the correct body part
+- Vietnamese labels inside small rounded white rectangles with subtle shadow
+- clean sans-serif black text, crisp and readable on mobile
+- labels must be neat, balanced around the subject, and must not overlap
+- no decorative title, no logo, no watermark, no brand name, no page name, no icon, no mascot
+- no Python overlay will be used later; all text must be rendered by the image model now
+""".strip()
+
 TEXT_DEDUP_RULES = """
 Global text safety rules:
 - Render each requested text string exactly once.
@@ -78,6 +93,13 @@ Global text safety rules:
 """.strip()
 
 ENGAGEMENT_TOPIC_TYPES = {"myth_vs_fact", "guess_quiz", "one_story", "before_after"}
+MODEL_RENDERED_TOPIC_TYPES = {
+    "anatomy_infographic",
+    "comparison_top5",
+    "single_card",
+    "matchup_versus",
+    *ENGAGEMENT_TOPIC_TYPES,
+}
 
 CAPTION_HASHTAGS = "#thegioimuonloai #topdongbat #reivewthegioidongvat #khamphatunhien #thegioidongvat #thucvatdongvat"
 MODEL_RENDERED_TEXT_MARKER = "FINAL INFOGRAPHIC MUST CONTAIN THE EXACT TEXT BELOW."
@@ -513,6 +535,54 @@ def matchup_stat_lines(animal: dict) -> list[str]:
     ]
 
 
+def anatomy_label_rows(topic: dict) -> str:
+    rows = []
+    for index, part in enumerate(topic["labels"], start=1):
+        rows.append(
+            "\n".join(
+                [
+                    f"Label {index}:",
+                    f"- Visible label text: {part['label_vi']}",
+                    f"- Pointer target: {part['target_en']}",
+                    f"- Anatomy guidance: {part['description_vi']}",
+                ]
+            )
+        )
+    return "\n".join(rows)
+
+
+def build_anatomy_image_prompt(topic: dict, content: dict) -> str:
+    scene_prompt = " ".join((content.get("image_prompt") or "").split()).strip()
+    return (
+        f"{ANATOMY_IMAGE_TEMPLATE}\n\n"
+        "Main subject:\n"
+        f"- Subject: one large realistic {topic['animal_en']} ({topic['animal_vi']}).\n"
+        f"- Composition: {topic['composition_en']}.\n"
+        f"- Transparency/anatomy: {topic['transparency_en']}.\n"
+        f"- Background: {topic.get('background_en', 'simple light grey-blue background, clean and minimal')}.\n\n"
+        "Vietnamese labels to render exactly, with pointer lines to the correct body part:\n"
+        f"{anatomy_label_rows(topic)}\n\n"
+        "Strict text rules:\n"
+        "- Render Vietnamese diacritics correctly.\n"
+        "- Render every visible label text exactly once.\n"
+        "- Do not add a title, subtitle, corner text, logo, watermark, page name, brand name, icon, mascot, caption, or decorative text.\n"
+        "- Do not translate, uppercase, paraphrase, duplicate, mirror, or restate any label.\n"
+        "- Do not add fake labels, placeholder labels, random symbols, numbers, UI text, or lorem ipsum.\n"
+        "- If label space is tight, reduce font size, move labels outward, or shorten pointer lines; never crop or overlap labels.\n"
+        "- Pointer lines must be thin black lines and must connect to the correct body part.\n"
+        "- Final self-check before output: visible text must be only the exact Vietnamese labels listed above.\n\n"
+        "Negative prompt:\n"
+        "logo, watermark, brand name, page name, text in the corner, decorative title, blurry text, misspelled Vietnamese, "
+        "overlapping labels, messy lines, cartoon style, 3D toy style, food photo, cooked animal, plate, chopsticks, sauce, "
+        "kitchen background, dark background, low resolution, cropped body, distorted anatomy, extra body parts, wrong labels\n\n"
+        "Style:\n"
+        "Realistic macro photography mixed with scientific diagram, high detail, natural colors, semi-transparent body where needed, "
+        "soft lighting, sharp focus, clean educational poster, viewer-friendly, suitable for Facebook biology educational content.\n\n"
+        "Additional visual guidance from text model, use only if it does not conflict with exact label rules:\n"
+        f"{scene_prompt}"
+    )
+
+
 def matchup_caption(topic: dict, content: dict) -> str:
     left = topic["left"]
     right = topic["right"]
@@ -662,6 +732,10 @@ def build_engagement_caption(content: dict) -> str:
     return finalize_caption(f"{content['title']}\n\n{normalize_generated_caption_text(content['caption'])}")
 
 
+def build_anatomy_caption(content: dict) -> str:
+    return finalize_caption(f"{content['title']}\n\n{normalize_generated_caption_text(content['caption'])}")
+
+
 def build_engagement_image_prompt(topic: dict, content: dict) -> str:
     title = compact_text(content.get("overlay_title") or topic["subject_vi"], 32).upper()
     primary = compact_text(content.get("overlay_primary") or topic["hook_vi"], 52)
@@ -715,6 +789,28 @@ def build_engagement_image_prompt(topic: dict, content: dict) -> str:
 def build_post_payload(topic: dict, scheduled_at: str, slot: str) -> dict:
     base_name = slugify(f"{scheduled_at}_{slot}_{topic['topic_key']}")
     final_path = str(FINAL_DIR / f"{base_name}.jpg")
+
+    if topic["topic_type"] == "anatomy_infographic":
+        content = generate_anatomy_content(topic)
+        image_prompt = build_anatomy_image_prompt(topic, content)
+        caption = build_anatomy_caption(content)
+        return {
+            "scheduled_at": scheduled_at,
+            "slot": slot,
+            "topic_type": topic["topic_type"],
+            "topic_key": topic["topic_key"],
+            "title": content["title"],
+            "overlay_title": None,
+            "overlay_subtitle": None,
+            "overlay_stat": None,
+            "overlay_hook": None,
+            "caption": caption,
+            "image_prompt": image_prompt,
+            "topic_payload": json.dumps(topic, ensure_ascii=False),
+            "raw_image_path": final_path,
+            "final_image_path": final_path,
+            "status": "READY",
+        }
 
     if topic["topic_type"] == "comparison_top5":
         content = generate_comparison_content(topic)
@@ -835,10 +931,7 @@ def overlay_post_image(post_data: dict) -> str:
             overlay_hook=post_data["overlay_hook"],
         )
 
-    if post_data["topic_type"] == "matchup_versus":
-        return post_data["final_image_path"]
-
-    if post_data["topic_type"] in ENGAGEMENT_TOPIC_TYPES:
+    if post_data["topic_type"] in MODEL_RENDERED_TOPIC_TYPES:
         return post_data["final_image_path"]
 
     raise ValueError(f"Unsupported topic_type: {post_data['topic_type']}")

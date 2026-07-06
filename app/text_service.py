@@ -223,6 +223,65 @@ Chỉ trả về JSON, không giải thích thêm.
     )
 
 
+def generate_anatomy_content(topic: dict) -> dict:
+    labels_text = "\n".join(
+        f'- {part["label_vi"]}: {part["description_vi"]}'
+        for part in topic["labels"]
+    )
+    prompt = f"""
+Bạn là biên tập viên Facebook về sinh học động vật, viết nội dung giáo dục dễ hiểu, tự nhiên, có hook nhưng không giật gân.
+
+Hãy tạo output JSON hợp lệ với đúng các key sau:
+- title
+- caption
+- image_prompt
+
+Thông tin bài viết:
+- topic_type: anatomy_infographic
+- Chủ đề tiếng Việt: {topic["subject_vi"]}
+- Chủ đề tiếng Anh: {topic["subject_en"]}
+- Chủ thể tiếng Việt: {topic["animal_vi"]}
+- Chủ thể tiếng Anh: {topic["animal_en"]}
+- Hook chính: {topic["hook_vi"]}
+- Fact chính: {topic["main_fact_vi"]}
+- Câu hỏi kéo bình luận: {topic["question_vi"]}
+
+Các nhãn giải phẫu sẽ xuất hiện trên ảnh, KHÔNG thay đổi và KHÔNG thêm nhãn mới:
+{labels_text}
+
+{STORYTELLING_RULES}
+{CAPTION_STYLE_RULES}
+
+Yêu cầu:
+1. title
+- tiếng Việt, tối đa 14 từ
+- có tính tò mò, nhưng không dùng kiểu giật gân sai sự thật
+- không dùng chữ "Top 5"
+
+2. caption
+- 5 đến 8 câu ngắn, khoảng 120-180 chữ
+- mở bằng một cảnh/tình huống khiến người xem muốn zoom vào ảnh, không mở kiểu sách giáo khoa
+- kể vì sao cấu tạo cơ thể của {topic["animal_vi"]} đáng xem, gắn với cách nó ăn, bơi, hô hấp, sinh sản hoặc sống sót
+- chỉ dùng dữ kiện được cung cấp ở trên; không tự thêm số liệu hoặc cơ quan ngoài danh sách
+- không liệt kê lại toàn bộ nhãn theo kiểu khô; hãy dẫn người xem nhìn vào ảnh để khám phá
+- giọng chân thật, duyên nhẹ, dễ hiểu
+- câu cuối là câu hỏi tự nhiên để kéo bình luận
+- KHÔNG viết "Ảnh minh họa AI" hoặc nói ảnh là AI
+
+3. image_prompt
+- tiếng Anh
+- chỉ mô tả thêm visual detail riêng cho chủ thể, không thêm text mới
+- realistic educational anatomy infographic, clean scientific style
+- no logo, no watermark, no brand name
+
+Chỉ trả về JSON, không markdown, không giải thích.
+"""
+    return generate_json(
+        prompt,
+        system="Bạn chỉ trả về JSON hợp lệ, không markdown, không giải thích.",
+    )
+
+
 def generate_single_card_content(topic: dict) -> dict:
     detail_vi = topic.get("detail_vi", "").strip()
     prompt = f"""

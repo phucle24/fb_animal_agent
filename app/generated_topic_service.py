@@ -91,7 +91,53 @@ def generate_topic(topic_type: str, existing_topics: list[dict]) -> dict:
         for topic in existing_topics[-80:]
     )
 
-    if topic_type == "comparison_top5":
+    if topic_type == "anatomy_infographic":
+        prompt = f"""
+Bạn là biên tập viên nội dung Facebook về sinh học động vật, chuyên tạo topic infographic giải phẫu sạch, dễ hiểu, có giá trị giáo dục và hình ảnh đẹp.
+
+Hãy sinh 1 topic mới dạng anatomy infographic, thay thế cho format Top 5.
+Không được trùng hoặc quá giống các topic đã có:
+{existing_summary}
+
+Chỉ trả về JSON hợp lệ với schema:
+{{
+  "topic_type": "anatomy_infographic",
+  "topic_key": "snake_case_english_unique_key",
+  "subject_vi": "Giải phẫu ...",
+  "subject_en": "English anatomy infographic subject",
+  "animal_vi": "tên con vật tiếng Việt",
+  "animal_en": "English common name",
+  "hook_vi": "hook cụ thể, khiến viewer muốn zoom vào ảnh",
+  "main_fact_vi": "fact chính về cấu tạo cơ thể, đúng dữ kiện phổ biến",
+  "question_vi": "câu hỏi kéo bình luận",
+  "composition_en": "side view/diagonal/centered composition instruction in English",
+  "transparency_en": "transparency/internal anatomy instruction in English",
+  "background_en": "simple light grey-blue background, clean and minimal",
+  "labels": [
+    {{
+      "label_vi": "nhãn tiếng Việt ngắn",
+      "target_en": "exact body part target in English",
+      "description_vi": "giải thích ngắn bằng tiếng Việt"
+    }}
+  ]
+}}
+
+{STORY_TOPIC_RULES}
+
+Yêu cầu bắt buộc:
+- Chủ thể nên là động vật có cấu tạo dễ nhìn và đủ hấp dẫn: cua, cá, mực, bạch tuộc, ong, bướm, ếch, cá ngựa, rùa, chim, rắn, sứa.
+- Không chọn tôm/shrimp vì topic đó đã đăng rồi.
+- Ưu tiên loài có cơ thể/giải phẫu dễ làm viewer tò mò: trong suốt, nhiều chân, mang, xúc tu, túi trứng, mai/vỏ, cánh, vòi, dạ dày, tim, đường ruột, cơ quan sinh sản.
+- labels phải có 8 đến 12 nhãn, mỗi label_vi tối đa 4 từ nếu có thể.
+- label_vi phải là tiếng Việt thường, rõ nghĩa, không viết hoa toàn bộ.
+- target_en phải chỉ đúng vị trí cơ thể để model nối pointer line chính xác.
+- description_vi phải cụ thể, không chung chung kiểu "bộ phận quan trọng".
+- Không chọn chủ thể quá khó render anatomy hoặc dễ gây phản cảm.
+- Không thêm logo, watermark, page name, title trong image; ảnh chỉ có nhãn giải phẫu.
+- Không bịa cơ quan không phổ biến; nếu không chắc thì chọn bộ phận ngoài cơ thể dễ xác định.
+- Không dùng lại chủ thể/góc anatomy cũ.
+"""
+    elif topic_type == "comparison_top5":
         prompt = f"""
 Bạn là biên tập viên nội dung Facebook về thế giới động vật và thực vật, ưu tiên topic có "điểm wow" rõ ràng và có thể kể thành một câu chuyện cuốn hút.
 
@@ -370,6 +416,14 @@ def topic_text(topic: dict) -> str:
                 item.get("detail_vi", ""),
             ]
         )
+    for label in topic.get("labels", []):
+        parts.extend(
+            [
+                label.get("label_vi", ""),
+                label.get("target_en", ""),
+                label.get("description_vi", ""),
+            ]
+        )
     for side in ("left", "right"):
         animal = topic.get(side, {})
         if isinstance(animal, dict):
@@ -428,7 +482,36 @@ def find_duplicate_reason(candidate: dict, existing_topics: list[dict]) -> str |
         if candidate.get("topic_type") != existing.get("topic_type"):
             continue
 
-        if candidate["topic_type"] == "comparison_top5":
+        if candidate["topic_type"] == "anatomy_infographic":
+            subject_similarity = jaccard(
+                token_set(
+                    " ".join(
+                        [
+                            candidate.get("subject_vi", ""),
+                            candidate.get("subject_en", ""),
+                            candidate.get("animal_vi", ""),
+                            candidate.get("animal_en", ""),
+                        ]
+                    )
+                ),
+                token_set(
+                    " ".join(
+                        [
+                            existing.get("subject_vi", ""),
+                            existing.get("subject_en", ""),
+                            existing.get("animal_vi", ""),
+                            existing.get("animal_en", ""),
+                        ]
+                    )
+                ),
+            )
+            content_similarity = jaccard(token_set(topic_text(candidate)), token_set(topic_text(existing)))
+            if subject_similarity >= 0.45:
+                return f"trùng/giống chủ thể anatomy với {existing.get('topic_key')}"
+            if content_similarity >= 0.5:
+                return f"nội dung anatomy quá giống {existing.get('topic_key')}"
+
+        elif candidate["topic_type"] == "comparison_top5":
             item_overlap = comparison_entity_overlap(candidate, existing)
             candidate_subject = token_set(candidate.get("subject_vi", "") + " " + candidate.get("subject_en", ""))
             existing_subject = token_set(existing.get("subject_vi", "") + " " + existing.get("subject_en", ""))
@@ -481,7 +564,41 @@ def validate_generated_topic(topic: dict, expected_type: str, existing_topics: l
         suffix += 1
     topic["topic_key"] = topic_key
 
-    if expected_type == "comparison_top5":
+    if expected_type == "anatomy_infographic":
+        for key in (
+            "subject_vi",
+            "subject_en",
+            "animal_vi",
+            "animal_en",
+            "hook_vi",
+            "main_fact_vi",
+            "question_vi",
+            "composition_en",
+            "transparency_en",
+            "background_en",
+        ):
+            value = str(topic.get(key, "")).strip()
+            if not value:
+                raise ValueError(f"Generated anatomy topic missing {key}.")
+            topic[key] = value
+        labels = topic.get("labels")
+        if not isinstance(labels, list) or not 8 <= len(labels) <= 12:
+            raise ValueError("Generated anatomy topic must contain 8 to 12 labels.")
+        seen_labels = set()
+        for label in labels:
+            if not isinstance(label, dict):
+                raise ValueError("Generated anatomy label must be an object.")
+            for key in ("label_vi", "target_en", "description_vi"):
+                value = str(label.get(key, "")).strip()
+                if not value:
+                    raise ValueError(f"Generated anatomy label missing {key}.")
+                label[key] = value
+            normalized_label = normalized_key(label["label_vi"])
+            if normalized_label in seen_labels:
+                raise ValueError(f"Duplicate anatomy label: {label['label_vi']}")
+            seen_labels.add(normalized_label)
+
+    elif expected_type == "comparison_top5":
         if topic.get("comparison_angle") not in ALLOWED_COMPARISON_ANGLES:
             topic["comparison_angle"] = "special ability"
         items = topic.get("items")
