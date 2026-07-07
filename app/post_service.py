@@ -70,15 +70,21 @@ Create a finished vertical 4:5 Vietnamese social poster for Facebook feed:
 
 ANATOMY_IMAGE_TEMPLATE = """
 FINAL INFOGRAPHIC MUST CONTAIN THE EXACT TEXT BELOW.
-Create a realistic educational anatomy infographic, vertical 4:5 portrait layout, clean scientific style.
-- one large realistic subject in side view, centered and filling most of the image
-- the body should be highly detailed and slightly semi-transparent where needed so important internal parts can be seen
-- simple light grey-blue background, clean and minimal, no texture, no decoration
-- thin black pointer lines from each label to the correct body part
+Create an ultra-realistic educational anatomy infographic, vertical portrait 4:5 layout, scientific illustration style mixed with high-end macro photography.
+- one large realistic subject in clean side view, occupying about 75-85% of the canvas
+- macro close-up, biology laboratory specimen photography mood, extremely sharp focus
+- the body should remain natural and realistic, with a semi-transparent cutaway only where needed so important internal anatomy can be seen
+- preserve real external texture: eyes, skin/shell/exoskeleton, hairs/scales/veins/segments/legs/fins/wings when relevant
+- minimal laboratory-style background: soft light gray or pale blue gradient, no texture, no decoration, no landscape
+- no flowers, plants, hive, honeycomb, food styling, plate, hands, tools, or environmental scene unless explicitly required by the subject
+- only a soft studio shadow beneath the subject if needed
+- leave sufficient clean white space around the subject for educational labels
+- use thin black leader lines pointing precisely to each anatomical structure
 - Vietnamese labels inside small rounded white rectangles with subtle shadow
-- clean sans-serif black text, crisp and readable on mobile
-- labels must be neat, balanced around the subject, and must not overlap
-- no decorative title, no logo, no watermark, no brand name, no page name, no icon, no mascot
+- modern sans-serif font, black text, consistent spacing, crisp and readable on mobile
+- labels must be neat, balanced around the subject, and must never overlap
+- every pointer line must end exactly at the anatomical structure
+- no decorative title, no logo, no watermark, no signature, no brand name, no page name, no icon, no mascot, no border
 - no Python overlay will be used later; all text must be rendered by the image model now
 """.strip()
 
@@ -559,6 +565,8 @@ def build_anatomy_image_prompt(topic: dict, content: dict) -> str:
         f"- Subject: one large realistic {topic['animal_en']} ({topic['animal_vi']}).\n"
         f"- Composition: {topic['composition_en']}.\n"
         f"- Transparency/anatomy: {topic['transparency_en']}.\n"
+        f"- External appearance: {topic.get('appearance_en', 'preserve the natural appearance, real body texture, realistic proportions, and accurate visible anatomy')}.\n"
+        f"- Internal organ colors: {topic.get('organ_colors_en', 'use subtle realistic biological colors; keep organs natural, not neon or cartoon-like')}.\n"
         f"- Background: {topic.get('background_en', 'simple light grey-blue background, clean and minimal')}.\n\n"
         "Vietnamese labels to render exactly, with pointer lines to the correct body part:\n"
         f"{anatomy_label_rows(topic)}\n\n"
@@ -573,11 +581,13 @@ def build_anatomy_image_prompt(topic: dict, content: dict) -> str:
         "- Final self-check before output: visible text must be only the exact Vietnamese labels listed above.\n\n"
         "Negative prompt:\n"
         "logo, watermark, brand name, page name, text in the corner, decorative title, blurry text, misspelled Vietnamese, "
-        "overlapping labels, messy lines, cartoon style, 3D toy style, food photo, cooked animal, plate, chopsticks, sauce, "
-        "kitchen background, dark background, low resolution, cropped body, distorted anatomy, extra body parts, wrong labels\n\n"
+        "overlapping labels, messy lines, cartoon style, anime, 3D toy style, fantasy animal, exaggerated anatomy, duplicate limbs, "
+        "duplicate wings, duplicate legs, extra organs, food photo, cooked animal, plate, chopsticks, sauce, flowers, plants, hive, honeycomb, "
+        "beekeeper, kitchen background, landscape background, dark background, colorful background, excessive shadows, low resolution, "
+        "cropped body, distorted body, distorted anatomy, wrong labels, cluttered composition\n\n"
         "Style:\n"
-        "Realistic macro photography mixed with scientific diagram, high detail, natural colors, semi-transparent body where needed, "
-        "soft lighting, sharp focus, clean educational poster, viewer-friendly, suitable for Facebook biology educational content.\n\n"
+        "Ultra high resolution, scientific museum quality, biology textbook illustration, National Geographic style macro realism, "
+        "accurate anatomy, clean layout, balanced typography, perfect readability, viewer-friendly, suitable for Facebook educational posts and science learning.\n\n"
         "Additional visual guidance from text model, use only if it does not conflict with exact label rules:\n"
         f"{scene_prompt}"
     )

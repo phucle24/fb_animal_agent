@@ -112,6 +112,8 @@ Chỉ trả về JSON hợp lệ với schema:
   "question_vi": "câu hỏi kéo bình luận",
   "composition_en": "side view/diagonal/centered composition instruction in English",
   "transparency_en": "transparency/internal anatomy instruction in English",
+  "appearance_en": "external appearance details in English: texture, color, body surface, legs/wings/fins/hairs/scales",
+  "organ_colors_en": "realistic internal organ color guidance in English",
   "background_en": "simple light grey-blue background, clean and minimal",
   "labels": [
     {{
@@ -125,13 +127,15 @@ Chỉ trả về JSON hợp lệ với schema:
 {STORY_TOPIC_RULES}
 
 Yêu cầu bắt buộc:
-- Chủ thể nên là động vật có cấu tạo dễ nhìn và đủ hấp dẫn: cua, cá, mực, bạch tuộc, ong, bướm, ếch, cá ngựa, rùa, chim, rắn, sứa.
-- Không chọn tôm/shrimp vì topic đó đã đăng rồi.
+- Chủ thể nên là động vật có cấu tạo dễ nhìn và đủ hấp dẫn: cua, cá, mực, bạch tuộc, bướm, ếch, cá ngựa, rùa, chim, rắn, sứa, bọ cánh cứng, chuồn chuồn.
+- Không chọn tôm/shrimp hoặc ong mật/honey bee/Apis mellifera vì các topic đó đã đăng rồi.
 - Ưu tiên loài có cơ thể/giải phẫu dễ làm viewer tò mò: trong suốt, nhiều chân, mang, xúc tu, túi trứng, mai/vỏ, cánh, vòi, dạ dày, tim, đường ruột, cơ quan sinh sản.
-- labels phải có 8 đến 12 nhãn, mỗi label_vi tối đa 4 từ nếu có thể.
+- labels phải có 10 đến 18 nhãn cho đa số loài; loài có cấu tạo rất hấp dẫn như ong/bướm/mực/cá ngựa có thể dùng tối đa 25 nhãn.
 - label_vi phải là tiếng Việt thường, rõ nghĩa, không viết hoa toàn bộ.
 - target_en phải chỉ đúng vị trí cơ thể để model nối pointer line chính xác.
 - description_vi phải cụ thể, không chung chung kiểu "bộ phận quan trọng".
+- appearance_en phải mô tả ngoại hình thật của loài: màu sắc, texture, lông/vảy/vỏ/cánh/chân/mắt/đốt thân nếu có.
+- organ_colors_en phải mô tả màu cơ quan tinh tế, tự nhiên, không neon, không hoạt hình.
 - Không chọn chủ thể quá khó render anatomy hoặc dễ gây phản cảm.
 - Không thêm logo, watermark, page name, title trong image; ảnh chỉ có nhãn giải phẫu.
 - Không bịa cơ quan không phổ biến; nếu không chắc thì chọn bộ phận ngoài cơ thể dễ xác định.
@@ -581,9 +585,17 @@ def validate_generated_topic(topic: dict, expected_type: str, existing_topics: l
             if not value:
                 raise ValueError(f"Generated anatomy topic missing {key}.")
             topic[key] = value
+        topic["appearance_en"] = str(
+            topic.get("appearance_en")
+            or "preserve natural body texture, real proportions, accurate visible anatomy, and realistic surface details"
+        ).strip()
+        topic["organ_colors_en"] = str(
+            topic.get("organ_colors_en")
+            or "use subtle realistic biological colors; keep organs natural, not neon or cartoon-like"
+        ).strip()
         labels = topic.get("labels")
-        if not isinstance(labels, list) or not 8 <= len(labels) <= 12:
-            raise ValueError("Generated anatomy topic must contain 8 to 12 labels.")
+        if not isinstance(labels, list) or not 8 <= len(labels) <= 25:
+            raise ValueError("Generated anatomy topic must contain 8 to 25 labels.")
         seen_labels = set()
         for label in labels:
             if not isinstance(label, dict):
