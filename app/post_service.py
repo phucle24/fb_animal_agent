@@ -80,9 +80,12 @@ Create an ultra-realistic educational anatomy infographic, vertical portrait 4:5
 - only a soft studio shadow beneath the subject if needed
 - leave sufficient clean white space around the subject for educational labels
 - use thin black leader lines pointing precisely to each anatomical structure
+- each leader line must terminate at the exact center of the corresponding anatomical structure, never empty space or an adjacent structure
+- leader lines should not cross; curve or reroute them if necessary to avoid intersections
 - Vietnamese labels inside small rounded white rectangles with subtle shadow
 - modern sans-serif font, black text, consistent spacing, crisp and readable on mobile
 - labels must be neat, balanced around the subject, and must never overlap
+- every anatomical structure should have only one corresponding label; no duplicate labels
 - every pointer line must end exactly at the anatomical structure
 - no decorative title, no logo, no watermark, no signature, no brand name, no page name, no icon, no mascot, no border
 - no Python overlay will be used later; all text must be rendered by the image model now
