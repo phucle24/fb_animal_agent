@@ -6,7 +6,6 @@ from app.db import insert_post
 from app.image_service import generate_image
 from app.overlay_service import overlay_comparison_top5, overlay_single_card
 from app.text_service import (
-    generate_anatomy_content,
     generate_comparison_content,
     generate_engagement_format_content,
     generate_matchup_content,
@@ -68,29 +67,6 @@ Create a finished vertical 4:5 Vietnamese social poster for Facebook feed:
 - no Python overlay will be used later; all text must be rendered by the image model now
 """.strip()
 
-ANATOMY_IMAGE_TEMPLATE = """
-FINAL INFOGRAPHIC MUST CONTAIN THE EXACT TEXT BELOW.
-Create an ultra-realistic educational anatomy infographic, vertical portrait 4:5 layout, scientific illustration style mixed with high-end macro photography.
-- one large realistic subject in clean side view, occupying about 75-85% of the canvas
-- macro close-up, biology laboratory specimen photography mood, extremely sharp focus
-- the body should remain natural and realistic, with a semi-transparent cutaway only where needed so important internal anatomy can be seen
-- preserve real external texture: eyes, skin/shell/exoskeleton, hairs/scales/veins/segments/legs/fins/wings when relevant
-- minimal laboratory-style background: soft light gray or pale blue gradient, no texture, no decoration, no landscape
-- no flowers, plants, hive, honeycomb, food styling, plate, hands, tools, or environmental scene unless explicitly required by the subject
-- only a soft studio shadow beneath the subject if needed
-- leave sufficient clean white space around the subject for educational labels
-- use thin black leader lines pointing precisely to each anatomical structure
-- each leader line must terminate at the exact center of the corresponding anatomical structure, never empty space or an adjacent structure
-- leader lines should not cross; curve or reroute them if necessary to avoid intersections
-- Vietnamese labels inside small rounded white rectangles with subtle shadow
-- modern sans-serif font, black text, consistent spacing, crisp and readable on mobile
-- labels must be neat, balanced around the subject, and must never overlap
-- every anatomical structure should have only one corresponding label; no duplicate labels
-- every pointer line must end exactly at the anatomical structure
-- no decorative title, no logo, no watermark, no signature, no brand name, no page name, no icon, no mascot, no border
-- no Python overlay will be used later; all text must be rendered by the image model now
-""".strip()
-
 TEXT_DEDUP_RULES = """
 Global text safety rules:
 - Render each requested text string exactly once.
@@ -103,7 +79,6 @@ Global text safety rules:
 
 ENGAGEMENT_TOPIC_TYPES = {"myth_vs_fact", "guess_quiz", "one_story", "before_after"}
 MODEL_RENDERED_TOPIC_TYPES = {
-    "anatomy_infographic",
     "comparison_top5",
     "single_card",
     "matchup_versus",
@@ -544,58 +519,6 @@ def matchup_stat_lines(animal: dict) -> list[str]:
     ]
 
 
-def anatomy_label_rows(topic: dict) -> str:
-    rows = []
-    for index, part in enumerate(topic["labels"], start=1):
-        rows.append(
-            "\n".join(
-                [
-                    f"Label {index}:",
-                    f"- Visible label text: {part['label_vi']}",
-                    f"- Pointer target: {part['target_en']}",
-                    f"- Anatomy guidance: {part['description_vi']}",
-                ]
-            )
-        )
-    return "\n".join(rows)
-
-
-def build_anatomy_image_prompt(topic: dict, content: dict) -> str:
-    scene_prompt = " ".join((content.get("image_prompt") or "").split()).strip()
-    return (
-        f"{ANATOMY_IMAGE_TEMPLATE}\n\n"
-        "Main subject:\n"
-        f"- Subject: one large realistic {topic['animal_en']} ({topic['animal_vi']}).\n"
-        f"- Composition: {topic['composition_en']}.\n"
-        f"- Transparency/anatomy: {topic['transparency_en']}.\n"
-        f"- External appearance: {topic.get('appearance_en', 'preserve the natural appearance, real body texture, realistic proportions, and accurate visible anatomy')}.\n"
-        f"- Internal organ colors: {topic.get('organ_colors_en', 'use subtle realistic biological colors; keep organs natural, not neon or cartoon-like')}.\n"
-        f"- Background: {topic.get('background_en', 'simple light grey-blue background, clean and minimal')}.\n\n"
-        "Vietnamese labels to render exactly, with pointer lines to the correct body part:\n"
-        f"{anatomy_label_rows(topic)}\n\n"
-        "Strict text rules:\n"
-        "- Render Vietnamese diacritics correctly.\n"
-        "- Render every visible label text exactly once.\n"
-        "- Do not add a title, subtitle, corner text, logo, watermark, page name, brand name, icon, mascot, caption, or decorative text.\n"
-        "- Do not translate, uppercase, paraphrase, duplicate, mirror, or restate any label.\n"
-        "- Do not add fake labels, placeholder labels, random symbols, numbers, UI text, or lorem ipsum.\n"
-        "- If label space is tight, reduce font size, move labels outward, or shorten pointer lines; never crop or overlap labels.\n"
-        "- Pointer lines must be thin black lines and must connect to the correct body part.\n"
-        "- Final self-check before output: visible text must be only the exact Vietnamese labels listed above.\n\n"
-        "Negative prompt:\n"
-        "logo, watermark, brand name, page name, text in the corner, decorative title, blurry text, misspelled Vietnamese, "
-        "overlapping labels, messy lines, cartoon style, anime, 3D toy style, fantasy animal, exaggerated anatomy, duplicate limbs, "
-        "duplicate wings, duplicate legs, extra organs, food photo, cooked animal, plate, chopsticks, sauce, flowers, plants, hive, honeycomb, "
-        "beekeeper, kitchen background, landscape background, dark background, colorful background, excessive shadows, low resolution, "
-        "cropped body, distorted body, distorted anatomy, wrong labels, cluttered composition\n\n"
-        "Style:\n"
-        "Ultra high resolution, scientific museum quality, biology textbook illustration, National Geographic style macro realism, "
-        "accurate anatomy, clean layout, balanced typography, perfect readability, viewer-friendly, suitable for Facebook educational posts and science learning.\n\n"
-        "Additional visual guidance from text model, use only if it does not conflict with exact label rules:\n"
-        f"{scene_prompt}"
-    )
-
-
 def matchup_caption(topic: dict, content: dict) -> str:
     left = topic["left"]
     right = topic["right"]
@@ -745,10 +668,6 @@ def build_engagement_caption(content: dict) -> str:
     return finalize_caption(f"{content['title']}\n\n{normalize_generated_caption_text(content['caption'])}")
 
 
-def build_anatomy_caption(content: dict) -> str:
-    return finalize_caption(f"{content['title']}\n\n{normalize_generated_caption_text(content['caption'])}")
-
-
 def build_engagement_image_prompt(topic: dict, content: dict) -> str:
     title = compact_text(content.get("overlay_title") or topic["subject_vi"], 32).upper()
     primary = compact_text(content.get("overlay_primary") or topic["hook_vi"], 52)
@@ -802,28 +721,6 @@ def build_engagement_image_prompt(topic: dict, content: dict) -> str:
 def build_post_payload(topic: dict, scheduled_at: str, slot: str) -> dict:
     base_name = slugify(f"{scheduled_at}_{slot}_{topic['topic_key']}")
     final_path = str(FINAL_DIR / f"{base_name}.jpg")
-
-    if topic["topic_type"] == "anatomy_infographic":
-        content = generate_anatomy_content(topic)
-        image_prompt = build_anatomy_image_prompt(topic, content)
-        caption = build_anatomy_caption(content)
-        return {
-            "scheduled_at": scheduled_at,
-            "slot": slot,
-            "topic_type": topic["topic_type"],
-            "topic_key": topic["topic_key"],
-            "title": content["title"],
-            "overlay_title": None,
-            "overlay_subtitle": None,
-            "overlay_stat": None,
-            "overlay_hook": None,
-            "caption": caption,
-            "image_prompt": image_prompt,
-            "topic_payload": json.dumps(topic, ensure_ascii=False),
-            "raw_image_path": final_path,
-            "final_image_path": final_path,
-            "status": "READY",
-        }
 
     if topic["topic_type"] == "comparison_top5":
         content = generate_comparison_content(topic)
