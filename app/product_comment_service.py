@@ -440,9 +440,11 @@ def rank_products_for_context(
 
 def product_comment_line(product: dict) -> str:
     sold = product.get("sold", "").strip()
+    name = product.get("name", "").strip()
+    link = product.get("link", "").strip()
     if sold:
-        return f'{product["name"]} với hơn {sold} lượt bán\n{product["link"]}'
-    return f'{product["name"]}\n{product["link"]}'
+        return f"{name} với hơn {sold} lượt bán\n👉 {link}"
+    return f"{name}\n👉 {link}"
 
 
 def infer_media_type(final_image_path: str | None) -> str:
@@ -532,16 +534,51 @@ def first_nonempty_line(text: str) -> str:
     return ""
 
 
-def build_product_comment(product: dict, comment_index: int) -> str:
+PRODUCT_COMMENT_TEMPLATES = (
+    # Nhóm theo yêu cầu trực tiếp từ bạn
+    "Nếu như video này hay thì click ủng hộ mình với nhé:\n{product_line}",
+    "Thêm mắm thêm muối cho những video tiếp theo giúp mình nhé:\n{product_line}",
+    "Cứu bé ở đây với nhé....\n{product_line}",
+    "Cứu bé ở đây với nhé, mỗi lượt click của cả nhà là động lực siêu to khổng lồ cho team:\n{product_line}",
+    "Cứu bé ở đây với nhé... Tiếp sức cho admin thêm động lực làm video tiếp theo nha:\n{product_line}",
+    # Nhóm nuôi editor / mì gói / cà phê / deadline (Hài hước, lầy lội)
+    "Tiếp năng lượng cho team editor mua mì gói chạy deadline video tiếp theo ở đây nha:\n{product_line}",
+    "Cứu đói cho người làm video bằng một chiếc click nhẹ nhàng ở đây nè:\n{product_line}",
+    "Xem video xong tiện tay bấm vào link tiếp sức cho admin một ly cà phê nha:\n{product_line}",
+    "Một chiếc link nuôi sống đam mê của editor, cả nhà click ủng hộ mình với nha:\n{product_line}",
+    "Ai thương người dựng video thức khuya dậy sớm thì bấm vào link ủng hộ một chiếc nha:\n{product_line}",
+    "Một chiếc link cứu rỗi deadline của admin, cả nhà ghé xem ủng hộ nhé:\n{product_line}",
+    "Một chiếc click nhỏ nhưng mang lại hộp sữa to bự cho admin. Cảm ơn cả nhà nhiều nha:\n{product_line}",
+    # Nhóm ủng hộ kênh / nâng cấp chất lượng video (Duyên dáng, thu hút)
+    "Thêm chút kinh phí mắm muối để các video sau bánh cuốn và chất lượng hơn nhé cả nhà:\n{product_line}",
+    "Nếu thấy nội dung bổ ích thì bấm vào link ủng hộ team mình một chút động lực nha:\n{product_line}",
+    "Mỗi lượt click vào link Shopee của các bạn là một chút hoa hồng giúp team duy trì kênh và ra thêm nhiều video xịn xò. Cảm ơn cả nhà yêu rất nhiều! ❤️\n{product_line}",
+    "Động lực để ra tập tiếp theo nằm trọn trong chiếc link này, cả nhà click ủng hộ mình với nhé:\n{product_line}",
+    "Góc ủng hộ kênh không tốn phí, tiện tay click vào link nghía thử món này giúp mình nhé:\n{product_line}",
+    "Muốn kênh có thêm kinh phí nâng cấp nội dung thì gửi gắm vào chiếc link này giúp mình nha:\n{product_line}",
+    "Ghé ngang qua bấm nhẹ chiếc link tiếp thêm 100% công lực cho team làm tập mới nhé:\n{product_line}",
+    "Món này đang hot mà giá lại êm, vừa săn đồ xịn vừa ủng hộ kênh một click nha cả nhà:\n{product_line}",
+    "Kênh phát triển được hay không là nhờ vào sự ủng hộ của cả nhà, bấm vào link nghía thử nha:\n{product_line}",
+    "Ủng hộ kênh một chút động lực để tụi mình ra thêm nhiều video hay ho nữa nhé:\n{product_line}",
+)
+
+
+def build_product_comment(
+    product: dict,
+    comment_index: int = 1,
+    seed: int | str = "",
+) -> str:
     product_line = product_comment_line(product)
-    if comment_index == 1:
-        return (
-            "Nếu mọi người thấy nội dung này hữu ích, hãy cho mình xin một like, share và theo dõi kênh nhé! "
-            "Mỗi lượt click vào link Shopee của các bạn là một chút hoa hồng giúp team editor mua "
-            '"bản quyền phần mềm" và duy trì kênh. Cảm ơn cả nhà yêu rất nhiều! ❤️\n'
-            f"{product_line}"
-        )
-    return product_line
+    seed_val = str(seed) if seed else (product.get("link") or product.get("name") or "product")
+    base_idx = zlib.crc32(seed_val.encode("utf-8")) % len(PRODUCT_COMMENT_TEMPLATES)
+    template_idx = (base_idx + max(0, comment_index - 1)) % len(PRODUCT_COMMENT_TEMPLATES)
+    template = PRODUCT_COMMENT_TEMPLATES[template_idx]
+    return template.format(
+        product_line=product_line,
+        name=product.get("name", ""),
+        link=product.get("link", ""),
+        sold=product.get("sold", ""),
+    )
 
 
 VIEWER_REPLY_TEMPLATES = (
@@ -559,6 +596,10 @@ VIEWER_REPLY_TEMPLATES = (
 
 
 DONATE_COMMENT_TEMPLATES = (
+    "Nếu như video này hay thì click ủng hộ mình với nhé:\n👉 {url}",
+    "Thêm mắm thêm muối cho những video tiếp theo giúp mình nhé:\n👉 {url}",
+    "Cứu bé ở đây với nhé, mỗi lượt ủng hộ là động lực siêu to khổng lồ cho team:\n👉 {url}",
+    "Tiếp năng lượng cho team editor mua mì gói chạy deadline video tiếp theo ở đây nha:\n👉 {url}",
     "Góc hậu trường của kênh, ai tò mò thì ghé chơi ở đây:\n{url}",
     "Khu vực bí mật của admin nằm ở đây, vào tham quan cho vui:\n{url}",
     "Nếu bạn thích mấy chiếc video kiểu này, đây là góc nhỏ phía sau kênh:\n{url}",
@@ -581,6 +622,7 @@ def build_viewer_reply_comment(comment_id: str, viewer_name: str = "bạn") -> s
 def build_donate_comment(fb_post_id: str) -> str:
     index = zlib.crc32(fb_post_id.encode("utf-8")) % len(DONATE_COMMENT_TEMPLATES)
     return DONATE_COMMENT_TEMPLATES[index].format(url=DONATE_COMMENT_URL)
+
 
 
 def external_post_id(fb_post_id: str) -> int:
@@ -770,7 +812,7 @@ def schedule_recent_donate_comments(now: datetime | None = None, dry_run: bool =
                 "comment_index": offset + 1,
                 "product_name": product["name"],
                 "product_link": product["link"],
-                "message": build_product_comment(product, offset),
+                "message": build_product_comment(product, offset, seed=item["fb_post_id"]),
                 "scheduled_at": product_scheduled_at.strftime("%Y-%m-%d %H:%M:%S"),
             }
             if dry_run:
@@ -828,7 +870,7 @@ def schedule_product_comments_for_post(
                 "comment_index": index,
                 "product_name": product["name"],
                 "product_link": product["link"],
-                "message": build_product_comment(product, index),
+                "message": build_product_comment(product, index, seed=post["id"]),
                 "scheduled_at": scheduled_at.strftime("%Y-%m-%d %H:%M:%S"),
             }
         )
