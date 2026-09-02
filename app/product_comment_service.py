@@ -8,6 +8,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from app.config import (
+    BASE_DIR,
     DONATE_COMMENT_DELAY_MINUTES,
     DONATE_COMMENT_LOOKBACK_HOURS,
     DONATE_COMMENT_SCAN_LIMIT,
@@ -205,12 +206,16 @@ RELATED_CATEGORY_BONUS = {
 
 
 def load_products() -> list[dict]:
-    if not PRODUCT_LINKS_CSV:
-        return []
-
-    path = Path(PRODUCT_LINKS_CSV).expanduser()
+    target = PRODUCT_LINKS_CSV or "data/product_links.csv"
+    path = Path(target).expanduser()
+    if not path.is_absolute():
+        path = (BASE_DIR / path).resolve()
     if not path.exists():
-        raise FileNotFoundError(f"Product CSV not found: {path}")
+        fallback = (BASE_DIR / "data/product_links.csv").resolve()
+        if fallback.exists():
+            path = fallback
+        else:
+            return []
 
     products = []
     with path.open("r", encoding="utf-8-sig", newline="") as file:
@@ -467,8 +472,16 @@ def fallback_pick_products(products: list[dict], seed: int | str, count: int) ->
     seed_value = seed if isinstance(seed, int) else zlib.crc32(str(seed).encode("utf-8"))
     start = (seed_value * count) % len(products)
     selected = []
-    for offset in range(min(count, len(products))):
-        selected.append(products[(start + offset) % len(products)])
+    seen_links = set()
+    for offset in range(len(products)):
+        prod = products[(start + offset) % len(products)]
+        link = prod.get("link", "")
+        if link and link in seen_links:
+            continue
+        seen_links.add(link)
+        selected.append(prod)
+        if len(selected) >= count:
+            break
     return selected
 
 
@@ -484,42 +497,7 @@ def pick_products_for_context(
     if not products:
         return []
 
-    ranked = rank_products_for_context(
-        products,
-        seed=seed,
-        title=title,
-        caption=caption,
-        topic_type=topic_type,
-        topic_payload=topic_payload,
-    )
-
-    if not ranked or ranked[0][0] <= 0:
-        return fallback_pick_products(products, seed, count)
-
-    selected = []
-    seen_links = set()
-    for score, product in ranked:
-        if score <= 0:
-            break
-        link = product.get("link", "")
-        if link in seen_links:
-            continue
-        seen_links.add(link)
-        selected.append(product)
-        if len(selected) >= count:
-            break
-
-    if len(selected) < count:
-        for product in fallback_pick_products(products, seed, count):
-            link = product.get("link", "")
-            if link in seen_links:
-                continue
-            selected.append(product)
-            seen_links.add(link)
-            if len(selected) >= count:
-                break
-
-    return selected
+    return fallback_pick_products(products, seed, count)
 
 
 def pick_products_for_post(post_id: int, count: int) -> list[dict]:
