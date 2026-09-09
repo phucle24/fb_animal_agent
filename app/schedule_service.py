@@ -13,6 +13,7 @@ from app.db import (
     count_future_posts,
     count_posts,
     exists_schedule,
+    list_posts_for_batch_submission,
     list_posts_for_direct_image_generation,
     mark_image_failed,
     mark_image_ready,
@@ -273,13 +274,18 @@ def ensure_future_posts_for_batch(
     current_future = count_future_posts(now_iso)
 
     if current_future >= min_future_posts:
+        batch = submit_pending_image_batch(limit=100) if list_posts_for_batch_submission(limit=1) else {
+            "submitted": 0,
+            "batch_job_name": None,
+            "batch_state": None,
+        }
         return {
             "current_future": current_future,
             "created": [],
             "direct_existing": direct_existing,
             "direct_cutoff": direct_cutoff_iso,
             "direct_enabled": direct_enabled,
-            "batch": {"submitted": 0, "batch_job_name": None, "batch_state": None},
+            "batch": batch,
         }
 
     if direct_enabled and direct_cutoff_iso:
@@ -297,7 +303,7 @@ def ensure_future_posts_for_batch(
         created = prepare_future_posts_for_batch(posts_to_create=target_future_posts)
 
     batch_created_count = sum(1 for post in created if post.get("mode") == "batch_new")
-    batch = submit_pending_image_batch(limit=max(batch_created_count, 1)) if batch_created_count else {
+    batch = submit_pending_image_batch(limit=100) if (batch_created_count or list_posts_for_batch_submission(limit=1)) else {
         "submitted": 0,
         "batch_job_name": None,
         "batch_state": None,
