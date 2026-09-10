@@ -15,8 +15,8 @@ if __name__ == "__main__":
     args = [arg for arg in sys.argv[1:] if arg != "--dry-run"]
     dry_run = "--dry-run" in sys.argv[1:]
     slot = args[0].strip().lower() if args else "all"
-    if slot not in {"all", "morning", "afternoon", "evening"}:
-        print("Usage: python scripts/publish_due_posts.py [all|morning|afternoon|evening] [--dry-run]")
+    if slot not in {"all", "morning", "afternoon", "evening", "night"}:
+        print("Usage: python scripts/publish_due_posts.py [all|morning|afternoon|evening|night] [--dry-run]")
         sys.exit(1)
 
     tz = ZoneInfo(TIMEZONE)

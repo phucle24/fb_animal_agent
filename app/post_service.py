@@ -32,39 +32,39 @@ Create a finished vertical 4:5 Vietnamese infographic poster for Facebook feed, 
 
 SINGLE_CARD_IMAGE_TEMPLATE = """
 FINAL INFOGRAPHIC MUST CONTAIN THE EXACT TEXT BELOW.
-Create a finished vertical 4:5 Vietnamese single-subject fact poster for Facebook feed:
-- exactly one dramatic photorealistic animal or plant hero image, large and unmistakable
-- the hero image must tell a mini-story: the subject is doing something, hiding from something, hunting, defending, transforming, glowing, or revealing the biological trick
-- premium dark charcoal editorial poster style with copper/orange accents
-- exactly three visible text groups total: headline, main metric, micro-fact hook
-- clean single-card layout with open space, not a ranking, not a comparison, not a list
-- the main metric and micro-fact hook are the clickable information core; make them visually prominent
+Create an ultra-high-definition vertical 4:5 Vietnamese wildlife feature poster for Facebook feed (National Geographic / BBC Earth editorial magazine cover aesthetic):
+- exactly one dominant photorealistic hero subject, occupying 75-85% of the frame, razor-sharp detail on eyes, skin texture, scales, fur, or plumage
+- action freeze / visual story: capture the subject in an intense, authentic natural moment (hunting, leaping, camouflaging, emitting bioluminescence, or revealing a hidden biological weapon)
+- cinematic high-contrast lighting: chiaroscuro, volumetric natural light beams, atmospheric depth, shallow depth-of-field with creamy bokeh background
+- modern, premium editorial typography integrated organically onto the image with subtle dark vignettes (NO clunky orange boxes, NO heavy border frames, NO generic Wikipedia table look)
+- exactly three visible text groups total: headline (3-5 words, large & punchy), key metric badge (clean, high contrast), and micro-fact hook
+- clean single-card composition with generous negative space, maximizing thumb-stopping dwell time on mobile screens
 - no rows, no repeated subject thumbnails, no numbered panels, no table, no grid
 - no Python overlay will be used later; all text must be rendered by the image model now
 """.strip()
 
 MATCHUP_IMAGE_TEMPLATE = """
 FINAL INFOGRAPHIC MUST CONTAIN THE EXACT TEXT BELOW.
-Create a finished vertical 4:5 Vietnamese scientific animal face-off infographic poster for Facebook feed:
-- premium split-screen layout with left animal versus right animal
-- dark forest/jungle background, copper/orange accents, cinematic shafts of light
-- bold condensed Vietnamese typography, clean science infographic mood
-- two realistic full-body or half-body animal portraits facing forward, separated by a thin vertical divider
-- make it feel like a scientific story of two different survival strategies, not a static ID card
-- data cards under each animal with concise measurements
+Create an ultra-realistic vertical 4:5 Vietnamese scientific animal face-off infographic poster for Facebook feed (BBC Earth / Discovery documentary face-off aesthetic):
+- dynamic split-screen composition with left animal versus right animal facing each other in their authentic natural habitat
+- cinematic atmospheric lighting: dramatic volumetric rim light, swirling dust, mist, or deep water rays creating intense primal tension
+- stylish luminous "VS" emblem centered between the two subjects
+- two realistic full-body or half-body animal portraits facing forward, dignified, alert, majestic, with intense eye contact
+- clean translucent spec cards at the lower edge of each side showing concise measurements with sharp modern typography
+- make it feel like a scientific showdown of two different evolutionary marvels, not a static ID card
 - no gore, no blood, no injury, no violent impact
 - no Python overlay will be used later; all text must be rendered by the image model now
 """.strip()
 
 ENGAGEMENT_IMAGE_TEMPLATE = """
 FINAL INFOGRAPHIC MUST CONTAIN THE EXACT TEXT BELOW.
-Create a finished vertical 4:5 Vietnamese social poster for Facebook feed:
-- premium dark charcoal editorial style with copper/orange accents
-- one dramatic photorealistic animal/plant/nature hero image
-- the image must create curiosity like a story frame: a hidden danger, surprising behavior, transformation, camouflage, scale reveal, or visual twist
-- bold condensed Vietnamese typography, clean and highly readable
-- exactly three visible text groups total: title, primary hook, secondary hook
-- no extra paragraphs, no random labels, no fake UI text
+Create a high-impact vertical 4:5 Vietnamese visual journalism poster for Facebook feed (National Geographic / Smithsonian style):
+- one breathtaking, thumb-stopping photorealistic hero image capturing a mind-bending natural phenomenon, optical illusion, or bizarre evolutionary adaptation
+- cinematic lighting with extreme subject focus, shallow depth of field, and rich atmospheric mood (mist, glow, deep sea darkness, or golden hour macro)
+- sleek modern layout: subtle natural vignettes for contrast, bold crisp Vietnamese typography that is instantly legible on mobile in 0.5 seconds
+- headline is punchy and short (maximum 3-5 words) that triggers immediate curiosity or challenges common knowledge
+- exactly three visible text groups total: headline, primary curiosity hook, secondary factual reveal
+- no extra paragraphs, no random labels, no fake UI text, no heavy artificial borders
 - no Python overlay will be used later; all text must be rendered by the image model now
 """.strip()
 
@@ -1588,9 +1588,9 @@ def build_model_rendered_infographic_prompt(image_prompt: str, topic: dict, cont
         f"\"{stat.upper()}\"\n"
         f"\"{hook}\"\n\n"
         "Recommended composition:\n"
-        "- Top: the headline as one large readable Vietnamese line or two lines.\n"
+        "- Top: the headline as one large readable Vietnamese line or two lines (3-5 punchy words).\n"
         "- Center: one dramatic realistic hero subject occupying most of the image, showing the unusual fact clearly.\n"
-        "- Lower area: one oversized copper/orange fact badge containing only the main fact text.\n"
+        "- Lower area: a sleek, high-contrast modern badge or clean typography group presenting the main fact text clearly against a subtle cinematic dark vignette.\n"
         "- Put the hook as a readable micro-fact line near the badge; it should explain why the metric matters, not feel like a generic slogan.\n"
         "- Keep generous margins and make Vietnamese diacritics accurate.\n\n"
         f"Hero image: realistic {topic['subject_en']} in its natural habitat, cinematic, sharp, dramatic, visually striking.\n"

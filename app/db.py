@@ -183,6 +183,24 @@ def count_posts() -> int:
     return total
 
 
+def count_posts_by_topic_type(topic_type: str) -> int:
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute("SELECT COUNT(*) AS total FROM posts WHERE topic_type = ?", (topic_type,))
+    total = cur.fetchone()["total"]
+    conn.close()
+    return total
+
+
+def count_posts_by_slot(slot: str) -> int:
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute("SELECT COUNT(*) AS total FROM posts WHERE slot = ?", (slot,))
+    total = cur.fetchone()["total"]
+    conn.close()
+    return total
+
+
 def count_future_posts(now_iso: str, statuses: tuple[str, ...] = ("READY", "WAITING_IMAGE")) -> int:
     conn = get_conn()
     cur = conn.cursor()

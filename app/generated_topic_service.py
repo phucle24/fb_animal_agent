@@ -34,12 +34,16 @@ ENGAGEMENT_TOPIC_GUIDES = {
 }
 
 STORY_TOPIC_RULES = """
-Nguyên tắc chọn topic bắt buộc:
-- Topic phải có "mầm câu chuyện": một cảnh nhỏ, mâu thuẫn, hiểu lầm, cú twist, hành vi lạ, hoặc khoảnh khắc khiến viewer muốn bấm vào ảnh.
-- Ưu tiên các góc có thể kể như mini-story: tưởng vô hại nhưng nguy hiểm, nhìn dễ thương nhưng là chiến thuật sinh tồn, nhỏ bé nhưng có vũ khí, chậm chạp nhưng sống dai, cây đứng yên nhưng biết lừa.
-- Tránh topic chỉ là danh sách khô hoặc fact rời rạc; mỗi topic phải gợi được câu hỏi "Ủa vì sao nó làm được vậy?".
-- Nội dung phải vừa thật vừa có tính wow: có cơ chế, môi trường sống, kẻ săn mồi/con mồi, quy mô, hoặc lợi ích sinh tồn cụ thể.
-- Giọng định hướng hóm hỉnh, duyên, dễ comment; không nhảm, không sai sự thật.
+Nguyên tắc chọn topic đột phá bắt buộc (Kéo reach tự nhiên Facebook):
+- TIÊU CHÍ NOVELTY CAO: Tuyệt đối tránh các loài quá quen thuộc/nhàm chán (như ếch thường, bọ ngựa thường, chó mèo thường) nếu không có góc khai thác cực dị.
+- Tập trung vào 4 nhóm nội dung nam châm hút view:
+  1. Thủy quái biển sâu & Vùng nước tối (Deep-Sea Anomalies): cá mắt thùng đầu trong suốt, cá miệng rộng, sứa ma quỷ, sâu bobbit, cá răng nanh.
+  2. Vũ khí sinh học & Hóa chất dị thường (Extreme Biological Weapons): bọ xịt axit 100°C, ếch biến xương ngón tay thành vuốt Wolverine, sứa hộp độc nhất hành tinh.
+  3. Ký sinh trùng & Thao túng tâm trí (Bizarre Parasites): nấm zombie điều khiển kiến, ong bắp cày ký sinh gián, đẻ nhờ tổ tàn nhẫn.
+  4. Kèo đối đầu kinh điển (Apex Matchups): những cặp đấu cân não về thể hình, lực cắn và chiến thuật sinh tồn trong tự nhiên.
+- Topic phải có "mầm câu chuyện": cảnh nhỏ, mâu thuẫn nhận thức, cú twist sinh học hoặc khoảnh khắc khiến viewer muốn zoom vào ảnh.
+- Luôn có cơ chế rõ ràng: giải thích cơ thể nó hoạt động ra sao, săn ai, né ai, vì sao tiến hóa được như vậy.
+- Giọng văn: Lôi cuốn, sắc bén, kích thích người xem comment tranh luận chia phe.
 """
 
 

@@ -3,29 +3,27 @@ from app.utils import matchup_measure_label, matchup_measure_value
 
 
 STORYTELLING_RULES = """
-Nguyên tắc kể chuyện bắt buộc cho mọi caption:
-- Mở đầu bằng một cảnh nhỏ hoặc tình huống dễ hình dung, như viewer đang xem một đoạn phim tự nhiên.
-- Câu đầu phải làm người xem tò mò hoặc bật cười nhẹ, không mở kiểu "Trong thế giới động vật..." hay "Bạn có biết rằng..." quá sách giáo khoa.
-- Sau hook phải có một cú "hóa ra..." hoặc twist sinh học rõ ràng.
-- Luôn giải thích vì sao điều đó đáng wow bằng cơ chế, môi trường sống, kẻ săn mồi/con mồi, quy mô, hoặc lợi ích sinh tồn.
-- Giọng hóm hỉnh, duyên, gần gũi; tuyệt đối không bịa, không giật gân sai sự thật.
-- Tránh văn khô kiểu encyclopedia và tránh câu chung chung như "đặc điểm này rất thú vị".
+Nguyên tắc kể chuyện đột phá cho mọi caption (Tối ưu thuật toán Facebook 2026):
+- QUY TẮC 3 DÒNG ĐẦU TIÊN (Above the Fold):
+  + Dòng 1: Cú sốc nhận thức hoặc khẳng định ngược đời, giật ngón tay người lướt (Ví dụ: "Đừng để vẻ ngoài ngố rừng này lừa bạn...", "Có một cỗ máy săn mồi dưới đáy biển mà khoa học cũng phải rùng mình...").
+  + Dòng 2: Câu hỏi kích thích tò mò hoặc mở đầu bí ẩn khiến người xem BẮT BUỘC bấm "Xem thêm" (See more).
+  + Dòng 3: Dẫn dắt ánh nhìn vào bức ảnh hoặc kêu gọi zoom in soi chi tiết cơ quan/vũ khí.
+- Thân bài (Story/Wow): Mổ xẻ cơ chế sinh học đằng sau sự thật, dùng hình tượng điện ảnh hoặc so sánh dễ hiểu (như cỗ máy F1, radar quân sự, áo tàng hình, súng bắn tỉa...).
+- KÍCH HOẠT TRANH LUẬN (Debate Trigger CTA): Cuối bài KHÔNG BAO GIỜ hỏi chung chung kiểu sách giáo khoa ("Bạn thấy có thú vị không?"). Phải đưa ra 2 luồng quan điểm đối lập hoặc thế tiến thoái lưỡng nan để người xem tranh cãi, bình luận qua lại (ví dụ: "Kèo solo này bạn đặt cược vào sức mạnh cơ bắp hay tốc độ? Cược bên nào comment bên dưới!").
+- Giọng văn: Lôi cuốn, dí dỏm, thông minh, gần gũi; tuyệt đối không bịa đặt số liệu sai khoa học.
 """
 
 
 CAPTION_STYLE_RULES = """
-Khung caption bắt buộc:
-- Độ dài phần caption/caption_intro do bạn viết: khoảng 120-180 chữ, không tính danh sách item cố định mà hệ thống sẽ tự ghép sau đó.
-- Cấu trúc: Hook 1-2 câu -> Story/Wow 2-3 câu -> Value 1-2 câu -> CTA 1 câu.
-- Hook phải mở bằng một cảnh, tình huống hoặc hiểu lầm cụ thể; KHÔNG mở bằng "Bạn có biết rằng", "Trong thế giới động vật", "Trong thế giới tự nhiên", "Thiên nhiên luôn...".
-- Story/Wow phải có một cú twist sinh học rõ: cơ chế, môi trường sống, kẻ săn mồi/con mồi, quy mô, hoặc lợi ích sinh tồn.
-- Value phải giúp viewer học được điều gì đó bằng ngôn ngữ dễ hiểu, không giống sách giáo khoa.
-- CTA là một câu hỏi tự nhiên, không ép like/share/comment lộ liễu.
-- Chỉ dùng dữ kiện có trong topic, items, detail_vi, fact_detail, main_fact_vi, twist_vi, verdict_vi; KHÔNG tự thêm số liệu, địa danh, hành vi, kẻ thù, hoặc kết luận nếu prompt không cung cấp.
-- Nếu dữ kiện không chắc tuyệt đối, dùng wording mềm như "thường", "có thể", "ước tính", "được ghi nhận", tùy đúng dữ liệu đã có.
-- Tránh cụm AI/khuôn mẫu: "đặc điểm thú vị", "khả năng đặc biệt", "vô cùng", "khiến ai cũng", "thiên nhiên kỳ diệu".
-- Ưu tiên tiếng Việt tự nhiên; không chèn tiếng Anh trong caption nếu đã có tên/thuật ngữ tiếng Việt phổ biến.
-- Giọng văn chân thật, duyên nhẹ, có chút hóm hỉnh; không Gen Z quá mạnh, không giật gân sai sự thật.
+Khung caption chuẩn Facebook Viral:
+- Độ dài: khoảng 130-190 chữ (đủ sâu để giữ chân người xem đọc 10-15s, tối ưu dwell time).
+- Cấu trúc 4 phần:
+  1. Hook (3 dòng đầu cực mạnh như quy chuẩn ở trên, không mở bằng "Bạn có biết", "Trong thế giới tự nhiên").
+  2. Story / Mechanism (2-3 câu giải thích cơ chế sinh tồn, vũ khí độc lạ, kẻ thù tự nhiên).
+  3. Wow Insight (1-2 câu rút ra góc nhìn bất ngờ về tiến hóa).
+  4. Debate CTA (1 câu hỏi kích hoạt người xem bình luận chia phe hoặc chia sẻ trải nghiệm).
+- Tránh các cụm từ AI sáo rỗng: "đặc điểm thú vị", "khả năng đặc biệt", "vô cùng kỳ diệu", "thiên nhiên luôn ẩn chứa".
+- Tiếng Việt tự nhiên, giàu tính hình tượng; không chèn tiếng Anh nếu đã có từ tiếng Việt tương đương.
 """
 
 

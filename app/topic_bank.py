@@ -1043,61 +1043,201 @@ ANATOMY_TOPICS = [
         "question_vi": "Bạn thấy lưỡi ếch hay da ếch kỳ lạ hơn?",
         "composition_en": "side view frog in a natural crouching pose, centered and filling most of the image, legs visible and body slightly translucent",
         "transparency_en": "semi-transparent torso so heart, lungs, stomach, and intestines are visible while external skin and legs remain realistic",
+        "appearance_en": "realistic common frog with moist olive-green and brown mottled skin, dark patch behind eyes, powerful long folded hind legs, webbed feet",
+        "organ_colors_en": "pinkish-red three-chambered heart, spongy pink lungs, pale yellow stomach, coiled reddish-brown intestines",
         "background_en": "simple light grey-blue background, clean and minimal, no texture, no decoration",
         "labels": [
-            {
-                "label_vi": "mắt ếch",
-                "target_en": "the raised eye on top of the head",
-                "description_vi": "mắt nhô cao giúp quan sát khi nổi trên mặt nước",
-            },
-            {
-                "label_vi": "màng nhĩ",
-                "target_en": "the round tympanum behind the eye",
-                "description_vi": "màng tròn sau mắt giúp tiếp nhận âm thanh",
-            },
-            {
-                "label_vi": "lưỡi dính",
-                "target_en": "the sticky tongue inside the mouth",
-                "description_vi": "lưỡi dính bật ra để bắt côn trùng",
-            },
-            {
-                "label_vi": "da ẩm",
-                "target_en": "the moist skin surface",
-                "description_vi": "da ẩm hỗ trợ trao đổi khí ngoài phổi",
-            },
-            {
-                "label_vi": "phổi",
-                "target_en": "the lungs inside the chest cavity",
-                "description_vi": "phổi giúp ếch hô hấp khi ở trên cạn",
-            },
-            {
-                "label_vi": "tim",
-                "target_en": "the heart area between the lungs",
-                "description_vi": "tim nằm trong khoang ngực giữa hai phổi",
-            },
-            {
-                "label_vi": "dạ dày",
-                "target_en": "the stomach inside the abdomen",
-                "description_vi": "dạ dày tiêu hóa con mồi sau khi nuốt",
-            },
-            {
-                "label_vi": "ruột",
-                "target_en": "the coiled intestine in the abdomen",
-                "description_vi": "ruột cuộn trong bụng để hấp thụ dinh dưỡng",
-            },
-            {
-                "label_vi": "chân trước",
-                "target_en": "the front leg",
-                "description_vi": "chân trước đỡ cơ thể khi tiếp đất",
-            },
-            {
-                "label_vi": "chân sau",
-                "target_en": "the long muscular hind leg",
-                "description_vi": "chân sau dài và khỏe để bật nhảy",
-            },
+            {"label_vi": "mắt ếch", "target_en": "the raised eye on top of the head", "description_vi": "mắt nhô cao giúp quan sát khi nổi trên mặt nước"},
+            {"label_vi": "màng nhĩ", "target_en": "the round tympanum behind the eye", "description_vi": "màng tròn sau mắt giúp tiếp nhận âm thanh"},
+            {"label_vi": "lưỡi dính", "target_en": "the sticky tongue inside the mouth", "description_vi": "lưỡi dính bật ra để bắt côn trùng"},
+            {"label_vi": "da ẩm", "target_en": "the moist skin surface", "description_vi": "da ẩm hỗ trợ trao đổi khí ngoài phổi"},
+            {"label_vi": "phổi", "target_en": "the lungs inside the chest cavity", "description_vi": "phổi giúp ếch hô hấp khi ở trên cạn"},
+            {"label_vi": "tim", "target_en": "the heart area between the lungs", "description_vi": "tim nằm trong khoang ngực giữa hai phổi"},
+            {"label_vi": "dạ dày", "target_en": "the stomach inside the abdomen", "description_vi": "dạ dày tiêu hóa con mồi sau khi nuốt"},
+            {"label_vi": "ruột", "target_en": "the coiled intestine in the abdomen", "description_vi": "ruột cuộn trong bụng để hấp thụ dinh dưỡng"},
+            {"label_vi": "chân trước", "target_en": "the front leg", "description_vi": "chân trước đỡ cơ thể khi tiếp đất"},
+            {"label_vi": "chân sau", "target_en": "the long muscular hind leg", "description_vi": "chân sau dài và khỏe để bật nhảy"},
+        ],
+    },
+    {
+        "topic_type": "anatomy_infographic",
+        "topic_key": "honeybee_anatomy_infographic",
+        "subject_vi": "Giải phẫu ong mật: cỗ máy tí hon bay lượn và châm nọc",
+        "subject_en": "Honeybee anatomy educational infographic",
+        "animal_vi": "con ong mật",
+        "animal_en": "honeybee",
+        "scientific_name": "Apis mellifera (western honeybee)",
+        "sex": "worker bee (female)",
+        "hook_vi": "Một cơ thể tí hon chỉ vài centimet nhưng chứa cả động cơ bay, túi lọc mật và vũ khí phòng vệ tinh vi.",
+        "main_fact_vi": "Ong mật có mắt kép nhìn tia UV, dạ dày chứa mật riêng biệt, giỏ phấn ở chân sau và tuyến nọc gắn ngòi có ngạnh.",
+        "question_vi": "Bạn thấy dạ dày mật hay ngòi châm của ong mật ấn tượng hơn?",
+        "composition_en": "lateral side-profile view of a worker honeybee facing left, body horizontal and natural, wings angled upward, legs spread realistically, filling 80 percent of frame",
+        "transparency_en": "semi-transparent cutaway along the thorax and abdomen revealing flight muscles, honey stomach, digestive tract, and venom apparatus while retaining natural golden-amber fuzzy exoskeleton",
+        "appearance_en": "realistic worker honeybee with golden-amber and dark brown striped fuzzy abdomen, hairy thorax, clear veined wings, dark compound eyes, jointed legs with pollen basket",
+        "organ_colors_en": "deep red flight muscles in thorax, translucent amber honey sac, soft pinkish digestive tract, pale yellow wax glands, translucent white venom sac",
+        "background_en": "simple light grey-blue background, clean and minimal, no texture, no decoration",
+        "labels": [
+            {"label_vi": "râu cảm giác", "target_en": "the segmented antenna on the head", "description_vi": "râu chứa thụ quan khứu giác và xúc giác cực nhạy"},
+            {"label_vi": "mắt kép", "target_en": "the large dark compound eye on side of head", "description_vi": "hàng ngàn thấu kính đơn nhìn được cả ánh sáng tử ngoại"},
+            {"label_vi": "vòi hút mật", "target_en": "the elongated proboscis mouthparts under head", "description_vi": "vòi dài để vươn sâu hút mật hoa"},
+            {"label_vi": "cơ bay ngực", "target_en": "the dense flight muscles filling the thorax", "description_vi": "khối cơ co bóp giúp cánh đập hơn 230 lần mỗi giây"},
+            {"label_vi": "cánh trước & sau", "target_en": "the veined membranous wings attached to thorax", "description_vi": "hai cặp cánh móc vào nhau khi bay để tăng lực nâng"},
+            {"label_vi": "giỏ phấn", "target_en": "the concave pollen basket corbicula on hind leg", "description_vi": "khoang lõm có lông viền ở chân sau để gom phấn hoa"},
+            {"label_vi": "dạ dày mật", "target_en": "the expandable honey stomach crop in front of abdomen", "description_vi": "túi trữ mật hoa tạm thời, ngăn cách với ruột tiêu hóa"},
+            {"label_vi": "dạ dày tiêu hóa", "target_en": "the ventriculus midgut in abdomen", "description_vi": "nơi tiêu hóa thức ăn để nuôi sống chính cá thể ong"},
+            {"label_vi": "tuyến sáp", "target_en": "the wax glands on lower ventral abdomen", "description_vi": "tuyến tiết các vảy sáp mỏng dùng xây tổ lục giác"},
+            {"label_vi": "túi nọc & ngòi", "target_en": "the venom sac and barbed stinger at abdominal tip", "description_vi": "vũ khí tự vệ có ngạnh gắn liền túi nọc ở đuôi"},
+        ],
+    },
+    {
+        "topic_type": "anatomy_infographic",
+        "topic_key": "seahorse_anatomy_infographic",
+        "subject_vi": "Giải phẫu cá ngựa: sinh vật biển độc đáo với túi ấp của con đực",
+        "subject_en": "Seahorse anatomy educational infographic",
+        "animal_vi": "cá ngựa",
+        "animal_en": "seahorse",
+        "scientific_name": "Hippocampus comes (tiger tail seahorse)",
+        "sex": "male specimen",
+        "hook_vi": "Loài cá kỳ lạ bơi đứng, đầu giống ngựa, đuôi như khỉ và chính con đực lại là kẻ mang thai sinh con.",
+        "main_fact_vi": "Cá ngựa có khung giáp xương thay vì vảy, mắt cử động độc lập, không có răng hay dạ dày thực thụ, con đực sở hữu túi ấp trứng.",
+        "question_vi": "Bạn thấy cơ chế cá ngựa đực mang thai có phải là điều kỳ lạ nhất đại dương?",
+        "composition_en": "upright lateral profile view of male seahorse, head tilted gracefully, curved neck, dorsal fin clearly visible, curled prehensile tail at bottom, filling 80 percent of vertical canvas",
+        "transparency_en": "cutaway through the abdominal armor and brood pouch revealing internal organs, swim bladder, simple digestive canal, and male brood pouch while retaining realistic textured bony plates",
+        "appearance_en": "realistic tiger tail seahorse with yellow-brown mottled coloration, segmented bony rings, spiny coronet on top of head, delicate translucent fins",
+        "organ_colors_en": "silver-white swim bladder, soft red two-chambered heart, pale pink simple tubular gut, warm peach vascular brood pouch lining",
+        "background_en": "simple light grey-blue background, clean and minimal, no texture, no decoration",
+        "labels": [
+            {"label_vi": "vương miện đỉnh đầu", "target_en": "the spiny coronet crest on top of head", "description_vi": "cấu trúc xương nhô cao riêng biệt như dấu vân tay ở mỗi cá thể"},
+            {"label_vi": "mõm hình ống", "target_en": "the elongated tubular snout", "description_vi": "mõm hút thức ăn như ống bơm mini không có răng"},
+            {"label_vi": "mắt chuyển động độc lập", "target_en": "the prominent circular eye", "description_vi": "hai mắt có thể nhìn về hai hướng khác nhau cùng lúc"},
+            {"label_vi": "giáp xương ngoài", "target_en": "the external bony armor rings covering body", "description_vi": "các đốt xương cứng bao bọc bảo vệ cơ thể khỏi kẻ săn mồi"},
+            {"label_vi": "vây ngực giữ thăng bằng", "target_en": "the small fan-like pectoral fin behind gill opening", "description_vi": "vây nhỏ hai bên mang giúp giữ thăng bằng và lái hướng"},
+            {"label_vi": "vây lưng đẩy bơi", "target_en": "the dorsal fin on lower back", "description_vi": "vây lưng rung nhanh tới 30-70 lần/giây để đẩy cá tiến lên"},
+            {"label_vi": "bong bóng điều tiết", "target_en": "the elongated swim bladder along spine", "description_vi": "túi khí giúp cá ngựa duy trì tư thế bơi đứng lơ lửng"},
+            {"label_vi": "đường ruột đơn", "target_en": "the simple digestive tract inside torso", "description_vi": "không có dạ dày thực sự, thức ăn đi nhanh qua ruột non"},
+            {"label_vi": "túi ấp trứng cá đực", "target_en": "the male brood pouch on front of lower abdomen", "description_vi": "nơi cá đực nhận trứng từ cá cái, thụ tinh và ấp nở con non"},
+            {"label_vi": "đuôi cuốn bám", "target_en": "the prehensile curled tail at base", "description_vi": "đuôi linh hoạt quấn chặt vào san hô và cỏ biển để không bị trôi"},
+        ],
+    },
+    {
+        "topic_type": "anatomy_infographic",
+        "topic_key": "orchid_mantis_anatomy_infographic",
+        "subject_vi": "Giải phẫu bọ ngựa phong lan: sát thủ ngụy trang thành cánh hoa",
+        "subject_en": "Orchid mantis anatomy educational infographic",
+        "animal_vi": "bọ ngựa phong lan",
+        "animal_en": "orchid mantis",
+        "scientific_name": "Hymenopus coronatus",
+        "sex": "adult female specimen",
+        "hook_vi": "Ẩn mình dưới vẻ đẹp đài các như một đóa hoa phong lan nở rộ, nhưng bên trong là cỗ máy săn mồi với tốc độ chớp mắt.",
+        "main_fact_vi": "Bọ ngựa phong lan có 4 chân sau biến dạng thành hình cánh hoa, mắt kép hình nón góc nhìn 360 độ và đôi chân trước đầy gai kẹp sắc bén.",
+        "question_vi": "Nếu là một chú ong, bạn có nhận ra đây là một cái bẫy chết người không?",
+        "composition_en": "three-quarter profile view of female orchid mantis in a poised hunting stance, petal-like legs spread gracefully, raptorial arms folded under head, filling 80 percent of frame",
+        "transparency_en": "semi-transparent cutaway along the elongated thorax and abdomen showing nerve cord, digestive crop, heart tube, and muscular raptorial joints while preserving realistic porcelain-pink petal textures",
+        "appearance_en": "realistic orchid mantis with translucent white and delicate pink coloration, broad petal-shaped femoral lobes on walking legs, brown collar band, bright green eyes",
+        "organ_colors_en": "pale cream ventral nerve chain, soft yellow-green crop and gut, clear dorsal vessel heart tube, pearlescent muscular bands",
+        "background_en": "simple light grey-blue background, clean and minimal, no texture, no decoration",
+        "labels": [
+            {"label_vi": "mắt kép hình nón", "target_en": "the conical compound eye on head", "description_vi": "tầm nhìn siêu nét phát hiện chuyển động con mồi từ xa"},
+            {"label_vi": "mắt đơn cảm quang", "target_en": "the simple ocelli between the antennae", "description_vi": "ba mắt đơn nhỏ cảm nhận cường độ ánh sáng môi trường"},
+            {"label_vi": "chân kẹp bắt mồi", "target_en": "the spined raptorial foreleg folded in front", "description_vi": "vũ khí phóng ra trong 1/40 giây kẹp chặt con mồi không lối thoát"},
+            {"label_vi": "gai kẹp sắc nhọn", "target_en": "the sharp interlocking spines on tibia and femur", "description_vi": "hàng gai đan cài khóa cứng thân côn trùng khi bị bắt"},
+            {"label_vi": "ngực trước kéo dài", "target_en": "the flexible elongated prothorax", "description_vi": "khớp nối cho phép đầu quay gần 180 độ linh hoạt"},
+            {"label_vi": "thùy chân cánh hoa", "target_en": "the wide petal-shaped lobe on walking leg", "description_vi": "chân sau dẹt rộng mô phỏng hoàn hảo cánh hoa lan"},
+            {"label_vi": "diều chứa thức ăn", "target_en": "the digestive crop in upper body", "description_vi": "khoang chứa nghiền nát thức ăn trước khi đưa vào ruột"},
+            {"label_vi": "chuỗi hạch thần kinh", "target_en": "the ventral nerve cord running along body", "description_vi": "hệ thần kinh điều khiển phản xạ phóng đòn cực nhanh"},
+            {"label_vi": "cánh bảo vệ", "target_en": "the delicate wings folded over abdomen", "description_vi": "cánh giúp con cái bay cự ly ngắn khi cần đổi hoa"},
+        ],
+    },
+    {
+        "topic_type": "anatomy_infographic",
+        "topic_key": "blue_ringed_octopus_anatomy_infographic",
+        "subject_vi": "Giải phẫu bạch tuộc đốm xanh: sát thủ tí hon mang nọc độc thần kinh",
+        "subject_en": "Blue-ringed octopus anatomy educational infographic",
+        "animal_vi": "bạch tuộc đốm xanh",
+        "animal_en": "blue-ringed octopus",
+        "scientific_name": "Hapalochlaena lunulata",
+        "sex": "adult specimen",
+        "hook_vi": "Chỉ nhỏ bằng quả bóng bàn nhưng lượng nọc độc của nó đủ hạ gục 26 người trưởng thành trong vòng vài phút.",
+        "main_fact_vi": "Bạch tuộc đốm xanh sở hữu 3 trái tim, máu màu xanh lam chứa đồng, tuyến nọc tiết tetrodotoxin chết người và các vòng xanh phát quang cảnh báo.",
+        "question_vi": "Bạn thấy điều gì đáng sợ nhất ở loài bạch tuộc tí hon này?",
+        "composition_en": "lateral three-quarter view of blue-ringed octopus resting on ocean floor, mantle raised naturally, arms gracefully curved showing underside suckers, luminous iridescent blue rings glowing vividly",
+        "transparency_en": "semi-transparent cutaway into the mantle dome revealing the 3 hearts, gill structures, digestive gland, and posterior salivary venom glands while keeping skin texture and blue rings authentic",
+        "appearance_en": "realistic blue-ringed octopus with golden-ochre textured skin adorned with vivid electric-blue iridescent rings with dark halos, eight supple arms",
+        "organ_colors_en": "bright electric blue dermal rings, crimson-red systemic heart, twin violet branchial hearts, beige digestive gland, pale translucent venom glands",
+        "background_en": "simple light grey-blue background, clean and minimal, no texture, no decoration",
+        "labels": [
+            {"label_vi": "vòng xanh phát quang", "target_en": "the luminous blue rings on skin surface", "description_vi": "tế bào iridophore co giãn phát sáng xanh lam rực rỡ để đe dọa"},
+            {"label_vi": "mắt thấu kính phức tạp", "target_en": "the high-acuity camera-type eye", "description_vi": "thị lực cực sắc bén nhận biết chuyển động và ánh sáng phân cực"},
+            {"label_vi": "mỏ chitin cứng", "target_en": "the parrot-like beak at center of arms", "description_vi": "mỏ nhọn như mỏ vẹt có thể cắn thủng lớp vỏ cua cứng"},
+            {"label_vi": "tuyến nọc tetrodotoxin", "target_en": "the posterior salivary venom gland near mouth", "description_vi": "nơi chứa vi khuẩn cộng sinh tạo độc tố thần kinh cực mạnh"},
+            {"label_vi": "ống siphon phản lực", "target_en": "the muscular siphon funnel under head", "description_vi": "ống bơm đẩy nước ra ngoài giúp bạch tuộc lao nhanh như phản lực"},
+            {"label_vi": "tim hệ thống chính", "target_en": "the central systemic heart in mantle cavity", "description_vi": "bơm máu xanh giàu hemocyanin đi nuôi toàn bộ cơ thể"},
+            {"label_vi": "hai tim mang phụ", "target_en": "the two branchial hearts next to the gills", "description_vi": "hai tim riêng phụ trách đẩy máu qua mang để lấy oxy"},
+            {"label_vi": "mang hô hấp", "target_en": "the feathery gills inside mantle cavity", "description_vi": "mang lọc oxy trực tiếp từ dòng nước lưu thông trong khoang thân"},
+            {"label_vi": "gan tụy tiêu hóa", "target_en": "the large digestive gland in mantle", "description_vi": "cơ quan tiết enzyme tiêu hóa con mồi thành dạng lỏng"},
+            {"label_vi": "giác hút xúc tu", "target_en": "the round muscular suckers lining each arm", "description_vi": "hàng trăm giác hút linh hoạt vừa giữ mồi vừa cảm nhận vị giác"},
+        ],
+    },
+    {
+        "topic_type": "anatomy_infographic",
+        "topic_key": "peregrine_falcon_anatomy_infographic",
+        "subject_vi": "Giải phẫu chim ưng: cỗ máy bổ nhào 380 km/h của bầu trời",
+        "subject_en": "Peregrine falcon anatomy educational infographic",
+        "animal_vi": "chim ưng peregrine",
+        "animal_en": "peregrine falcon",
+        "scientific_name": "Falco peregrinus",
+        "sex": "adult specimen",
+        "hook_vi": "Sinh vật nhanh nhất hành tinh khi bổ nhào từ tầng mây với tốc độ tương đương một chiếc xe đua F1.",
+        "main_fact_vi": "Chim ưng có cấu trúc hình nón trong mũi để thở ở tốc độ 380 km/h, mắt có mí thứ ba trong suốt và cơ ngực chiếm 20% trọng lượng cơ thể.",
+        "question_vi": "Thiết kế khí động học của chim ưng có phải là đỉnh cao tiến hóa của loài chim?",
+        "composition_en": "lateral aerodynamic profile view of peregrine falcon perched or in banking posture, pointed wings angled sleekly, compact head, powerful talons gripping perch, filling 80 percent of frame",
+        "transparency_en": "semi-transparent cutaway into the torso and head showing deep keel bone, massive pectoral muscles, continuous airflow air-sac system, and oversized heart while maintaining realistic slate-blue plumage",
+        "appearance_en": "realistic adult peregrine falcon with slate-gray barred back, barred white-buff chest, black hooded head with distinct moustachial stripe, bright yellow cere and talons",
+        "organ_colors_en": "deep burgundy pectoral muscles, ivory sternal keel bone, translucent pink air sacs, bright red enlarged heart, sharp yellow foot pads",
+        "background_en": "simple light grey-blue background, clean and minimal, no texture, no decoration",
+        "labels": [
+            {"label_vi": "mũi nón cản gió", "target_en": "the bony tubercle baffle inside the nostril", "description_vi": "gờ xương hình nón điều hòa áp suất không khí khi lao cực nhanh"},
+            {"label_vi": "màng chớp bảo vệ mắt", "target_en": "the translucent nictitating membrane across eye", "description_vi": "mí mắt thứ ba quét sạch bụi và bảo vệ mắt như kính chắn gió"},
+            {"label_vi": "răng xé trên mỏ", "target_en": "the notched tomial tooth on upper curved beak", "description_vi": "răng phụ hình tam giác ở mép mỏ dùng bẻ gãy đốt sống con mồi"},
+            {"label_vi": "cơ ngực bay khổng lồ", "target_en": "the massive pectoralis flight muscles on breast", "description_vi": "khối cơ cực khỏe tạo lực đập cánh mạnh mẽ xuyên gió"},
+            {"label_vi": "xương sống lưỡi hái", "target_en": "the deep sternal keel carina bone", "description_vi": "mỏm xương ngực nhô sâu làm điểm tựa vững chắc cho khối cơ bay"},
+            {"label_vi": "hệ thống túi khí", "target_en": "the interconnected air sacs in thorax and abdomen", "description_vi": "cho phép luồng khí giàu oxy lưu thông một chiều liên tục cả khi hít và thở"},
+            {"label_vi": "trái tim công suất cao", "target_en": "the oversized four-chambered heart", "description_vi": "đập tới 600-900 nhịp/phút cung cấp oxy tức thì cho cơ bắp"},
+            {"label_vi": "cánh khí động học", "target_en": "the pointed swept-back primary flight feathers", "description_vi": "đầu cánh nhọn giảm tối đa lực cản không khí khi bổ nhào"},
+            {"label_vi": "móng vuốt khóa mồi", "target_en": "the curved sharp talons on muscular feet", "description_vi": "vũ khí va chạm ở tốc độ cao làm con mồi gục ngã ngay trên không"},
+        ],
+    },
+    {
+        "topic_type": "anatomy_infographic",
+        "topic_key": "white_lipped_pit_viper_anatomy_infographic",
+        "subject_vi": "Giải phẫu rắn lục: cảm biến nhiệt hồng ngoại và răng nanh gập",
+        "subject_en": "White-lipped pit viper anatomy educational infographic",
+        "animal_vi": "rắn lục đuôi đỏ",
+        "animal_en": "white-lipped pit viper",
+        "scientific_name": "Trimeresurus albolabris",
+        "sex": "adult specimen",
+        "hook_vi": "Kẻ săn mồi về đêm nhìn thấy nhiệt độ của con mồi trong bóng tối tuyệt đối và sở hữu cặp răng tiêm nọc gập mở như dao bấm.",
+        "main_fact_vi": "Rắn lục có hố loreal cảm nhận tia hồng ngoại, cặp răng nanh rỗng gập sát vòm họng và tim có thể trượt vị trí khi nuốt mồi to.",
+        "question_vi": "Bạn thấy hố cảm biến nhiệt hay cơ chế răng nanh dao bấm lợi hại hơn?",
+        "composition_en": "lateral three-quarter view of coiled green pit viper, triangular head raised alertly, mouth slightly ajar displaying the folding fang, keeled body scales clearly rendered, filling 80 percent of frame",
+        "transparency_en": "semi-transparent cutaway into the triangular head and anterior body showing venom gland, duct, hollow fang, elongated right lung, trachea extension, and mobile heart while keeping vibrant green scales realistic",
+        "appearance_en": "realistic white-lipped pit viper with vibrant emerald green keeled scales, distinct white or yellow stripe along upper lip, rusty red tail tip, bright yellow-gold eyes with vertical pupils",
+        "organ_colors_en": "pale yellow venom glands behind eye, ivory hollow fangs, translucent elongated lung, deep red mobile heart, pale pink distensible esophagus",
+        "background_en": "simple light grey-blue background, clean and minimal, no texture, no decoration",
+        "labels": [
+            {"label_vi": "hố cảm biến nhiệt", "target_en": "the loreal pit organ between eye and nostril", "description_vi": "cơ quan cảm thụ hồng ngoại phát hiện nhiệt độ con mồi trong đêm"},
+            {"label_vi": "đồng tử thẳng đứng", "target_en": "the vertical slit pupil in gold iris", "description_vi": "đồng tử co giãn tối đa giúp quan sát sắc nét trong bóng tối"},
+            {"label_vi": "răng nanh rỗng gập mở", "target_en": "the long hollow solenoglyphous fang on maxilla", "description_vi": "răng nanh tựa kim tiêm gập sát vòm miệng và bật ra 90 độ khi cắn"},
+            {"label_vi": "tuyến nọc tan máu", "target_en": "the hemotoxic venom gland behind the eye", "description_vi": "sản sinh enzyme phá hủy tế bào máu và làm đông máu con mồi"},
+            {"label_vi": "khí quản vươn dài", "target_en": "the extended tracheal tube on floor of mouth", "description_vi": "cho phép rắn vẫn thở bình thường khi đang ngậm nuốt con mồi to"},
+            {"label_vi": "lưỡi chẻ cảm nhận mùi", "target_en": "the forked sensory tongue protruding from mouth", "description_vi": "đưa phân tử mùi vào cơ quan Jacobson trên vòm họng"},
+            {"label_vi": "phổi đơn kéo dài", "target_en": "the elongated functional right lung along spine", "description_vi": "phổi dạng ống dài thích nghi với thân hình mảnh của loài bò sát"},
+            {"label_vi": "trái tim di động", "target_en": "the flexible mobile heart in anterior body", "description_vi": "có thể dịch chuyển vị trí để không bị chèn ép khi thức ăn lớn trôi qua"},
+            {"label_vi": "xương hàm linh hoạt", "target_en": "the elastic jaw ligaments connecting mandibles", "description_vi": "dây chằng đàn hồi cho phép mở rộng miệng nuốt con mồi to hơn đầu"},
         ],
     },
 ]
+
 
 
 SINGLE_TOPICS = [
@@ -1714,6 +1854,28 @@ MYTH_VS_FACT_TOPICS = [
         "twist_vi": "Một số màu rực rỡ xuất hiện khi chúng căng thẳng hoặc muốn ra tín hiệu.",
         "question_vi": "Bạn nghĩ màu nào của tắc kè trông bá đạo nhất?",
     },
+    {
+        "topic_type": "myth_vs_fact",
+        "topic_key": "tardigrade_immortal_myth_fact",
+        "subject_vi": "Gấu nước có thật sự bất tử?",
+        "subject_en": "Are tardigrades truly immortal?",
+        "visual_subject_en": "microscopic tardigrade water bear floating in space vacuum",
+        "hook_vi": "Nhiều người tưởng sinh vật tí hon này là thần thánh không bao giờ chết.",
+        "main_fact_vi": "Chúng chỉ 'bất tử tạm thời' bằng cách rút cạn 99% nước cơ thể vào trạng thái ngủ đông cực hạn.",
+        "twist_vi": "Ở trạng thái này, chúng chịu được chân không vũ trụ, tia phóng xạ và nhiệt độ -200°C trong hàng chục năm.",
+        "question_vi": "Bạn có tin sinh vật này có nguồn gốc từ ngoài Trái Đất không?",
+    },
+    {
+        "topic_type": "myth_vs_fact",
+        "topic_key": "bombardier_beetle_acid_myth_fact",
+        "subject_vi": "Bọ xịt hóa chất sôi 100°C tự nổ bụng?",
+        "subject_en": "Can bombardier beetles spray boiling chemicals without blowing up?",
+        "visual_subject_en": "bombardier beetle spraying hot chemical blast at predator in macro shot",
+        "hook_vi": "Tưởng như chuyện viễn tưởng: một con bọ mang pháo phản lực trong bụng.",
+        "main_fact_vi": "Nó trộn hydroquinone và hydrogen peroxide trong buồng đốt đặc biệt rồi xịt ra luồng hơi sôi 100°C.",
+        "twist_vi": "Van một chiều tự động đóng mở hàng trăm lần mỗi giây giúp bọ không bị nổ tung từ bên trong.",
+        "question_vi": "Nếu đối mặt con bọ này, bạn có dám chọc nó không?",
+    },
 ]
 
 
@@ -1750,6 +1912,17 @@ GUESS_QUIZ_TOPICS = [
         "main_fact_vi": "Đáp án là cá mang rổ, chuyên bắn côn trùng rơi khỏi cành.",
         "twist_vi": "Nó phải tính cả khúc xạ ánh sáng khi nhắm mục tiêu trên mặt nước.",
         "question_vi": "Bạn có bắn trúng nổi mục tiêu kiểu này không?",
+    },
+    {
+        "topic_type": "guess_quiz",
+        "topic_key": "guess_bobbit_worm",
+        "subject_vi": "Đố vui: sát thủ cát ngầm chém đôi con mồi trong 1 giây?",
+        "subject_en": "Guess the ambush predator buried beneath sea floor sand",
+        "visual_subject_en": "bobbit worm striking from seabed sand with massive rainbow jaws",
+        "hook_vi": "Chỉ nhô vài chiếc râu trên cát, nhưng bên dưới là cỗ máy săn mồi dài tới 3 mét.",
+        "main_fact_vi": "Đáp án là sâu Bobbit (Eunice aphroditois), loài săn mồi mai phục đáng sợ dưới đáy biển.",
+        "twist_vi": "Bộ hàm kẹp hình lưỡi kéo đóng lại nhanh đến mức có thể chém đứt đôi một con cá trước khi kéo xuống cát.",
+        "question_vi": "Nếu đi biển, bạn có sợ đạp trúng sát thủ giấu mình này không?",
     },
 ]
 
@@ -1788,6 +1961,17 @@ ONE_STORY_TOPICS = [
         "twist_vi": "Mùi khó chịu lại là chiêu marketing cực hiệu quả trong tự nhiên.",
         "question_vi": "Bạn dám đứng gần bông hoa này bao lâu?",
     },
+    {
+        "topic_type": "one_story",
+        "topic_key": "cordyceps_zombie_ant_story",
+        "subject_vi": "Câu chuyện lạ: loài nấm thao túng tâm trí biến kiến thành zombie",
+        "subject_en": "Ophiocordyceps zombie ant mind control story",
+        "visual_subject_en": "zombie ant clamped to leaf underside with fungal stalk erupting from head",
+        "hook_vi": "Cơn ác mộng có thật trong rừng nhiệt đới: một loài nấm có thể cướp quyền điều khiển não bộ sinh vật khác.",
+        "main_fact_vi": "Bào tử nấm Ophiocordyceps xâm nhập kiến, ép nó bỏ tổ, leo lên mặt dưới chiếc lá cao đúng 25cm rồi cắn chặt hàm tự sát.",
+        "twist_vi": "Sau khi kiến chết, nấm mọc xuyên qua đầu nạn nhân để phát tán hàng triệu bào tử xuống cả đàn kiến bên dưới.",
+        "question_vi": "Bạn thấy kịch bản nấm zombie này có đáng sợ hơn phim Hollywood không?",
+    },
 ]
 
 
@@ -1825,20 +2009,47 @@ BEFORE_AFTER_TOPICS = [
         "twist_vi": "Sau: dạng medusa bơi tự do với chuông và xúc tu quen thuộc.",
         "question_vi": "Bạn có bất ngờ vì sứa từng có giai đoạn bám một chỗ không?",
     },
+    {
+        "topic_type": "before_after",
+        "topic_key": "cicada_17_year_underground_before_after",
+        "subject_vi": "Trước và sau: 17 năm trong bóng tối hóa thành ca sĩ mùa hè",
+        "subject_en": "Periodical cicada 17 year underground transformation",
+        "visual_subject_en": "cicada nymph emerging from soil shedding exoskeleton into winged adult",
+        "hook_vi": "Chờ đợi gần 2 thập kỷ trong lòng đất chỉ để có vài tuần cất tiếng hát dưới ánh mặt trời.",
+        "main_fact_vi": "Trước: ấu trùng sống dưới lòng đất hút nhựa rễ cây suốt 17 năm dài đằng đẵng.",
+        "twist_vi": "Sau: hàng tỷ con đồng loạt chui lên lột xác, mọc cánh bay lên cành cây và kết thúc vòng đời chỉ sau 4-6 tuần.",
+        "question_vi": "17 năm chờ đợi cho 1 tháng tỏa sáng, bạn thấy sự kiên nhẫn này có phi thường không?",
+    },
 ]
 
 
-def get_topic_by_index(index: int) -> dict:
-    """Rotate evenly across all content formats."""
-    topic_banks = [
-        ("anatomy_infographic", ANATOMY_TOPICS),
-        ("single_card", SINGLE_TOPICS),
-        ("matchup_versus", MATCHUP_TOPICS),
-        ("myth_vs_fact", MYTH_VS_FACT_TOPICS),
-        ("guess_quiz", GUESS_QUIZ_TOPICS),
-        ("one_story", ONE_STORY_TOPICS),
-        ("before_after", BEFORE_AFTER_TOPICS),
-    ]
+GENERAL_TOPIC_BANKS = [
+    ("matchup_versus", MATCHUP_TOPICS),
+    ("one_story", ONE_STORY_TOPICS),
+    ("myth_vs_fact", MYTH_VS_FACT_TOPICS),
+    ("guess_quiz", GUESS_QUIZ_TOPICS),
+    ("single_card", SINGLE_TOPICS),
+    ("before_after", BEFORE_AFTER_TOPICS),
+]
+
+
+def get_topic_by_index(index: int, slot: str | None = None) -> dict:
+    """
+    Slot-aware topic picker:
+    - If slot is 'night' or 'evening': dedicated to anatomy_infographic (Master Prompt).
+    - If slot is 'morning' or unspecified: rotates across GENERAL_TOPIC_BANKS.
+    """
+    if slot in {"night", "evening"}:
+        if index < len(ANATOMY_TOPICS):
+            return deepcopy(ANATOMY_TOPICS[index])
+
+        from app.generated_topic_service import get_generated_topic
+
+        existing_topics = list(ANATOMY_TOPICS)
+        return get_generated_topic("anatomy_infographic", index - len(ANATOMY_TOPICS), existing_topics)
+
+    # General rotation for morning slot
+    topic_banks = GENERAL_TOPIC_BANKS
     topic_group = index % len(topic_banks)
     group_index = index // len(topic_banks)
     topic_type, topics = topic_banks[topic_group]
@@ -1852,4 +2063,6 @@ def get_topic_by_index(index: int) -> dict:
     for _, bank in topic_banks:
         existing_topics.extend(bank)
     existing_topics.extend(COMPARISON_TOPICS)
+    existing_topics.extend(ANATOMY_TOPICS)
     return get_generated_topic(topic_type, group_index - len(topics), existing_topics)
+

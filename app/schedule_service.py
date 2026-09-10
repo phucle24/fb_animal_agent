@@ -12,6 +12,8 @@ from app.config import (
 from app.db import (
     count_future_posts,
     count_posts,
+    count_posts_by_slot,
+    count_posts_by_topic_type,
     exists_schedule,
     list_posts_for_batch_submission,
     list_posts_for_direct_image_generation,
@@ -25,12 +27,11 @@ BOOTSTRAP_STATE_PATH = DB_PATH.parent / "direct_image_bootstrap_until.txt"
 
 
 def posting_slots_for_date(day):
-    # Monday=0 ... Sunday=6
-    if day.weekday() == 5:
-        return [("morning", 9, 15), ("evening", 21, 0)]
-    if day.weekday() == 6:
-        return [("morning", 9, 15), ("evening", 20, 30)]
-    return [("morning", 8, 15), ("evening", 20, 30)]
+    # Daily posting schedule:
+    # 1. 10:00 AM (morning): 1 photo post with general topic (automated)
+    # 2. 19:00 (7 PM): 1 video (manual by user; product comment service automatically engages)
+    # 3. 22:00 (10 PM night): 1 photo post with anatomy infographic (automated)
+    return [("morning", 10, 0), ("night", 22, 0)]
 
 
 def generate_schedule(days: int = 7):
@@ -68,9 +69,11 @@ def prepare_weekly_posts(days: int = 7) -> list[dict]:
     from app.post_service import build_post
 
     slots = generate_schedule(days=days)
-    base_index = count_posts()
+    night_base = count_posts_by_topic_type("anatomy_infographic")
+    morning_base = count_posts_by_slot("morning")
+    night_offset = 0
+    morning_offset = 0
     created = []
-    offset = 0
 
     for slot_name, dt in slots:
         scheduled_at = dt.strftime("%Y-%m-%d %H:%M:%S")
@@ -78,7 +81,13 @@ def prepare_weekly_posts(days: int = 7) -> list[dict]:
         if exists_schedule(scheduled_at, slot_name):
             continue
 
-        topic = get_topic_by_index(base_index + offset)
+        if slot_name in {"night", "evening"}:
+            topic = get_topic_by_index(night_base + night_offset, slot=slot_name)
+            night_offset += 1
+        else:
+            topic = get_topic_by_index(morning_base + morning_offset, slot=slot_name)
+            morning_offset += 1
+
         post_id = build_post(topic, scheduled_at, slot_name)
         created.append(
             {
@@ -88,7 +97,6 @@ def prepare_weekly_posts(days: int = 7) -> list[dict]:
                 "topic_key": topic["topic_key"],
             }
         )
-        offset += 1
 
     return created
 
@@ -97,9 +105,11 @@ def prepare_weekly_posts_for_batch(days: int = 7) -> list[dict]:
     from app.post_service import build_post_for_batch
 
     slots = generate_schedule(days=days)
-    base_index = count_posts()
+    night_base = count_posts_by_topic_type("anatomy_infographic")
+    morning_base = count_posts_by_slot("morning")
+    night_offset = 0
+    morning_offset = 0
     created = []
-    offset = 0
 
     for slot_name, dt in slots:
         scheduled_at = dt.strftime("%Y-%m-%d %H:%M:%S")
@@ -107,7 +117,13 @@ def prepare_weekly_posts_for_batch(days: int = 7) -> list[dict]:
         if exists_schedule(scheduled_at, slot_name):
             continue
 
-        topic = get_topic_by_index(base_index + offset)
+        if slot_name in {"night", "evening"}:
+            topic = get_topic_by_index(night_base + night_offset, slot=slot_name)
+            night_offset += 1
+        else:
+            topic = get_topic_by_index(morning_base + morning_offset, slot=slot_name)
+            morning_offset += 1
+
         post_id = build_post_for_batch(topic, scheduled_at, slot_name)
         created.append(
             {
@@ -117,7 +133,6 @@ def prepare_weekly_posts_for_batch(days: int = 7) -> list[dict]:
                 "topic_key": topic["topic_key"],
             }
         )
-        offset += 1
 
     return created
 
@@ -128,9 +143,11 @@ def prepare_future_posts_for_batch(posts_to_create: int, start_after_iso: str | 
     if posts_to_create <= 0:
         return []
 
-    base_index = count_posts()
+    night_base = count_posts_by_topic_type("anatomy_infographic")
+    morning_base = count_posts_by_slot("morning")
+    night_offset = 0
+    morning_offset = 0
     created = []
-    offset = 0
 
     # Scan more slots than needed because some future slots may already exist.
     slots = generate_future_schedule(target_slots=posts_to_create + 60)
@@ -141,7 +158,13 @@ def prepare_future_posts_for_batch(posts_to_create: int, start_after_iso: str | 
         if exists_schedule(scheduled_at, slot_name):
             continue
 
-        topic = get_topic_by_index(base_index + offset)
+        if slot_name in {"night", "evening"}:
+            topic = get_topic_by_index(night_base + night_offset, slot=slot_name)
+            night_offset += 1
+        else:
+            topic = get_topic_by_index(morning_base + morning_offset, slot=slot_name)
+            morning_offset += 1
+
         post_id = build_post_for_batch(topic, scheduled_at, slot_name)
         created.append(
             {
@@ -152,7 +175,6 @@ def prepare_future_posts_for_batch(posts_to_create: int, start_after_iso: str | 
                 "mode": "batch_new",
             }
         )
-        offset += 1
 
         if len(created) >= posts_to_create:
             break
@@ -222,9 +244,11 @@ def prepare_future_posts_direct(posts_to_create: int, cutoff_iso: str) -> list[d
     if posts_to_create <= 0:
         return []
 
-    base_index = count_posts()
+    night_base = count_posts_by_topic_type("anatomy_infographic")
+    morning_base = count_posts_by_slot("morning")
+    night_offset = 0
+    morning_offset = 0
     created = []
-    offset = 0
 
     slots = generate_future_schedule(target_slots=posts_to_create + 60)
     for slot_name, dt in slots:
@@ -234,7 +258,13 @@ def prepare_future_posts_direct(posts_to_create: int, cutoff_iso: str) -> list[d
         if exists_schedule(scheduled_at, slot_name):
             continue
 
-        topic = get_topic_by_index(base_index + offset)
+        if slot_name in {"night", "evening"}:
+            topic = get_topic_by_index(night_base + night_offset, slot=slot_name)
+            night_offset += 1
+        else:
+            topic = get_topic_by_index(morning_base + morning_offset, slot=slot_name)
+            morning_offset += 1
+
         post_id = build_post(topic, scheduled_at, slot_name)
         created.append(
             {
@@ -245,7 +275,6 @@ def prepare_future_posts_direct(posts_to_create: int, cutoff_iso: str) -> list[d
                 "mode": "direct_new",
             }
         )
-        offset += 1
 
         if len(created) >= posts_to_create:
             break
