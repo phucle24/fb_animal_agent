@@ -93,7 +93,7 @@ def generate_topic(topic_type: str, existing_topics: list[dict]) -> dict:
 
     if topic_type == "anatomy_infographic":
         prompt = f"""
-Bạn là biên tập viên nội dung Facebook về sinh học động vật, chuyên tạo topic infographic giải phẫu sạch, dễ hiểu, có giá trị giáo dục và hình ảnh đẹp.
+Bạn là biên tập viên nội dung Facebook về sinh học động vật, chuyên tạo topic infographic giải phẫu sạch, dễ hiểu, có giá trị giáo dục và hình ảnh đẹp cho series "Giải phẫu muôn loài".
 
 Hãy sinh 1 topic mới dạng anatomy infographic, thay thế cho format Top 5.
 Không được trùng hoặc quá giống các topic đã có:
@@ -107,10 +107,12 @@ Chỉ trả về JSON hợp lệ với schema:
   "subject_en": "English anatomy infographic subject",
   "animal_vi": "tên con vật tiếng Việt",
   "animal_en": "English common name",
+  "scientific_name": "Tên khoa học Latinh chính xác (ví dụ: Scylla serrata, Apis mellifera...)",
+  "sex": "adult specimen (hoặc male/female nếu có dị hình giới tính quan trọng)",
   "hook_vi": "hook cụ thể, khiến viewer muốn zoom vào ảnh",
   "main_fact_vi": "fact chính về cấu tạo cơ thể, đúng dữ kiện phổ biến",
   "question_vi": "câu hỏi kéo bình luận",
-  "composition_en": "side view/diagonal/centered composition instruction in English",
+  "composition_en": "side view/three-quarter view composition instruction in English",
   "transparency_en": "transparency/internal anatomy instruction in English",
   "appearance_en": "external appearance details in English: texture, color, body surface, legs/wings/fins/hairs/scales",
   "organ_colors_en": "realistic internal organ color guidance in English",
@@ -127,13 +129,14 @@ Chỉ trả về JSON hợp lệ với schema:
 {STORY_TOPIC_RULES}
 
 Yêu cầu bắt buộc:
-- Chủ thể nên là động vật có cấu tạo dễ nhìn và đủ hấp dẫn: cua, cá, mực, bạch tuộc, bướm, ếch, cá ngựa, rùa, chim, rắn, sứa, bọ cánh cứng, chuồn chuồn.
-- Không chọn tôm/shrimp hoặc ong mật/honey bee/Apis mellifera vì các topic đó đã đăng rồi.
+- Series: "Giải phẫu muôn loài" - phong cách bản vẽ khoa học bảo tàng cao cấp (museum-quality scientific anatomy plate).
+- Chủ thể nên là động vật có cấu tạo dễ nhìn và đủ hấp dẫn: cua, cá, mực, bạch tuộc, bướm, ếch, cá ngựa, rùa, chim, rắn, sứa, bọ cánh cứng, chuồn chuồn, tôm, ong, châu chấu, bọ ngựa.
+- Không chọn tôm gõ kiến/pistol shrimp nếu đã đăng gần đây.
 - Ưu tiên loài có cơ thể/giải phẫu dễ làm viewer tò mò: trong suốt, nhiều chân, mang, xúc tu, túi trứng, mai/vỏ, cánh, vòi, dạ dày, tim, đường ruột, cơ quan sinh sản.
-- labels phải có 10 đến 18 nhãn cho đa số loài; loài có cấu tạo rất hấp dẫn như côn trùng/bướm/mực/cá ngựa có thể dùng tối đa 30 nhãn.
-- label_vi phải là tiếng Việt thường, rõ nghĩa, không viết hoa toàn bộ.
-- target_en phải chỉ đúng vị trí cơ thể để model nối pointer line chính xác.
-- description_vi phải cụ thể, không chung chung kiểu "bộ phận quan trọng".
+- labels: 12 đến 20 nhãn chính (không nên nhồi quá 20 nhãn để bố cục thoáng, sắc nét và dễ đọc trên màn hình điện thoại).
+- label_vi phải là tiếng Việt chuẩn, rõ nghĩa, không viết hoa toàn bộ.
+- target_en phải chỉ đúng vị trí cơ thể (anatomical anchor) để model nối pointer line chính xác.
+- description_vi phải cụ thể, nêu chức năng sinh học của bộ phận.
 - appearance_en phải mô tả ngoại hình thật của loài: màu sắc, texture, lông/vảy/vỏ/cánh/chân/mắt/đốt thân nếu có.
 - organ_colors_en phải mô tả màu cơ quan tinh tế, tự nhiên, không neon, không hoạt hình.
 - Nếu là côn trùng có mắt kép và mắt đơn, label phải phân biệt rõ "Mắt kép" và "Mắt đơn"; target_en của mắt đơn phải chỉ cụm ocelli riêng, không nhập chung vào compound eye.
@@ -587,6 +590,10 @@ def validate_generated_topic(topic: dict, expected_type: str, existing_topics: l
             if not value:
                 raise ValueError(f"Generated anatomy topic missing {key}.")
             topic[key] = value
+        topic["scientific_name"] = str(
+            topic.get("scientific_name") or topic.get("animal_en") or "biological specimen"
+        ).strip()
+        topic["sex"] = str(topic.get("sex") or "adult specimen").strip()
         topic["appearance_en"] = str(
             topic.get("appearance_en")
             or "preserve natural body texture, real proportions, accurate visible anatomy, and realistic surface details"

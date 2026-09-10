@@ -68,28 +68,896 @@ Create a finished vertical 4:5 Vietnamese social poster for Facebook feed:
 - no Python overlay will be used later; all text must be rendered by the image model now
 """.strip()
 
-ANATOMY_IMAGE_TEMPLATE = """
+ANATOMY_MASTER_PROMPT_TEMPLATE = """
 FINAL INFOGRAPHIC MUST CONTAIN THE EXACT TEXT BELOW.
-Create an ultra-realistic educational anatomy infographic, vertical portrait 4:5 layout, scientific illustration style mixed with high-end macro photography.
-- one large realistic subject in clean side view, occupying about 75-85% of the canvas
-- macro close-up, biology laboratory specimen photography mood, extremely sharp focus
-- the body should remain natural and realistic, with a semi-transparent cutaway only where needed so important internal anatomy can be seen
-- preserve real external texture: eyes, skin/shell/exoskeleton, hairs/scales/veins/segments/legs/fins/wings when relevant
-- minimal laboratory-style background: soft light gray or pale blue gradient, no texture, no decoration, no landscape
-- no flowers, plants, hive, honeycomb, food styling, plate, hands, tools, or environmental scene unless explicitly required by the subject
-- only a soft studio shadow beneath the subject if needed
-- leave sufficient clean white space around the subject for educational labels
-- use thin black leader lines pointing precisely to each anatomical structure
-- each leader line must terminate at the exact center of the corresponding anatomical structure, never empty space or an adjacent structure
-- leader lines should not cross; curve or reroute them if necessary to avoid intersections
-- Vietnamese labels inside small rounded white rectangles with subtle shadow
-- modern sans-serif font, black text, consistent spacing, crisp and readable on mobile
-- labels must be neat, balanced around the subject, and must never overlap
-- every anatomical structure should have only one corresponding label; no duplicate labels
-- every pointer line must end exactly at the anatomical structure
-- no decorative title, no logo, no watermark, no signature, no brand name, no page name, no icon, no mascot, no border
-- no Python overlay will be used later; all text must be rendered by the image model now
+MASTER PROMPT — ULTRA-REALISTIC ANIMAL ANATOMY EDUCATIONAL INFOGRAPHIC
+
+Create an ultra-realistic, scientifically accurate educational anatomy infographic of a single adult [ANIMAL] ([SCIENTIFIC NAME]), presented as a premium biological anatomy plate.
+
+The image must combine:
+- professional macro photography
+- scientific anatomical illustration
+- museum-quality specimen presentation
+- modern educational infographic design
+- realistic anatomical cutaway visualization
+
+The final result should look like a premium zoology textbook illustration, natural history museum exhibit, National Geographic educational graphic, Smithsonian-style scientific plate, or professional biology reference material.
+
+==================================================
+1. SUBJECT IDENTITY
+==================================================
+
+Species:
+[ANIMAL]
+
+Scientific name:
+[SCIENTIFIC NAME]
+
+Life stage:
+adult specimen
+
+Sex:
+[MALE / FEMALE / EITHER / SPECIFY]
+
+The animal must be immediately recognizable as the correct species.
+
+Preserve authentic:
+- body proportions
+- body segmentation
+- skin / shell / scales / feathers / fur / exoskeleton
+- appendages
+- anatomical symmetry where applicable
+- species-specific external morphology
+- species-specific organs
+- species-specific locomotion structures
+- species-specific respiratory structures
+- species-specific digestive structures
+- species-specific reproductive structures
+
+Do not create a generic representation of the animal.
+
+The anatomy must reflect the actual biological organization of the specified species.
+
+Species-specific morphology details:
+[SPECIES APPEARANCE]
+
+==================================================
+2. VIEW AND BODY ORIENTATION
+==================================================
+
+Use the most anatomically informative viewing angle for the animal.
+
+Preferred composition:
+- side profile / lateral view when appropriate
+- three-quarter anatomical view when a strict side view would hide major structures
+- dorsal or ventral view only when necessary for anatomical clarity
+
+Species-specific orientation guidance:
+[SPECIES COMPOSITION]
+
+The body must be positioned naturally and realistically.
+
+Do not distort the specimen simply to make room for labels.
+
+The animal should occupy approximately 70–85% of the visual canvas.
+
+Keep the entire specimen visible whenever possible.
+
+Do not crop:
+- head
+- major appendages
+- tail
+- wings
+- legs
+- fins
+- antennae
+- claws
+- other diagnostically important external structures
+
+==================================================
+3. ANATOMICAL CUTAWAY SYSTEM
+==================================================
+
+Use a sophisticated scientific cutaway technique.
+
+The external body covering should remain partially visible and realistic while selectively becoming semi-transparent in anatomically important regions.
+
+The transparency must reveal internal structures naturally.
+
+Do NOT make the entire animal completely transparent.
+
+Instead use controlled anatomical windows:
+
+- retain realistic external surface texture
+- selectively reduce opacity around major organs
+- reveal organs beneath the external body wall
+- preserve realistic depth
+- preserve three-dimensional spatial relationships
+- avoid flat diagrammatic appearance
+
+Species-specific cutaway guidance:
+[SPECIES TRANSPARENCY]
+
+The cutaway should look physically believable, as though a professional scientific illustrator has carefully exposed selected anatomical regions.
+
+Internal organs must appear embedded within the correct body cavities.
+
+Do not arrange organs as floating objects.
+
+Do not separate organs from the body unnaturally.
+
+Do not make internal organs larger than anatomically possible.
+
+==================================================
+4. HEAD ANATOMY
+==================================================
+
+Accurately render every major external and internal structure of the head that is relevant to [ANIMAL].
+
+Include species-appropriate structures such as:
+
+- eyes
+- compound eyes where applicable
+- simple eyes / ocelli where applicable
+- antennae
+- mouth
+- jaws
+- teeth where applicable
+- tongue
+- nasal structures where applicable
+- ears / tympanum where applicable
+- brain
+- nerves
+- sensory organs
+
+CRITICAL RULE:
+
+Different visual or sensory organs must remain anatomically distinct.
+
+If the species has compound eyes and simple eyes, show them as separate structures.
+
+If the species has specialized sensory structures, preserve their real anatomical position and morphology.
+
+Every sensory organ must be visibly distinguishable before labels are added.
+
+==================================================
+5. BODY REGIONS
+==================================================
+
+Accurately identify the major body regions according to the biology of the species.
+
+Examples where applicable:
+
+- head
+- neck
+- thorax
+- abdomen
+- cephalothorax
+- trunk
+- tail
+- shell
+- carapace
+- plastron
+- dorsal body region
+- ventral body region
+
+Do not force anatomical terminology that does not apply to the species.
+
+Use scientifically appropriate terminology for the specified animal.
+
+==================================================
+6. SKELETAL / SUPPORT STRUCTURES
+==================================================
+
+Reveal the appropriate support system for the animal.
+
+Depending on the species, show:
+
+- bones
+- skull
+- vertebral column
+- ribs
+- joints
+- cartilage
+- exoskeleton
+- shell
+- carapace
+- internal supporting structures
+- specialized skeletal structures
+
+Bones should have realistic ivory / off-white coloration.
+
+Exoskeletons should preserve realistic material texture.
+
+Shells and hard anatomical structures should retain realistic thickness and layering.
+
+Never invent bones or support structures.
+
+==================================================
+7. MUSCULAR SYSTEM
+==================================================
+
+Show major functional muscle groups relevant to the animal.
+
+Muscles should have realistic biological texture.
+
+Use natural deep pink, reddish, burgundy, or brownish biological coloration depending on species.
+
+Show especially important locomotion muscles.
+
+Examples:
+
+- flight muscles
+- jumping muscles
+- swimming muscles
+- jaw muscles
+- leg muscles
+- tail muscles
+- respiratory muscles where applicable
+- trunk muscles
+
+Muscle groups must remain attached to the correct skeletal or supporting structures.
+
+Do not display disconnected muscle bundles.
+
+==================================================
+8. RESPIRATORY SYSTEM
+==================================================
+
+Show the correct respiratory anatomy for the specified animal.
+
+Examples:
+
+Insects:
+- spiracles
+- tracheal trunks
+- tracheoles
+
+Fish:
+- gills
+- gill arches
+- filaments
+- lamellae
+
+Birds:
+- lungs
+- air sacs
+- trachea
+
+Mammals:
+- nasal passages
+- trachea
+- bronchi
+- lungs
+
+Amphibians:
+- lungs
+- skin-related respiratory structures where relevant
+
+Reptiles:
+- lungs
+- trachea
+- bronchi
+
+The respiratory system must be species-appropriate.
+
+Never mix anatomical systems between unrelated animal groups.
+
+==================================================
+9. DIGESTIVE SYSTEM
+==================================================
+
+Show the appropriate digestive tract from entrance to exit.
+
+Where applicable, include:
+
+- mouth
+- esophagus
+- crop
+- stomach
+- proventriculus
+- gizzard
+- midgut
+- small intestine
+- large intestine
+- ceca
+- rectum
+- cloaca
+- digestive glands
+- liver
+- pancreas
+- hepatopancreas
+- anus
+
+Each organ must appear in its actual anatomical sequence.
+
+Organs must be correctly connected.
+
+Do not create random isolated digestive organs.
+
+==================================================
+10. CIRCULATORY SYSTEM
+==================================================
+
+Show the appropriate circulatory anatomy.
+
+Depending on the animal, include:
+
+- heart
+- vessels
+- arteries
+- veins
+- capillary structures
+- dorsal vessel
+- hemolymphatic structures where applicable
+
+Use realistic biological colors.
+
+Maintain correct anatomical placement.
+
+Do not confuse circulatory organs with digestive or respiratory organs.
+
+==================================================
+11. NERVOUS SYSTEM
+==================================================
+
+Where appropriate, reveal:
+
+- brain
+- spinal cord
+- ventral nerve cord
+- ganglia
+- major peripheral nerves
+- sensory nerves
+
+The nervous system should appear delicate and anatomically integrated.
+
+Do not make nerves excessively thick.
+
+Do not make them resemble blood vessels.
+
+==================================================
+12. EXCRETORY SYSTEM
+==================================================
+
+Display the species-specific excretory organs.
+
+Examples:
+
+- kidneys
+- urinary structures
+- Malpighian tubules
+- rectal glands
+- specialized excretory organs
+
+The exact system must match the animal's biology.
+
+==================================================
+13. REPRODUCTIVE SYSTEM
+==================================================
+
+Show the anatomically appropriate reproductive structures.
+
+Depending on sex and species, include:
+
+- ovaries
+- testes
+- oviducts
+- uterus
+- sperm ducts
+- seminal structures
+- reproductive openings
+- ovipositor
+- eggs / follicles
+- cloaca
+- other species-specific reproductive organs
+
+If the image shows a female specimen, use anatomically correct female reproductive structures.
+
+If the image shows a male specimen, use male reproductive anatomy.
+
+Do not mix male and female structures.
+
+==================================================
+14. EXTERNAL ANATOMICAL STRUCTURES
+==================================================
+
+Clearly preserve all relevant external anatomical structures.
+
+Depending on the species, include:
+
+- antennae
+- eyes
+- mouthparts
+- wings
+- fins
+- legs
+- claws
+- hooves
+- paws
+- tails
+- whiskers
+- feathers
+- fur
+- scales
+- shell plates
+- carapace
+- body segments
+- specialized sensory structures
+
+External morphology must remain visually recognizable even where the body becomes transparent.
+
+==================================================
+15. COLOR AND MATERIAL REALISM
+==================================================
+
+Use realistic biological colors.
+
+External body colors must match the natural appearance of [ANIMAL].
+
+Internal structures should have subtle biological coloration rather than exaggerated neon colors.
+
+Species-specific organ color guidance:
+[SPECIES ORGAN COLORS]
+
+Suggested anatomy palette:
+
+Brain:
+light cream / ivory
+
+Nerves:
+pale cream / warm white
+
+Muscles:
+deep pink / reddish brown
+
+Blood vessels:
+dark red
+
+Heart:
+dark red
+
+Lungs:
+soft pink
+
+Liver:
+reddish brown
+
+Digestive tract:
+natural pink / beige / brown
+
+Gallbladder:
+deep green where applicable
+
+Fat:
+soft yellow
+
+Bones:
+warm ivory
+
+Cartilage:
+slightly translucent pale cream
+
+Glands:
+species-appropriate pale yellow / pink
+
+Air sacs:
+very pale translucent blue-white where applicable
+
+Do not oversaturate internal organs.
+
+Do not make anatomy look like a colorful fantasy diagram.
+
+==================================================
+16. LIGHTING
+==================================================
+
+Professional scientific laboratory lighting.
+
+Soft diffused illumination.
+
+Neutral white-balanced light.
+
+Subtle highlights on anatomical surfaces.
+
+Gentle shadows creating depth.
+
+No dramatic cinematic lighting.
+
+No horror lighting.
+
+No harsh spotlight.
+
+No colored studio lighting.
+
+The image should feel clean, precise, premium, scientific, and trustworthy.
+
+==================================================
+17. BACKGROUND
+==================================================
+
+Minimal premium scientific background.
+
+Preferred background:
+[SPECIES BACKGROUND]
+
+The background must remain visually quiet.
+
+No environmental scenery unless explicitly requested.
+
+Do not include:
+
+- grass
+- leaves
+- flowers
+- rocks
+- soil
+- ocean
+- trees
+- cages
+- kitchens
+- farms
+- laboratory equipment
+- people
+- hands
+- plates
+- food
+- unrelated objects
+
+The animal must remain the dominant visual element.
+
+==================================================
+18. VISUAL COMPOSITION
+==================================================
+
+Use a highly polished editorial layout.
+
+The specimen is the visual centerpiece.
+
+Labels should be distributed around the animal with excellent spacing.
+
+Keep sufficient negative space around the specimen for annotations.
+
+Do not overcrowd the image.
+
+Do not place labels directly on top of anatomical structures.
+
+Do not allow text boxes to touch the specimen unnecessarily.
+
+Create a visual hierarchy:
+
+1. animal
+2. major anatomical structures
+3. anatomical callouts
+4. secondary details
+
+The composition should feel calm, premium, balanced, and easy to scan.
+
+==================================================
+19. PRECISION ANATOMICAL CALLOUT SYSTEM
+==================================================
+
+EXTREMELY IMPORTANT.
+
+Leader lines must use precision callouts similar to professional medical, veterinary, zoological, and biological anatomy textbooks.
+
+Every callout line must connect directly from the label to the exact anatomical structure.
+
+Every leader line should terminate with either:
+
+- a small solid circular endpoint exactly touching the target structure
+
+OR
+
+- a fine arrowhead precisely indicating the exact anatomical location
+
+The endpoint must NEVER:
+
+- float in empty space
+- stop before reaching the structure
+- point to the general body region
+- touch a neighboring structure
+- point between two organs
+- terminate on a transparent region without identifying the organ
+- point to an unrelated structure
+
+The endpoint must physically touch or precisely indicate the intended anatomical structure.
+
+==================================================
+20. ANATOMICAL ANCHORING RULE
+==================================================
+
+Every label must have a unique anatomical anchor.
+
+The system must conceptually identify the target structure BEFORE drawing the leader line.
+
+For example:
+
+"Mắt kép"
+→ anchor specifically to the faceted compound eye surface
+
+"Mắt đơn"
+→ anchor specifically to the individual ocelli
+
+"Tim"
+→ anchor specifically to the heart tissue
+
+"Gan"
+→ anchor specifically to the liver
+
+"Khí quản"
+→ anchor specifically to the tracheal structure
+
+"Cơ cánh"
+→ anchor specifically to the flight muscle bundle
+
+Do not point merely toward the general anatomical area.
+
+==================================================
+21. DENSE ANATOMICAL REGION RULE
+==================================================
+
+When multiple organs are located close together:
+
+- move labels farther away from the body
+- maintain clean spacing
+- route each leader line independently
+- preserve exact anatomical anchors
+- avoid line intersections
+- avoid ambiguous arrows
+- avoid touching neighboring organs
+
+When necessary, leader lines may use gentle bends or elbows.
+
+Leader lines should automatically reroute around other labels.
+
+Never sacrifice anatomical accuracy merely to shorten a leader line.
+
+Accuracy has priority over line length.
+
+==================================================
+22. LABEL PLACEMENT
+==================================================
+
+Each anatomical label should appear inside a clean, elegant, white or very lightly tinted rounded rectangle.
+
+Use:
+
+- modern sans-serif typography
+- black or very dark neutral text
+- subtle shadow
+- consistent padding
+- consistent corner radius
+- consistent font size
+- consistent visual hierarchy
+
+Labels must remain readable at normal viewing size.
+
+Do not use decorative fonts.
+
+Do not use excessive typography effects.
+
+==================================================
+23. LABEL LANGUAGE
+==================================================
+
+All anatomical labels must be written in Vietnamese.
+
+Use the exact Vietnamese terminology supplied below.
+
+Do not translate labels incorrectly.
+
+Do not invent alternative terminology unless explicitly requested.
+
+ANATOMICAL LABELS:
+
+[ANATOMICAL LABELS]
+
+Every label must be:
+
+- correctly spelled
+- fully visible
+- correctly accented
+- anatomically accurate
+- connected to exactly one structure
+
+==================================================
+24. LABEL PRIORITY
+==================================================
+
+If the number of anatomical structures is too large for the canvas, prioritize:
+
+LEVEL 1 — major organs and visually important structures
+
+LEVEL 2 — major external structures
+
+LEVEL 3 — secondary internal structures
+
+LEVEL 4 — microscopic structures
+
+Do not overcrowd the image merely to include every possible anatomical detail.
+
+Preserve visual clarity.
+
+The most educational structures should receive the clearest and most prominent labels.
+
+==================================================
+25. ANATOMICAL ACCURACY CHECK
+==================================================
+
+Before finalizing the image, conceptually validate the anatomy.
+
+Check:
+
+- species identity
+- body segmentation
+- organ placement
+- organ proportions
+- organ connectivity
+- symmetry
+- external morphology
+- number of limbs
+- number of eyes
+- number of wings
+- reproductive anatomy
+- respiratory anatomy
+- digestive anatomy
+- circulatory anatomy
+- nervous anatomy
+- support structures
+- muscle placement
+
+Never add fictional organs.
+
+Never duplicate organs.
+
+Never remove major organs.
+
+Never mix anatomy from another animal species.
+
+Never use mammalian anatomy for an insect.
+
+Never use insect anatomy for a crustacean.
+
+Never use bird anatomy for a mammal.
+
+Species-specific anatomy always takes priority.
+
+==================================================
+26. EDUCATIONAL VISUAL QUALITY
+==================================================
+
+The final image should communicate scientific information immediately.
+
+A viewer should be able to understand:
+
+- what animal this is
+- where major organs are located
+- how the body is organized
+- which external structures perform important functions
+- how different organ systems fit together
+
+The result should be visually fascinating but scientifically responsible.
+
+It should feel like an image that people would stop scrolling to inspect.
+
+[SCENE GUIDANCE]
+
+==================================================
+27. AESTHETIC QUALITY
+==================================================
+
+Premium editorial art direction.
+
+Elegant.
+
+Clean.
+
+Sophisticated.
+
+Modern.
+
+Scientific.
+
+Natural.
+
+Visually balanced.
+
+High information density without visual clutter.
+
+Use generous negative space.
+
+Avoid cheap-looking AI infographic aesthetics.
+
+Avoid excessive arrows.
+
+Avoid excessive boxes.
+
+Avoid rainbow colors.
+
+Avoid unnecessary icons.
+
+Avoid decorative elements.
+
+==================================================
+28. PHOTOREALISM
+==================================================
+
+Ultra-photorealistic anatomy.
+
+Macro-level surface detail.
+
+Highly realistic textures.
+
+Natural material properties.
+
+Realistic translucency.
+
+Realistic depth.
+
+Accurate reflections.
+
+Subtle biological imperfections.
+
+The specimen should feel like a real biological organism rather than a 3D-rendered toy.
+
+==================================================
+29. TEXT QUALITY
+==================================================
+
+All Vietnamese text must be rendered cleanly.
+
+Correct Vietnamese diacritics are mandatory.
+
+No:
+
+- spelling errors
+- missing accents
+- duplicated characters
+- truncated words
+- random English
+- gibberish
+- fake symbols
+- malformed typography
+
+Every label should be fully readable.
+
+Do not create additional text that was not requested.
+
+==================================================
+30. STRICT CLEAN IMAGE REQUIREMENT
+==================================================
+
+Do not include any:
+
+- logo
+- watermark
+- brand name
+- page name
+- creator name
+- signature
+- copyright text
+- website URL
+- QR code
+- social media icon
+- badge
+- stamp
+- promotional text
+- decorative title
+- banner
+- unrelated labels
+- identifying marks
+
+The final image must be completely clean and free of all unwanted overlays.
+
+==================================================
+31. NEGATIVE PROMPT
+==================================================
+
+logo, watermark, brand name, page name, signature, copyright, copyright text, website URL, QR code, social media icon, promotional banner, badge, stamp, decorative title, unrelated text, unrelated labels, cartoon, anime, manga, fantasy creature, monster, toy, plastic texture, generic CGI, cheap 3D render, incorrect anatomy, fictional organs, duplicated organs, missing organs, incorrect body proportions, incorrect species, mixed-species anatomy, distorted organs, misplaced organs, floating organs, disconnected organs, incorrect eye anatomy, incorrect limb count, incorrect wing count, incorrect segmentation, malformed head, malformed body, malformed appendages, distorted skeleton, unrealistic muscles, unrealistic internal organs, blurry anatomy, low resolution, noisy image, excessive contrast, excessive saturation, neon organs, dramatic lighting, dark background, cluttered composition, crowded labels, overlapping labels, crossed leader lines, floating leader lines, inaccurate pointer lines, pointer lines ending in empty space, pointer lines pointing to neighboring structures, ambiguous callouts, unreadable text, misspelled Vietnamese, missing Vietnamese accents, truncated labels, extra animals, people, hands, environmental scenery, decorative objects.
 """.strip()
+
+ANATOMY_IMAGE_TEMPLATE = ANATOMY_MASTER_PROMPT_TEMPLATE
 
 TEXT_DEDUP_RULES = """
 Global text safety rules:
@@ -547,53 +1415,68 @@ def matchup_stat_lines(animal: dict) -> list[str]:
 def anatomy_label_rows(topic: dict) -> str:
     rows = []
     for index, part in enumerate(topic["labels"], start=1):
+        target = part.get("target_en", "").strip()
+        label_vi = part.get("label_vi", "").strip()
+        desc = part.get("description_vi", "").strip()
         rows.append(
-            "\n".join(
-                [
-                    f"Label {index}:",
-                    f"- Visible label text: {part['label_vi']}",
-                    f"- Pointer target: {part['target_en']}",
-                    f"- Anatomy guidance: {part['description_vi']}",
-                ]
-            )
+            f"Label {index}:\n"
+            f"- Visible label text: {label_vi}\n"
+            f"- Anatomical anchor target: {target}\n"
+            f"- Pointer rule: Leader line must connect from '{label_vi}' directly and terminate precisely at {target} (no floating endpoint, no neighboring structure)\n"
+            f"- Biological guidance: {desc}"
         )
-    return "\n".join(rows)
+    return "\n\n".join(rows)
 
 
 def build_anatomy_image_prompt(topic: dict, content: dict) -> str:
     scene_prompt = " ".join((content.get("image_prompt") or "").split()).strip()
-    return (
-        f"{ANATOMY_IMAGE_TEMPLATE}\n\n"
-        "Main subject:\n"
-        f"- Subject: one large realistic {topic['animal_en']} ({topic['animal_vi']}).\n"
-        f"- Composition: {topic['composition_en']}.\n"
-        f"- Transparency/anatomy: {topic['transparency_en']}.\n"
-        f"- External appearance: {topic.get('appearance_en', 'preserve the natural appearance, real body texture, realistic proportions, and accurate visible anatomy')}.\n"
-        f"- Internal organ colors: {topic.get('organ_colors_en', 'use subtle realistic biological colors; keep organs natural, not neon or cartoon-like')}.\n"
-        f"- Background: {topic.get('background_en', 'simple light grey-blue background, clean and minimal')}.\n\n"
-        "Vietnamese labels to render exactly, with pointer lines to the correct body part:\n"
-        f"{anatomy_label_rows(topic)}\n\n"
-        "Strict text rules:\n"
-        "- Render Vietnamese diacritics correctly.\n"
-        "- Render every visible label text exactly once.\n"
-        "- Do not add a title, subtitle, corner text, logo, watermark, page name, brand name, icon, mascot, caption, or decorative text.\n"
-        "- Do not translate, uppercase, paraphrase, duplicate, mirror, or restate any label.\n"
-        "- Do not add fake labels, placeholder labels, random symbols, numbers, UI text, or lorem ipsum.\n"
-        "- If label space is tight, reduce font size, move labels outward, or shorten pointer lines; never crop or overlap labels.\n"
-        "- Pointer lines must be thin black lines and must connect to the correct body part.\n"
-        "- Final self-check before output: visible text must be only the exact Vietnamese labels listed above.\n\n"
-        "Negative prompt:\n"
-        "logo, watermark, brand name, page name, text in the corner, decorative title, blurry text, misspelled Vietnamese, "
-        "overlapping labels, messy lines, cartoon style, anime, 3D toy style, fantasy animal, exaggerated anatomy, duplicate limbs, "
-        "duplicate wings, duplicate legs, extra organs, food photo, cooked animal, plate, chopsticks, sauce, flowers, plants, hive, honeycomb, "
-        "beekeeper, kitchen background, landscape background, dark background, colorful background, excessive shadows, low resolution, "
-        "cropped body, distorted body, distorted anatomy, wrong labels, cluttered composition\n\n"
-        "Style:\n"
-        "Ultra high resolution, scientific museum quality, biology textbook illustration, National Geographic style macro realism, "
-        "accurate anatomy, clean layout, balanced typography, perfect readability, viewer-friendly, suitable for Facebook educational posts and science learning.\n\n"
-        "Additional visual guidance from text model, use only if it does not conflict with exact label rules:\n"
-        f"{scene_prompt}"
+    scene_guidance = (
+        f"Additional visual and biological guidance from specialist:\n{scene_prompt}"
+        if scene_prompt
+        else ""
     )
+
+    animal_name = f"{topic['animal_en']} ({topic['animal_vi']})"
+    scientific_name = (
+        topic.get("scientific_name")
+        or topic.get("species_latin")
+        or topic.get("animal_en")
+        or "adult biological specimen"
+    )
+    sex = topic.get("sex") or "adult specimen"
+    species_composition = topic.get(
+        "composition_en",
+        "side profile / lateral view, animal positioned naturally and occupying about 70-85% of the canvas",
+    )
+    species_transparency = topic.get(
+        "transparency_en",
+        "semi-transparent cutaway windows revealing major internal organs naturally while preserving realistic external body texture",
+    )
+    species_appearance = topic.get(
+        "appearance_en",
+        "preserve natural body texture, authentic proportions, accurate visible anatomy, and realistic surface details",
+    )
+    species_organ_colors = topic.get(
+        "organ_colors_en",
+        "use subtle realistic biological colors; keep organs natural, not neon or cartoon-like",
+    )
+    species_background = topic.get(
+        "background_en",
+        "minimal cool pale grey gradient, clean museum specimen backdrop",
+    )
+
+    prompt = ANATOMY_MASTER_PROMPT_TEMPLATE
+    prompt = prompt.replace("[ANIMAL]", animal_name)
+    prompt = prompt.replace("[SCIENTIFIC NAME]", scientific_name)
+    prompt = prompt.replace("[MALE / FEMALE / EITHER / SPECIFY]", sex)
+    prompt = prompt.replace("[SPECIES COMPOSITION]", species_composition)
+    prompt = prompt.replace("[SPECIES TRANSPARENCY]", species_transparency)
+    prompt = prompt.replace("[SPECIES APPEARANCE]", species_appearance)
+    prompt = prompt.replace("[SPECIES ORGAN COLORS]", species_organ_colors)
+    prompt = prompt.replace("[SPECIES BACKGROUND]", species_background)
+    prompt = prompt.replace("[ANATOMICAL LABELS]", anatomy_label_rows(topic))
+    prompt = prompt.replace("[SCENE GUIDANCE]", scene_guidance)
+    return prompt
 
 
 def matchup_caption(topic: dict, content: dict) -> str:
