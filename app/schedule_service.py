@@ -329,7 +329,11 @@ def ensure_future_posts_for_batch(
         )
         created.extend(batch_created)
     else:
-        created = prepare_future_posts_for_batch(posts_to_create=target_future_posts)
+        batch_safe_start_iso = (now + timedelta(hours=4)).strftime("%Y-%m-%d %H:%M:%S")
+        created = prepare_future_posts_for_batch(
+            posts_to_create=target_future_posts,
+            start_after_iso=batch_safe_start_iso,
+        )
 
     batch_created_count = sum(1 for post in created if post.get("mode") == "batch_new")
     batch = submit_pending_image_batch(limit=100) if (batch_created_count or list_posts_for_batch_submission(limit=1)) else {
