@@ -1,3 +1,4 @@
+import time
 import requests
 
 from app.config import (
@@ -18,44 +19,78 @@ def ensure_deepseek_config():
         raise RuntimeError("Missing ANIMAL_AGENT_DEEPSEEK_API_KEY")
 
 
-def generate_json(prompt: str, system: str | None = None, max_tokens: int = 4096) -> dict:
+def generate_json(
+    prompt: str,
+    system: str | None = None,
+    max_tokens: int = 4096,
+    retries: int = 3,
+) -> dict:
     ensure_deepseek_config()
     messages = []
     if system:
         messages.append({"role": "system", "content": system})
     messages.append({"role": "user", "content": prompt})
 
-    response = requests.post(
-        f"{DEEPSEEK_BASE_URL}/chat/completions",
-        headers={
-            "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
-            "Content-Type": "application/json",
-        },
-        json={
-            "model": DEEPSEEK_TEXT_MODEL,
-            "messages": messages,
-            "response_format": {"type": "json_object"},
-            "thinking": {"type": "disabled"},
-            "stream": False,
-            "max_tokens": max_tokens,
-        },
-        timeout=DEEPSEEK_TIMEOUT_SECONDS,
-    )
+    last_error = None
+    for attempt in range(retries):
+        try:
+            response = requests.post(
+                f"{DEEPSEEK_BASE_URL}/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "model": DEEPSEEK_TEXT_MODEL,
+                    "messages": messages,
+                    "response_format": {"type": "json_object"},
+                    "thinking": {"type": "disabled"},
+                    "stream": False,
+                    "max_tokens": max_tokens,
+                },
+                timeout=DEEPSEEK_TIMEOUT_SECONDS,
+            )
+            result = response.json()
+        except (requests.RequestException, ValueError, TimeoutError) as exc:
+            last_error = exc
+            if attempt < retries - 1:
+                time.sleep(3 * (2 ** attempt))
+                continue
+            raise DeepSeekError(f"DeepSeek request failed: {exc}") from exc
 
-    try:
-        result = response.json()
-    except ValueError as exc:
-        raise DeepSeekError(f"DeepSeek returned non-JSON response: {response.text[:500]}") from exc
+        if response.status_code >= 400 or "error" in result:
+            err_msg = str(result.get("error") or result)
+            last_error = DeepSeekError(err_msg)
+            if attempt < retries - 1:
+                time.sleep(3 * (2 ** attempt))
+                continue
+            raise DeepSeekError(err_msg)
 
-    if response.status_code >= 400 or "error" in result:
-        raise DeepSeekError(str(result))
+        choices = result.get("choices") or []
+        if not choices:
+            last_error = DeepSeekError(f"DeepSeek returned no choices: {result}")
+            if attempt < retries - 1:
+                time.sleep(2)
+                continue
+            raise last_error
 
-    choices = result.get("choices") or []
-    if not choices:
-        raise DeepSeekError(f"DeepSeek returned no choices: {result}")
+        content = (choices[0].get("message") or {}).get("content", "")
+        if not content:
+            last_error = DeepSeekError(f"DeepSeek returned empty content: {result}")
+            if attempt < retries - 1:
+                time.sleep(2)
+                continue
+            raise last_error
 
-    content = (choices[0].get("message") or {}).get("content", "")
-    if not content:
-        raise DeepSeekError(f"DeepSeek returned empty content: {result}")
+        try:
+            return safe_json_loads(content)
+        except Exception as exc:
+            last_error = exc
+            if attempt < retries - 1:
+                time.sleep(2)
+                continue
+            raise
 
-    return safe_json_loads(content)
+    if last_error:
+        raise last_error
+    raise DeepSeekError("Failed to generate content from DeepSeek")
