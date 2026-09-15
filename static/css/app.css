@@ -438,6 +438,82 @@ textarea {
   color: var(--danger);
 }
 
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.comment-item {
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.comment-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.comment-slot {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.comment-msg {
+  margin: 0;
+  font-family: inherit;
+  font-size: 13px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: var(--bg);
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+
+.product-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.badge-sold {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #fef08a;
+  color: #854d0e;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.product-link {
+  font-size: 13px;
+  color: var(--accent);
+  word-break: break-all;
+  font-weight: 500;
+}
+
+.product-link:hover {
+  text-decoration: underline;
+  color: var(--accent-dark);
+}
+
 @media (max-width: 900px) {
   .topbar {
     padding: 0 16px;

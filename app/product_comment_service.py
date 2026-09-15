@@ -173,13 +173,18 @@ CATEGORY_KEYWORDS = {
     "reptile_amphibian": (
         "snake",
         "ran ho mang",
+        "ran",
         "crocodile",
+        "ca sau",
         "alligator",
         "frog",
-        "thằn lan",
+        "ech",
+        "nhai",
         "than lan",
+        "tac ke",
         "lizard",
         "turtle",
+        "rua",
     ),
     "animal_toy": (
         "thu bong",
@@ -431,7 +436,7 @@ def rank_products_for_context(
         title_score = text_match_score(title, product, token_weight=14, category_weight=2)
         caption_score = text_match_score(caption, product, token_weight=5, category_weight=1)
         topic_score = text_match_score(topic_text, product, token_weight=3, category_weight=1)
-        score = title_score or caption_score or topic_score
+        score = title_score + caption_score + topic_score
         ranked.append((score, product))
 
     def sort_key(item):
@@ -496,6 +501,29 @@ def pick_products_for_context(
     products = load_products()
     if not products:
         return []
+
+    has_context = bool(title or caption or topic_type or topic_payload)
+    if has_context:
+        ranked = rank_products_for_context(
+            products,
+            seed=seed,
+            title=title,
+            caption=caption,
+            topic_type=topic_type,
+            topic_payload=topic_payload,
+        )
+        selected = []
+        seen_links = set()
+        for score, product in ranked:
+            link = product.get("link", "")
+            if link and link in seen_links:
+                continue
+            seen_links.add(link)
+            selected.append(product)
+            if len(selected) >= count:
+                break
+        if selected:
+            return selected
 
     return fallback_pick_products(products, seed, count)
 

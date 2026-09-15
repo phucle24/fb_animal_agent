@@ -106,7 +106,7 @@ python scripts/ensure_future_posts_batch.py
 Caption bài mới tự thêm:
 
 ```text
-#thegioimuonloai #topdongbat #reivewthegioidongvat #khamphatunhien
+#thegioimuonloai #topdongvat #reviewthegioidongvat #khamphatunhien #thegioidongvat #thucvatdongvat
 ```
 
 Muốn cập nhật caption các bài đã tạo nhưng chưa đăng:

@@ -5,10 +5,11 @@ from zoneinfo import ZoneInfo
 from flask import Flask, abort, flash, redirect, render_template, request, send_file, url_for
 
 from app.batch_service import poll_all_image_batches, submit_pending_image_batch
-from app.config import BASE_DIR, TIMEZONE, WEB_HOST, WEB_PORT, WEB_SECRET_KEY
+from app.config import BASE_DIR, PRODUCT_COMMENTS_PER_POST, TIMEZONE, WEB_HOST, WEB_PORT, WEB_SECRET_KEY
 from app.db import (
     batch_publish_overview,
     dashboard_stats,
+    get_conn,
     get_post,
     init_db,
     list_posts,
@@ -17,7 +18,10 @@ from app.db import (
     update_status,
 )
 from app.facebook_service import publish_photo
-from app.product_comment_service import schedule_product_comments_for_post
+from app.product_comment_service import (
+    pick_products_for_context,
+    schedule_product_comments_for_post,
+)
 from app.schedule_service import prepare_one_test_post, prepare_weekly_posts, prepare_weekly_posts_for_batch
 
 
@@ -50,7 +54,33 @@ def create_app() -> Flask:
         post = get_post(post_id)
         if not post:
             abort(404)
-        return render_template("post_detail.html", post=post)
+
+        conn = get_conn()
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT * FROM post_product_comments WHERE post_id = ? ORDER BY comment_index ASC",
+            (post_id,),
+        )
+        comments = [dict(r) for r in cur.fetchall()]
+        conn.close()
+
+        preview_products = []
+        if not comments:
+            preview_products = pick_products_for_context(
+                post_id,
+                count=PRODUCT_COMMENTS_PER_POST,
+                title=post["title"],
+                caption=post["caption"],
+                topic_type=post["topic_type"],
+                topic_payload=post["topic_payload"],
+            )
+
+        return render_template(
+            "post_detail.html",
+            post=post,
+            comments=comments,
+            preview_products=preview_products,
+        )
 
     @flask_app.post("/actions/init-db")
     def action_init_db():

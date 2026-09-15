@@ -978,22 +978,29 @@ MODEL_RENDERED_TOPIC_TYPES = {
     *ENGAGEMENT_TOPIC_TYPES,
 }
 
-CAPTION_HASHTAGS = "#thegioimuonloai #topdongbat #reivewthegioidongvat #khamphatunhien #thegioidongvat #thucvatdongvat"
+CAPTION_HASHTAGS = "#thegioimuonloai #topdongvat #reviewthegioidongvat #khamphatunhien #thegioidongvat #thucvatdongvat"
 MODEL_RENDERED_TEXT_MARKER = "FINAL INFOGRAPHIC MUST CONTAIN THE EXACT TEXT BELOW."
 AI_DISCLAIMERS = (
     "Ảnh minh họa AI.",
     "Ảnh minh hoạ AI.",
     "Ảnh AI minh họa.",
     "Ảnh AI minh hoạ.",
+    "Ảnh minh họa AI",
+    "Ảnh minh hoạ AI",
+    "Ảnh AI minh họa",
+    "Ảnh AI minh hoạ",
+    "Ảnh: AI minh họa",
+    "Ảnh: AI minh hoạ",
     "AI illustration.",
+    "AI illustration",
 )
 DRY_CAPTION_OPENERS = (
-    r"^\s*Bạn\s+có\s+biết\s+rằng\s*[,:\-–—]?\s*",
-    r"^\s*Bạn\s+có\s+biết\s*[,:\-–—]?\s*",
-    r"^\s*Trong\s+thế\s+giới\s+động\s+vật\s*[,:\-–—]?\s*",
-    r"^\s*Trong\s+thế\s+giới\s+tự\s+nhiên\s*[,:\-–—]?\s*",
-    r"^\s*Thiên\s+nhiên\s+luôn\s+ẩn\s+chứa\s+những\s+điều\s+kỳ\s+diệu\s*[,.\-–—]?\s*",
-    r"^\s*Thiên\s+nhiên\s+luôn\s*[,:\-–—]?\s*",
+    r"^\s*Bạn\s+có\s+biết\s+rằng\s*[,.?:\-–—]?\s*",
+    r"^\s*Bạn\s+có\s+biết\s*[,.?:\-–—]?\s*",
+    r"^\s*Trong\s+thế\s+giới\s+động\s+vật\s*[,.?:\-–—]?\s*",
+    r"^\s*Trong\s+thế\s+giới\s+tự\s+nhiên\s*[,.?:\-–—]?\s*",
+    r"^\s*Thiên\s+nhiên\s+luôn\s+ẩn\s+chứa\s+những\s+điều\s+kỳ\s+diệu\s*[,.?:\-–—]?\s*",
+    r"^\s*Thiên\s+nhiên\s+luôn\s*[,.?:\-–—]?\s*",
 )
 CAPTION_CLICHE_REPLACEMENTS = (
     ("là một khả năng đặc biệt", "là một chi tiết"),
@@ -1016,6 +1023,16 @@ CAPTION_CLICHE_REPLACEMENTS = (
         "Chiến lược sinh tồn giúp nó chịu được điều kiện khắc nghiệt",
         "Cách sinh tồn riêng giúp nó vượt qua môi trường khắc nghiệt",
     ),
+    ("không khỏi ngỡ ngàng", "bất ngờ"),
+    ("Không khỏi ngỡ ngàng", "Bất ngờ"),
+    ("không khỏi kinh ngạc", "bất ngờ"),
+    ("Không khỏi kinh ngạc", "Bất ngờ"),
+    ("bí ẩn chưa có lời giải", "cơ chế đặc biệt"),
+    ("Bí ẩn chưa có lời giải", "Cơ chế đặc biệt"),
+    ("thế giới tự nhiên muôn màu", "thế giới hoang dã"),
+    ("Thế giới tự nhiên muôn màu", "Thế giới hoang dã"),
+    ("minh chứng cho sự kỳ diệu", "cho thấy sự thích nghi"),
+    ("Minh chứng cho sự kỳ diệu", "Cho thấy sự thích nghi"),
     ("vô cùng", "rất"),
     ("Vô cùng", "Rất"),
     ("khiến ai cũng", "dễ khiến người xem"),
@@ -1093,7 +1110,7 @@ def strip_generated_hashtags(text: str) -> str:
 def normalize_caption_opening(text: str) -> str:
     cleaned = text.strip()
     for pattern in DRY_CAPTION_OPENERS:
-        next_cleaned = re.sub(pattern, "", cleaned, count=1, flags=re.IGNORECASE).lstrip(" ,.:;-–—")
+        next_cleaned = re.sub(pattern, "", cleaned, count=1, flags=re.IGNORECASE).lstrip(" ,.?:;-–—")
         if next_cleaned != cleaned:
             return capitalize_first_letter(next_cleaned.strip())
     return cleaned

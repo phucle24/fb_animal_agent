@@ -126,8 +126,6 @@ def overlay_single_card(
         draw_text(draw, (85, hook_y), line, hook_font, (245, 245, 245, 255), stroke_width=1)
         hook_y += 42
 
-    draw_text(draw, (60, 1290), "Ảnh minh họa AI", small_font, (255, 255, 255, 220))
-
     out = Image.alpha_composite(img, overlay).convert("RGB")
     out.save(final_path, quality=95)
     return final_path
@@ -214,8 +212,6 @@ def overlay_comparison_top5(
             fill=(255, 196, 30, 255),
         )
         draw_text(draw, (badge_x1 + 20, badge_y1 + 10), badge_text, row_stat_font, (0, 0, 0, 255))
-
-    draw_text(draw, (60, 1295), "Ảnh minh họa AI", small_font, (255, 255, 255, 220))
 
     out = Image.alpha_composite(img, overlay).convert("RGB")
     out.save(final_path, quality=95)

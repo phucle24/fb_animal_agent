@@ -72,6 +72,38 @@
         </dl>
       {% endif %}
 
+      {% if comments %}
+        <h2>Bình luận sản phẩm đã lên lịch ({{ comments|length }})</h2>
+        <div class="comments-list">
+          {% for c in comments %}
+            <div class="comment-item">
+              <div class="comment-meta">
+                <span class="status status-{{ c.status|lower }}">{{ c.status }}</span>
+                <span class="comment-slot">Comment #{{ c.comment_index }}</span>
+                <span class="comment-time">{{ c.scheduled_at }}</span>
+              </div>
+              <pre class="comment-msg">{{ c.message }}</pre>
+              <a href="{{ c.product_link }}" target="_blank" rel="noopener" class="product-link">🔗 {{ c.product_name }}</a>
+            </div>
+          {% endfor %}
+        </div>
+      {% elif preview_products %}
+        <h2>Sản phẩm Shopee khớp ngữ cảnh ({{ preview_products|length }})</h2>
+        <div class="comments-list">
+          {% for p in preview_products %}
+            <div class="comment-item">
+              <div class="product-header">
+                <strong>{{ p.name }}</strong>
+                {% if p.sold %}
+                  <span class="badge-sold">Đã bán {{ p.sold }}</span>
+                {% endif %}
+              </div>
+              <a href="{{ p.link }}" target="_blank" rel="noopener" class="product-link">👉 {{ p.link }}</a>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
       {% if post.fb_post_id %}
         <h2>Facebook</h2>
         <p class="mono">{{ post.fb_post_id }}</p>
