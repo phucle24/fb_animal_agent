@@ -6,10 +6,12 @@ from zoneinfo import ZoneInfo
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app.config import (
+    DONATE_COMMENT_DELAY_AFTER_AFF_MINUTES,
     DONATE_COMMENT_DELAY_MINUTES,
     DONATE_COMMENT_LOOKBACK_HOURS,
     DONATE_COMMENT_SCAN_LIMIT,
     DONATE_COMMENT_URL,
+    PRODUCT_COMMENT_VIDEO_DELAY_MINUTES,
     TIMEZONE,
 )
 from app.facebook_service import list_recent_page_posts, list_recent_page_reels, list_recent_page_videos
@@ -40,9 +42,11 @@ if __name__ == "__main__":
     now = datetime.now(tz)
     lookback_start = now - timedelta(hours=DONATE_COMMENT_LOOKBACK_HOURS)
 
-    print_section("Donate config")
+    print_section("Comment schedule config")
+    print(f"PRODUCT_COMMENT_VIDEO_DELAY_MINUTES={PRODUCT_COMMENT_VIDEO_DELAY_MINUTES} (affiliate link)")
+    print(f"DONATE_COMMENT_DELAY_AFTER_AFF_MINUTES={DONATE_COMMENT_DELAY_AFTER_AFF_MINUTES}")
+    print(f"DONATE_COMMENT_DELAY_MINUTES={DONATE_COMMENT_DELAY_MINUTES} (donate link)")
     print(f"DONATE_COMMENT_URL={DONATE_COMMENT_URL or '-'}")
-    print(f"DONATE_COMMENT_DELAY_MINUTES={DONATE_COMMENT_DELAY_MINUTES}")
     print(f"DONATE_COMMENT_SCAN_LIMIT={DONATE_COMMENT_SCAN_LIMIT}")
     print(f"DONATE_COMMENT_LOOKBACK_HOURS={DONATE_COMMENT_LOOKBACK_HOURS}")
     print(f"Now={now.strftime('%Y-%m-%d %H:%M:%S %Z')}")
@@ -72,10 +76,12 @@ if __name__ == "__main__":
                 print("  missing created_time; queue logic will use current scan time as fallback")
             if created_at:
                 created_local = created_at.astimezone(tz)
-                scheduled_at = created_local + timedelta(minutes=DONATE_COMMENT_DELAY_MINUTES)
+                aff_scheduled = created_local + timedelta(minutes=PRODUCT_COMMENT_VIDEO_DELAY_MINUTES)
+                donate_scheduled = aff_scheduled + timedelta(minutes=DONATE_COMMENT_DELAY_AFTER_AFF_MINUTES)
                 print(
                     f"  local_created={created_local.strftime('%Y-%m-%d %H:%M:%S')} | "
-                    f"scheduled={scheduled_at.strftime('%Y-%m-%d %H:%M:%S')} | "
+                    f"aff_scheduled={aff_scheduled.strftime('%Y-%m-%d %H:%M:%S')} | "
+                    f"donate_scheduled={donate_scheduled.strftime('%Y-%m-%d %H:%M:%S')} | "
                     f"in_lookback={created_local >= lookback_start}"
                 )
 

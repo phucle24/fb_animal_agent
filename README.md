@@ -260,13 +260,14 @@ ANIMAL_AGENT_AUTO_GENERATE_TOPICS=true
 ANIMAL_AGENT_GENERATED_TOPICS_PATH=data/generated_topics.jsonl
 
 ANIMAL_AGENT_PRODUCT_LINKS_CSV=data/product_links.csv
-ANIMAL_AGENT_PRODUCT_COMMENT_IMAGE_DELAY_MINUTES=15
+ANIMAL_AGENT_PRODUCT_COMMENT_IMAGE_DELAY_MINUTES=30
 ANIMAL_AGENT_PRODUCT_COMMENT_VIDEO_DELAY_MINUTES=30
 ANIMAL_AGENT_PRODUCT_COMMENTS_PER_POST=2
-ANIMAL_AGENT_REEL_PRODUCT_COMMENTS_PER_POST=3
+ANIMAL_AGENT_REEL_PRODUCT_COMMENTS_PER_POST=2
 
 ANIMAL_AGENT_DONATE_COMMENT_URL=https://zypage.com/gopmotchut
-ANIMAL_AGENT_DONATE_COMMENT_DELAY_MINUTES=25
+ANIMAL_AGENT_DONATE_COMMENT_DELAY_AFTER_AFF_MINUTES=5
+ANIMAL_AGENT_DONATE_COMMENT_DELAY_MINUTES=35
 ANIMAL_AGENT_DONATE_COMMENT_SCAN_LIMIT=1
 ANIMAL_AGENT_DONATE_COMMENT_LOOKBACK_HOURS=72
 ```
@@ -323,21 +324,15 @@ CSV sản phẩm nên có các cột:
 - `Link ưu đãi`
 - `Doanh thu` hoặc `Lượt bán` nếu muốn comment hiện dạng `sản phẩm với hơn {giá trị} lượt bán`
 
-Luồng comment sản phẩm:
+Luồng comment sản phẩm & donate:
 
-- bài ảnh: tạo 2 comment sau khi bài đăng được 15 phút
-- bài video/reel thủ công: số comment theo `ANIMAL_AGENT_REEL_PRODUCT_COMMENTS_PER_POST`
-- mỗi bài chỉ tạo 1 lần
+- bài ảnh / bài viết do bot xuất bản: tạo comment sản phẩm (affiliate link) sau 30 phút, tiếp theo đó 5 phút (phút thứ 35) chèn thêm link kêu gọi donate nếu cấu hình `ANIMAL_AGENT_DONATE_COMMENT_URL`
+- bài video/reel thủ công / đăng hàng loạt: quét và lên lịch comment sản phẩm (affiliate link) sau 30 phút, tiếp theo đó 5 phút (phút thứ 35) chèn thêm link kêu gọi donate
+- số comment sản phẩm theo `ANIMAL_AGENT_PRODUCT_COMMENTS_PER_POST` hoặc `ANIMAL_AGENT_REEL_PRODUCT_COMMENTS_PER_POST`
+- mỗi bài / reel chỉ queue 1 lần để tránh trùng lặp
 - comment sản phẩm đầu tiên có lời kêu gọi like/share/follow và giải thích link Shopee hỗ trợ kênh
-- các comment sản phẩm còn lại chỉ gồm tên sản phẩm ngắn gọn, lượt bán nếu có, và link
-- link sản phẩm chỉ tự gắn cho bài do bot publish vì lúc đó bot có `fb_post_id` trong DB
-
-Luồng comment donate cho thước phim/reel:
-
-- timer comment quét Page posts/videos gần đây qua Graph API
-- nếu phát hiện reel/video đăng thủ công hoặc hàng loạt, bot queue 1 comment donate sau 15 phút
-- mỗi reel/video chỉ queue 1 lần để tránh spam
-- cần Page token có quyền đọc Page engagement và comment với tư cách Page
+- các comment sản phẩm tiếp theo gồm tên sản phẩm ngắn gọn, lượt bán nếu có, và link
+- comment donate có nội dung kêu gọi ủng hộ kênh / mời cà phê / góp một chút kinh phí duy trì nội dung kèm link `DONATE_COMMENT_URL`
 
 ### 6. Bật systemd cho chạy tự động
 

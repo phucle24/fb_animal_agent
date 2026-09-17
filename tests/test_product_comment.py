@@ -66,6 +66,99 @@ class TestProductCommentService(unittest.TestCase):
         self.assertIn("thêm mắm thêm muối cho những video tiếp theo giúp mình nhé", donate_templates_lower)
         self.assertIn("cứu bé ở đây với nhé", donate_templates_lower)
 
+    def test_schedule_timing_aff_at_30m_and_donate_at_35m(self):
+        from unittest.mock import patch
+        from datetime import datetime
+        from zoneinfo import ZoneInfo
+        from app.config import TIMEZONE
+        from app.product_comment_service import schedule_product_comments_for_post
+
+        tz = ZoneInfo(TIMEZONE)
+        posted_at = datetime(2026, 9, 17, 10, 0, 0, tzinfo=tz)
+        post = {
+            "id": 101,
+            "title": "Sư tử săn mồi",
+            "caption": "Chúa sơn lâm đại chiến",
+            "topic_type": "comparison_top5",
+            "topic_payload": "{}",
+            "final_image_path": "assets/final/101.mp4",
+        }
+
+        inserted_records = []
+
+        def mock_insert(data):
+            inserted_records.append(data)
+            return True
+
+        mock_products = [
+            {"name": "Đồ chơi sư tử", "link": "https://shopee.vn/lion", "sold": "100"},
+            {"name": "Mô hình hổ", "link": "https://shopee.vn/tiger", "sold": "200"},
+        ]
+
+        with patch("app.product_comment_service.pick_products_for_context", return_value=mock_products), \
+             patch("app.product_comment_service.insert_product_comment", side_effect=mock_insert), \
+             patch("app.product_comment_service.DONATE_COMMENT_URL", "https://zypage.com/gopmotchut"):
+
+            count = schedule_product_comments_for_post(post, "fb_test_post_101", posted_at=posted_at)
+            self.assertEqual(count, 3)
+
+            # Record 1: Affiliate product 1 scheduled at 10:30 (30 mins after post)
+            self.assertEqual(inserted_records[0]["comment_index"], 1)
+            self.assertEqual(inserted_records[0]["scheduled_at"], "2026-09-17 10:30:00")
+            self.assertEqual(inserted_records[0]["product_name"], "Đồ chơi sư tử")
+
+            # Record 2: Affiliate product 2 scheduled at 10:32
+            self.assertEqual(inserted_records[1]["comment_index"], 2)
+            self.assertEqual(inserted_records[1]["scheduled_at"], "2026-09-17 10:32:00")
+            self.assertEqual(inserted_records[1]["product_name"], "Mô hình hổ")
+
+            # Record 3: Donate link scheduled at 10:35 (35 mins after post, 5 mins after aff link)
+            self.assertEqual(inserted_records[2]["comment_index"], 3)
+            self.assertEqual(inserted_records[2]["scheduled_at"], "2026-09-17 10:35:00")
+            self.assertEqual(inserted_records[2]["product_name"], "Ủng hộ kênh")
+            self.assertIn("https://zypage.com/gopmotchut", inserted_records[2]["message"])
+
+    def test_schedule_recent_donate_comments_timing_and_order(self):
+        from unittest.mock import patch
+        from datetime import datetime
+        from zoneinfo import ZoneInfo
+        from app.config import TIMEZONE
+        from app.product_comment_service import schedule_recent_donate_comments
+
+        tz = ZoneInfo(TIMEZONE)
+        video_created = datetime(2026, 9, 17, 12, 0, 0, tzinfo=tz)
+        scan_now = datetime(2026, 9, 17, 12, 10, 0, tzinfo=tz)
+
+        mock_video_objects = [
+            {
+                "fb_post_id": "reel_video_999",
+                "created_at": video_created,
+                "source": "video_reels",
+                "title": "Gấu bắc cực săn mồi",
+                "caption": "Cuộc chiến sinh tồn của gấu tuyết",
+            }
+        ]
+
+        mock_products = [
+            {"name": "Gấu bông tuyết", "link": "https://shopee.vn/bear", "sold": "500"},
+        ]
+
+        with patch("app.product_comment_service.normalize_external_video_objects", return_value=mock_video_objects), \
+             patch("app.product_comment_service.pick_products_for_context", return_value=mock_products), \
+             patch("app.product_comment_service.DONATE_COMMENT_URL", "https://zypage.com/gopmotchut"):
+
+            results = schedule_recent_donate_comments(now=scan_now, dry_run=True)
+            self.assertEqual(len(results), 2)
+
+            # First item: Affiliate link at 12:30 (30 minutes after created)
+            self.assertEqual(results[0]["kind"], "product")
+            self.assertEqual(results[0]["scheduled_at"], "2026-09-17 12:30:00")
+            self.assertEqual(results[0]["product_name"], "Gấu bông tuyết")
+
+            # Second item: Donate link at 12:35 (35 minutes after created, 5 minutes after aff)
+            self.assertEqual(results[1]["kind"], "donate")
+            self.assertEqual(results[1]["scheduled_at"], "2026-09-17 12:35:00")
+
 
 if __name__ == "__main__":
     unittest.main()

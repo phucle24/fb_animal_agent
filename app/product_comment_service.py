@@ -9,6 +9,7 @@ from zoneinfo import ZoneInfo
 
 from app.config import (
     BASE_DIR,
+    DONATE_COMMENT_DELAY_AFTER_AFF_MINUTES,
     DONATE_COMMENT_DELAY_MINUTES,
     DONATE_COMMENT_LOOKBACK_HOURS,
     DONATE_COMMENT_SCAN_LIMIT,
@@ -765,9 +766,6 @@ def normalize_external_video_objects() -> list[dict]:
 
 
 def schedule_recent_donate_comments(now: datetime | None = None, dry_run: bool = False) -> list[dict]:
-    if not DONATE_COMMENT_URL:
-        return []
-
     tz = ZoneInfo(TIMEZONE)
     now = now or datetime.now(tz)
     if now.tzinfo is None:
@@ -781,43 +779,26 @@ def schedule_recent_donate_comments(now: datetime | None = None, dry_run: bool =
         if created_local < lookback_start:
             continue
 
-        scheduled_at = created_local + timedelta(minutes=DONATE_COMMENT_DELAY_MINUTES)
         external_id = external_post_id(item["fb_post_id"])
-        donate_data = {
-            "post_id": external_id,
-            "fb_post_id": item["fb_post_id"],
-            "comment_index": 1,
-            "product_name": "Ủng hộ kênh",
-            "product_link": DONATE_COMMENT_URL,
-            "message": build_donate_comment(item["fb_post_id"]),
-            "scheduled_at": scheduled_at.strftime("%Y-%m-%d %H:%M:%S"),
-        }
-        if dry_run:
-            donate_inserted = False
-        else:
-            donate_inserted = insert_product_comment_once(donate_data)
-        results.append(
-            {
-                "fb_post_id": item["fb_post_id"],
-                "scheduled_at": donate_data["scheduled_at"],
-                "inserted": donate_inserted,
-                "source": item["source"],
-                "kind": "donate",
-            }
-        )
-
         products = pick_products_for_context(
             external_id,
             REEL_PRODUCT_COMMENTS_PER_POST,
             title=item.get("title", ""),
             caption=item.get("caption", ""),
         )
+
+        aff_delay = PRODUCT_COMMENT_VIDEO_DELAY_MINUTES
+        aff_base_time = created_local + timedelta(minutes=aff_delay)
+        last_aff_scheduled_at = aff_base_time
+
+        # 1. Schedule Affiliate product comments first (comment_index = 1..N)
         for offset, product in enumerate(products, start=1):
-            product_scheduled_at = scheduled_at + timedelta(minutes=offset * 2)
+            product_scheduled_at = aff_base_time + timedelta(minutes=(offset - 1) * 2)
+            last_aff_scheduled_at = product_scheduled_at
             product_data = {
                 "post_id": external_id,
                 "fb_post_id": item["fb_post_id"],
-                "comment_index": offset + 1,
+                "comment_index": offset,
                 "product_name": product["name"],
                 "product_link": product["link"],
                 "message": build_product_comment(product, offset, seed=item["fb_post_id"]),
@@ -837,6 +818,39 @@ def schedule_recent_donate_comments(now: datetime | None = None, dry_run: bool =
                     "product_name": product["name"],
                 }
             )
+
+        # 2. Schedule Donate comment next (5 minutes after affiliate link)
+        if DONATE_COMMENT_URL:
+            target_donate_time = aff_base_time + timedelta(minutes=DONATE_COMMENT_DELAY_AFTER_AFF_MINUTES)
+            if products and target_donate_time <= last_aff_scheduled_at:
+                donate_scheduled_at = last_aff_scheduled_at + timedelta(minutes=2)
+            else:
+                donate_scheduled_at = target_donate_time
+
+            donate_index = len(products) + 1
+            donate_data = {
+                "post_id": external_id,
+                "fb_post_id": item["fb_post_id"],
+                "comment_index": donate_index,
+                "product_name": "Ủng hộ kênh",
+                "product_link": DONATE_COMMENT_URL,
+                "message": build_donate_comment(item["fb_post_id"]),
+                "scheduled_at": donate_scheduled_at.strftime("%Y-%m-%d %H:%M:%S"),
+            }
+            if dry_run:
+                donate_inserted = False
+            else:
+                donate_inserted = insert_product_comment_once(donate_data)
+            results.append(
+                {
+                    "fb_post_id": item["fb_post_id"],
+                    "scheduled_at": donate_data["scheduled_at"],
+                    "inserted": donate_inserted,
+                    "source": item["source"],
+                    "kind": "donate",
+                }
+            )
+
     return results
 
 
@@ -852,25 +866,28 @@ def schedule_product_comments_for_post(
     products = pick_products_for_context(
         post["id"],
         PRODUCT_COMMENTS_PER_POST,
-        title=post["title"],
-        caption=post["caption"],
-        topic_type=post["topic_type"],
-        topic_payload=post["topic_payload"],
+        title=post.get("title", ""),
+        caption=post.get("caption", ""),
+        topic_type=post.get("topic_type", ""),
+        topic_payload=post.get("topic_payload", ""),
     )
-    if not products:
-        return 0
 
     tz = ZoneInfo(TIMEZONE)
     base_time = posted_at or datetime.now(tz)
     if base_time.tzinfo is None:
         base_time = base_time.replace(tzinfo=tz)
 
-    media_type = infer_media_type(post["final_image_path"])
+    media_type = infer_media_type(post.get("final_image_path"))
     delay_minutes = 0 if immediate else product_comment_delay_minutes(media_type)
 
     inserted = 0
+    aff_base_time = base_time + timedelta(minutes=delay_minutes)
+    last_aff_scheduled_at = aff_base_time
+
+    # 1. Schedule Affiliate product comments first (comment_index = 1..N)
     for index, product in enumerate(products, start=1):
-        scheduled_at = base_time + timedelta(minutes=delay_minutes + ((index - 1) * 2))
+        scheduled_at = aff_base_time + timedelta(minutes=((index - 1) * 2))
+        last_aff_scheduled_at = scheduled_at
         did_insert = insert_product_comment(
             {
                 "post_id": post["id"],
@@ -884,6 +901,33 @@ def schedule_product_comments_for_post(
         )
         if did_insert:
             inserted += 1
+
+    # 2. Schedule Donate comment next (5 minutes after affiliate link)
+    if DONATE_COMMENT_URL:
+        if immediate:
+            donate_scheduled_at = (last_aff_scheduled_at + timedelta(seconds=10)) if products else base_time
+        else:
+            target_donate_time = aff_base_time + timedelta(minutes=DONATE_COMMENT_DELAY_AFTER_AFF_MINUTES)
+            if products and target_donate_time <= last_aff_scheduled_at:
+                donate_scheduled_at = last_aff_scheduled_at + timedelta(minutes=2)
+            else:
+                donate_scheduled_at = target_donate_time
+
+        donate_index = len(products) + 1
+        did_insert_donate = insert_product_comment(
+            {
+                "post_id": post["id"],
+                "fb_post_id": fb_post_id,
+                "comment_index": donate_index,
+                "product_name": "Ủng hộ kênh",
+                "product_link": DONATE_COMMENT_URL,
+                "message": build_donate_comment(fb_post_id),
+                "scheduled_at": donate_scheduled_at.strftime("%Y-%m-%d %H:%M:%S"),
+            }
+        )
+        if did_insert_donate:
+            inserted += 1
+
     return inserted
 
 
