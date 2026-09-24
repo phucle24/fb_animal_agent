@@ -129,13 +129,15 @@ Yêu cầu:
 
 6. image_prompt
 - tiếng Anh
-- chỉ mô tả cảnh ảnh, không tự mô tả layout chữ
+- CHỈ mô tả cảnh thiên nhiên, sinh vật, hành động, ánh sáng và chi tiết thị giác
+- TUYỆT ĐỐI KHÔNG chứa các từ khóa layout hay poster như: poster, infographic, headline, title, tag, badge, pill, text, visual journalism, visual journalism poster
+- không tự mô tả bố cục chữ hay văn bản
 - visually striking, cinematic, high contrast, strong subject focus
 - phải làm nổi bật cơ chế/quy mô/hành vi đặc biệt của topic
 - tạo một visual story rõ ràng: chủ thể đang làm gì, môi trường nào, mối đe dọa/cơ chế/twist nằm ở đâu
 - nếu là myth_vs_fact, hãy mô tả cảnh có "before assumption vs hidden survival function" bằng hình ảnh, không dùng chữ
 - dùng scale cue, glow, motion trail, macro detail, split transformation, silhouette, mystery lighting nếu phù hợp
-- no watermark, no logo, no fake text
+- no watermark, no logo, no fake text, no english labels
 
 Chỉ trả về JSON, không markdown, không giải thích.
 """
@@ -205,14 +207,13 @@ Yêu cầu:
 
 5. image_prompt
 - tiếng Anh
-- mô tả phong cách ảnh động vật hoang dã thực tế cho infographic ranking
+- CHỈ mô tả bối cảnh, ánh sáng, chuyển động, biểu cảm của các sinh vật
+- TUYỆT ĐỐI KHÔNG chứa từ khóa layout hay poster như: poster, infographic, headline, title, tag, badge, visual journalism, visual journalism poster
 - cinematic, sharp, visually striking
-- mô tả môi trường sống, ánh sáng, chuyển động, biểu cảm của các sinh vật
 - có visual story rõ: bối cảnh, hành động, khoảnh khắc căng/tò mò/hài hước, chi tiết khiến viewer muốn zoom ảnh
 - nhấn mạnh khoảnh khắc "wow" hoặc đặc điểm khiến người xem muốn bấm vào ảnh đọc tiếp
 - không cần tự viết layout chữ vì hệ thống sẽ dựng prompt infographic cuối cùng
-- no watermark
-- suitable for ranking infographic
+- no watermark, no logo, no fake text, no english labels
 
 Chỉ trả về JSON, không giải thích thêm.
 """
@@ -270,9 +271,10 @@ Yêu cầu:
 
 3. image_prompt
 - tiếng Anh
-- chỉ mô tả thêm visual detail riêng cho chủ thể, không thêm text mới
-- realistic educational anatomy infographic, clean scientific style
-- no logo, no watermark, no brand name
+- CHỈ mô tả thêm visual detail riêng cho chủ thể, không thêm text mới
+- TUYỆT ĐỐI KHÔNG chứa các từ khóa layout như: poster, infographic, headline, title, tag, badge, visual journalism
+- realistic educational anatomy, clean scientific style
+- no logo, no watermark, no brand name, no english labels
 
 Chỉ trả về JSON, không markdown, không giải thích.
 """
@@ -350,7 +352,8 @@ Yêu cầu:
 
 6. image_prompt
 - tiếng Anh
-- chỉ mô tả cảnh ảnh, KHÔNG mô tả layout poster
+- CHỈ mô tả cảnh ảnh, KHÔNG mô tả layout poster hay chữ
+- TUYỆT ĐỐI KHÔNG chứa các từ khóa: poster, infographic, headline, title, tag, badge, pill, text, visual journalism, visual journalism poster
 - single-subject wildlife/nature cinematic scene
 - sharp, dramatic, beautiful
 - strong subject focus
@@ -358,10 +361,9 @@ Yêu cầu:
 - mô tả một khoảnh khắc như cảnh phim, có hành động hoặc dấu hiệu thị giác khiến viewer muốn bấm vào ảnh
 - phản ánh đúng detail_vi/fact_detail bằng hình ảnh, làm rõ quy mô/cơ chế/hành vi đặc biệt để người xem "wow"
 - ưu tiên cảnh có chiều sâu, tương phản, scale cue, motion trail, glow, macro detail hoặc môi trường sống đặc trưng nếu phù hợp
-- không tự viết text layout, không thêm infographic, ranking, list, panel, table, grid instructions
 - no ranking, no list, no top 5, no panel, no table, no grid, no fake text, no extra typography
-- no watermark
-- suitable for educational social media poster
+- no watermark, no logo, no english labels
+- suitable for educational social media photography
 
 Chỉ trả về JSON.
 """
@@ -412,8 +414,9 @@ Yêu cầu:
 
 2. overlay_title
 - tiếng Việt, rất ngắn
-- dạng poster so sánh, ví dụ: "JAGUAR VS LEOPARD", "CÁ MẬP TRẮNG VS CÁ MẬP HỔ"
+- dạng so sánh hai loài bằng tiếng Việt, ví dụ: "BÁO ĐỐM VS BÁO HOA MAI", "CÁ MẬP TRẮNG VS CÁ MẬP HỔ"
 - tối đa 9 từ
+- KHÔNG dùng tên tiếng Anh
 
 3. caption_intro
 - 5 đến 8 câu, khoảng 120-180 chữ
@@ -431,12 +434,14 @@ Yêu cầu:
 
 4. image_prompt
 - tiếng Anh
-- cinematic wildlife comparison infographic poster
+- CHỈ mô tả cảnh hai sinh vật trong môi trường tự nhiên, KHÔNG mô tả layout hay chữ
+- TUYỆT ĐỐI KHÔNG chứa các từ khóa: poster, infographic, headline, title, tag, badge, pill, visual journalism, visual journalism poster
+- cinematic wildlife scientific comparison scene
 - two similarly sized animals facing forward in split-screen natural habitat scene
-- visual story should feel like a scientific face-off poster: tension from posture, habitat, scale, and lighting, not violence
+- visual story should feel like a scientific face-off: tension from posture, habitat, scale, and lighting, not violence
 - premium dark copper/orange style, dramatic light beams, scientific comparison mood
 - no gore, no injury, no blood, no fighting impact, no attack pose
-- no watermark
+- no watermark, no logo, no english labels
 - do not invent extra text layout; system will build final infographic prompt
 
 Chỉ trả về JSON, không giải thích thêm.

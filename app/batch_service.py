@@ -13,6 +13,7 @@ from app.db import (
 )
 from app.image_service import save_image_from_response
 from app.post_service import image_prompt_renders_final_text, overlay_post_image
+from app.prompt_safety import enforce_prompt_language_and_safety
 
 
 COMPLETED_STATES = {
@@ -35,11 +36,12 @@ def _client():
 
 
 def _image_batch_request(image_prompt: str) -> dict:
+    safe_prompt = enforce_prompt_language_and_safety(image_prompt)
     return {
         "contents": [
             {
                 "role": "user",
-                "parts": [{"text": image_prompt}],
+                "parts": [{"text": safe_prompt}],
             }
         ],
         "config": {

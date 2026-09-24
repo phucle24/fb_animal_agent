@@ -3,6 +3,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 from app.config import GEMINI_API_KEY, GEMINI_IMAGE_MODEL, IMAGE_ASPECT_RATIO, IMAGE_FALLBACK_ON_ERROR
+from app.prompt_safety import enforce_prompt_language_and_safety
 
 
 def _ensure_api_key():
@@ -124,6 +125,7 @@ def generate_image(
     retries: int = 2,
     fallback_on_error: bool | None = None,
 ) -> str:
+    image_prompt = enforce_prompt_language_and_safety(image_prompt)
     _ensure_api_key()
     client = _client()
     types = _types()

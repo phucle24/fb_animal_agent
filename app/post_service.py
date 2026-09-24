@@ -12,12 +12,17 @@ from app.text_service import (
     generate_matchup_content,
     generate_single_card_content,
 )
+from app.prompt_safety import (
+    enforce_prompt_language_and_safety,
+    sanitize_scene_prompt,
+    clean_single_scene_prompt,
+)
 from app.utils import matchup_measure_label, matchup_measure_value, slugify, vietnamize_common_terms
 
 
 INFOGRAPHIC_IMAGE_TEMPLATE = """
 FINAL INFOGRAPHIC MUST CONTAIN THE EXACT TEXT BELOW.
-Create a finished vertical 4:5 Vietnamese infographic poster for Facebook feed, in the same visual direction as a premium wildlife ranking graphic:
+Create a vertical 4:5 finished wildlife ranking presentation for Facebook feed in Vietnamese:
 - black/dark charcoal background panels
 - copper/orange border and separators
 - bold condensed white Vietnamese typography
@@ -27,12 +32,13 @@ Create a finished vertical 4:5 Vietnamese infographic poster for Facebook feed, 
 - dramatic photorealistic animal images, sharp eyes, motion, cinematic lighting
 - every panel should feel like a tiny visual story, showing the animal/plant doing the behavior or revealing the survival trick behind the data
 - vertical 4:5 layout with enough height for a header and five stacked panels, all text readable without cropping
+- NO English text anywhere, NO top header pill tags, NO "Thủ bạt", NO unrequested words
 - no Python overlay will be used later; all text must be rendered by the image model now
 """.strip()
 
 SINGLE_CARD_IMAGE_TEMPLATE = """
 FINAL INFOGRAPHIC MUST CONTAIN THE EXACT TEXT BELOW.
-Create an ultra-high-definition vertical 4:5 Vietnamese wildlife feature poster for Facebook feed (National Geographic / BBC Earth editorial magazine cover aesthetic):
+Create an ultra-high-definition vertical 4:5 Vietnamese wildlife single-subject documentary photo feature for Facebook feed:
 - exactly one dominant photorealistic hero subject, occupying 75-85% of the frame, razor-sharp detail on eyes, skin texture, scales, fur, or plumage
 - action freeze / visual story: capture the subject in an intense, authentic natural moment (hunting, leaping, camouflaging, emitting bioluminescence, or revealing a hidden biological weapon)
 - cinematic high-contrast lighting: chiaroscuro, volumetric natural light beams, atmospheric depth, shallow depth-of-field with creamy bokeh background
@@ -40,12 +46,13 @@ Create an ultra-high-definition vertical 4:5 Vietnamese wildlife feature poster 
 - exactly three visible text groups total: headline (3-5 words, large & punchy), key metric badge (clean, high contrast), and micro-fact hook
 - clean single-card composition with generous negative space, maximizing thumb-stopping dwell time on mobile screens
 - no rows, no repeated subject thumbnails, no numbered panels, no table, no grid
+- NO top header bar, NO corner tags, NO floating pill badges, NO "Thủ bạt", NO English text of any kind
 - no Python overlay will be used later; all text must be rendered by the image model now
 """.strip()
 
 MATCHUP_IMAGE_TEMPLATE = """
 FINAL INFOGRAPHIC MUST CONTAIN THE EXACT TEXT BELOW.
-Create an ultra-realistic vertical 4:5 Vietnamese scientific animal face-off infographic poster for Facebook feed (BBC Earth / Discovery documentary face-off aesthetic):
+Create an ultra-realistic vertical 4:5 Vietnamese scientific animal face-off comparison feature for Facebook feed:
 - dynamic split-screen composition with left animal versus right animal facing each other in their authentic natural habitat
 - cinematic atmospheric lighting: dramatic volumetric rim light, swirling dust, mist, or deep water rays creating intense primal tension
 - stylish luminous "VS" emblem centered between the two subjects
@@ -53,18 +60,21 @@ Create an ultra-realistic vertical 4:5 Vietnamese scientific animal face-off inf
 - clean translucent spec cards at the lower edge of each side showing concise measurements with sharp modern typography
 - make it feel like a scientific showdown of two different evolutionary marvels, not a static ID card
 - no gore, no blood, no injury, no violent impact
+- NO top header bar, NO corner tags, NO floating pill badges, NO "Thủ bạt", NO English text or labels anywhere (only central graphic "VS" emblem is permitted)
 - no Python overlay will be used later; all text must be rendered by the image model now
 """.strip()
 
 ENGAGEMENT_IMAGE_TEMPLATE = """
 FINAL INFOGRAPHIC MUST CONTAIN THE EXACT TEXT BELOW.
-Create a high-impact vertical 4:5 Vietnamese visual journalism poster for Facebook feed (National Geographic / Smithsonian style):
+Create an ultra-high-definition vertical 4:5 Vietnamese wildlife documentary photo feature for Facebook feed:
 - one breathtaking, thumb-stopping photorealistic hero image capturing a mind-bending natural phenomenon, optical illusion, or bizarre evolutionary adaptation
 - cinematic lighting with extreme subject focus, shallow depth of field, and rich atmospheric mood (mist, glow, deep sea darkness, or golden hour macro)
 - sleek modern layout: subtle natural vignettes for contrast, bold crisp Vietnamese typography that is instantly legible on mobile in 0.5 seconds
 - headline is punchy and short (maximum 3-5 words) that triggers immediate curiosity or challenges common knowledge
 - exactly three visible text groups total: headline, primary curiosity hook, secondary factual reveal
 - no extra paragraphs, no random labels, no fake UI text, no heavy artificial borders
+- NO top header bar, NO corner tags, NO floating pill badges, NO "Thủ bạt", NO English text of any kind
+- all visible typography must be in Vietnamese only; zero English letters or words anywhere
 - no Python overlay will be used later; all text must be rendered by the image model now
 """.strip()
 
@@ -911,6 +921,9 @@ Correct Vietnamese diacritics are mandatory.
 
 No:
 
+- English words, English labels, English letters, or Latin text
+- "Thủ bạt", "thủ bạt", "thu bat", "đề bạt", "tiêu đề", or placeholder/Sino-Vietnamese publishing tags
+- top-corner pills, badges, floating tags, or header bars
 - spelling errors
 - missing accents
 - duplicated characters
@@ -954,19 +967,23 @@ The final image must be completely clean and free of all unwanted overlays.
 31. NEGATIVE PROMPT
 ==================================================
 
-logo, watermark, brand name, page name, signature, copyright, copyright text, website URL, QR code, social media icon, promotional banner, badge, stamp, decorative title, unrelated text, unrelated labels, cartoon, anime, manga, fantasy creature, monster, toy, plastic texture, generic CGI, cheap 3D render, incorrect anatomy, fictional organs, duplicated organs, missing organs, incorrect body proportions, incorrect species, mixed-species anatomy, distorted organs, misplaced organs, floating organs, disconnected organs, incorrect eye anatomy, incorrect limb count, incorrect wing count, incorrect segmentation, malformed head, malformed body, malformed appendages, distorted skeleton, unrealistic muscles, unrealistic internal organs, blurry anatomy, low resolution, noisy image, excessive contrast, excessive saturation, neon organs, dramatic lighting, dark background, cluttered composition, crowded labels, overlapping labels, crossed leader lines, floating leader lines, inaccurate pointer lines, pointer lines ending in empty space, pointer lines pointing to neighboring structures, ambiguous callouts, unreadable text, misspelled Vietnamese, missing Vietnamese accents, truncated labels, extra animals, people, hands, environmental scenery, decorative objects.
+Thủ bạt, thủ bạt, thu bat, Đề bạt, đề bạt, journalism header, news poster header, English text, English words, English labels, English typography, Latin text, pill tag, header pill, category badge, top badge, logo, watermark, brand name, page name, signature, copyright, copyright text, website URL, QR code, social media icon, promotional banner, badge, stamp, decorative title, unrelated text, unrelated labels, cartoon, anime, manga, fantasy creature, monster, toy, plastic texture, generic CGI, cheap 3D render, incorrect anatomy, fictional organs, duplicated organs, missing organs, incorrect body proportions, incorrect species, mixed-species anatomy, distorted organs, misplaced organs, floating organs, disconnected organs, incorrect eye anatomy, incorrect limb count, incorrect wing count, incorrect segmentation, malformed head, malformed body, malformed appendages, distorted skeleton, unrealistic muscles, unrealistic internal organs, blurry anatomy, low resolution, noisy image, excessive contrast, excessive saturation, neon organs, dramatic lighting, dark background, cluttered composition, crowded labels, overlapping labels, crossed leader lines, floating leader lines, inaccurate pointer lines, pointer lines ending in empty space, pointer lines pointing to neighboring structures, ambiguous callouts, unreadable text, misspelled Vietnamese, missing Vietnamese accents, truncated labels, extra animals, people, hands, environmental scenery, decorative objects.
 """.strip()
 
 ANATOMY_IMAGE_TEMPLATE = ANATOMY_MASTER_PROMPT_TEMPLATE
 
 TEXT_DEDUP_RULES = """
-Global text safety rules:
+Global text safety & language purity rules:
+- STRICT ZERO ENGLISH TEXT: Every single visible character, word, title, label, and callout MUST be in Vietnamese. There must be ABSOLUTELY ZERO English text, English words, or English letters anywhere on the canvas (strictly NO words such as "Infographic", "Poster", "National Geographic", "Smithsonian", "BBC Earth", "Discovery", "Wildlife", "Fact", "Myth", "Stat", "Data", "Photo", "Source", "News", "Magazine", "Tag", etc.).
+- STRICTLY FORBID "THỦ BẠT" AND PLACEHOLDER LABELS: Under NO circumstances render the word "Thủ bạt", "thủ bạt", "thu bat", "Đề bạt", "Tiêu đề", "Mục lục", "Thủ từ", "Bạt", "Chú thích", or any meaningless, Sino-Vietnamese, placeholder, UI, or hallucinated words/tags.
+- NO TOP HEADER BARS OR PILL TAGS: Do NOT render any top header bar, top-left or top-right pill buttons, floating category badges, or corner stamps at the top of the canvas. The topmost text must strictly be the main title.
+- ONLY THE EXACT LISTED VIETNAMESE STRINGS: Render ONLY the exact text strings explicitly provided in the prompt. Every word outside the explicit list is strictly forbidden.
 - Render each requested text string exactly once.
 - Never duplicate a headline as a second header, background word, watermark, badge, shadow caption, footer, or decorative echo.
 - Never repeat the same words in another location just to balance the layout.
 - Never add extra labels, subtitles, explanations, UI text, fake text, lorem ipsum, brand text, or watermark.
 - If the poster feels empty, use image composition, lighting, borders, shapes, arrows, empty space, texture, or visual contrast instead of extra text.
-- Final self-check before output: count visible text groups and remove every duplicate or unrequested text element.
+- Final self-check before output: count visible text groups and remove every duplicate, unrequested, English, or meaningless text element.
 """.strip()
 
 ENGAGEMENT_TOPIC_TYPES = {"myth_vs_fact", "guess_quiz", "one_story", "before_after"}
@@ -1259,29 +1276,6 @@ def normalize_single_card_content(topic: dict, content: dict) -> dict:
     return normalized
 
 
-def clean_single_scene_prompt(image_prompt: str) -> str:
-    prompt = " ".join((image_prompt or "").split()).strip()
-    forbidden_terms = (
-        "row",
-        "rows",
-        "panel",
-        "panels",
-        "list",
-        "ranking",
-        "rank",
-        "top 5",
-        "table",
-        "grid",
-        "text",
-        "typography",
-        "infographic",
-        "poster layout",
-    )
-    lowered = prompt.lower()
-    if any(term in lowered for term in forbidden_terms):
-        return ""
-    return prompt
-
 
 def comparison_item_detail(item: dict, topic: dict) -> str:
     detail = item.get("detail_vi", "").strip()
@@ -1446,7 +1440,7 @@ def anatomy_label_rows(topic: dict) -> str:
 
 
 def build_anatomy_image_prompt(topic: dict, content: dict) -> str:
-    scene_prompt = " ".join((content.get("image_prompt") or "").split()).strip()
+    scene_prompt = sanitize_scene_prompt(content.get("image_prompt") or "")
     scene_guidance = (
         f"Additional visual and biological guidance from specialist:\n{scene_prompt}"
         if scene_prompt
@@ -1493,7 +1487,7 @@ def build_anatomy_image_prompt(topic: dict, content: dict) -> str:
     prompt = prompt.replace("[SPECIES BACKGROUND]", species_background)
     prompt = prompt.replace("[ANATOMICAL LABELS]", anatomy_label_rows(topic))
     prompt = prompt.replace("[SCENE GUIDANCE]", scene_guidance)
-    return prompt
+    return enforce_prompt_language_and_safety(prompt)
 
 
 def matchup_caption(topic: dict, content: dict) -> str:
@@ -1525,11 +1519,12 @@ def matchup_caption(topic: dict, content: dict) -> str:
 
 
 def build_model_rendered_infographic_prompt(image_prompt: str, topic: dict, content: dict) -> str:
+    clean_scene = sanitize_scene_prompt(image_prompt)
     if topic["topic_type"] == "comparison_top5":
         title = content.get("overlay_subtitle") or topic["subject_vi"]
         title = title.upper()
         rows = comparison_prompt_rows(topic)
-        return (
+        prompt = (
             f"{INFOGRAPHIC_IMAGE_TEMPLATE}\n\n"
             "Reference visual style:\n"
             "- Reference layout: header title on top, numbered panels below, text column left, animal image right.\n"
@@ -1541,6 +1536,8 @@ def build_model_rendered_infographic_prompt(image_prompt: str, topic: dict, cont
             "Panel text and image content to render exactly:\n"
             f"{rows}\n\n"
             "Strict text rules:\n"
+            "- STRICT ZERO ENGLISH TEXT: Every visible word and label must be in Vietnamese. No English words, no English labels.\n"
+            "- STRICT NO 'THỦ BẠT': Under no circumstances render 'Thủ bạt' or any placeholder or meaningless tags.\n"
             "- Render Vietnamese diacritics correctly.\n"
             "- Use the exact text strings above, no extra words, no English labels, no fake text.\n"
             f"{TEXT_DEDUP_RULES}\n"
@@ -1549,8 +1546,9 @@ def build_model_rendered_infographic_prompt(image_prompt: str, topic: dict, cont
             "- If text cannot fit inside a panel, reduce font size, tighten spacing, or split into two short lines.\n"
             "- Never crop, truncate, overlap, or replace the listed text; readability is more important than large type.\n\n"
             "Additional photo/style guidance from the text model, use only if it does not conflict with exact text rules:\n"
-            f"{image_prompt}"
+            f"{clean_scene}"
         )
+        return enforce_prompt_language_and_safety(prompt)
 
     if topic["topic_type"] == "matchup_versus":
         left = topic["left"]
@@ -1558,7 +1556,7 @@ def build_model_rendered_infographic_prompt(image_prompt: str, topic: dict, cont
         title = content.get("overlay_title") or topic["subject_vi"]
         left_text = "\n".join([left["name_vi"].upper(), *matchup_stat_lines(left)])
         right_text = "\n".join([right["name_vi"].upper(), *matchup_stat_lines(right)])
-        return (
+        prompt = (
             f"{MATCHUP_IMAGE_TEMPLATE}\n\n"
             "Header text to render exactly:\n"
             f"{title.upper()}\n\n"
@@ -1569,6 +1567,8 @@ def build_model_rendered_infographic_prompt(image_prompt: str, topic: dict, cont
             "Bottom note text to render exactly:\n"
             "Số liệu ước tính, có thể thay đổi theo cá thể\n\n"
             "Strict text rules:\n"
+            "- STRICT ZERO ENGLISH TEXT: All text must be in Vietnamese. Strictly NO English words or labels anywhere on the image (the only non-Vietnamese graphic allowed is the central 'VS' symbol).\n"
+            "- STRICT NO 'THỦ BẠT': Absolutely NEVER render 'Thủ bạt' or any placeholder or meaningless tags.\n"
             "- Render Vietnamese diacritics correctly.\n"
             "- Use the exact text strings above, no extra words, no English labels, no fake text.\n"
             f"{TEXT_DEDUP_RULES}\n"
@@ -1580,18 +1580,21 @@ def build_model_rendered_infographic_prompt(image_prompt: str, topic: dict, cont
             f"- Right animal: realistic {right['name_en']}, powerful, alert, no aggression impact.\n"
             "- Create tension through posture, lighting, scale, and composition, not violence.\n\n"
             "Additional photo/style guidance from the text model, use only if it does not conflict with exact text rules:\n"
-            f"{image_prompt}"
+            f"{clean_scene}"
         )
+        return enforce_prompt_language_and_safety(prompt)
 
     title = content.get("overlay_title") or topic["subject_vi"]
     stat = content.get("overlay_stat") or topic.get("fact_value", "")
     hook = content.get("overlay_hook") or ""
     visual_detail = topic.get("detail_vi") or topic.get("fact_detail", "")
-    scene_prompt = clean_single_scene_prompt(content.get("image_prompt", ""))
-    return (
+    scene_prompt = sanitize_scene_prompt(content.get("image_prompt", ""))
+    prompt = (
         f"{SINGLE_CARD_IMAGE_TEMPLATE}\n\n"
         "ABSOLUTE SINGLE-CARD RULES:\n"
         "- This poster has ONE subject and ONE scene only.\n"
+        "- STRICT ZERO ENGLISH TEXT: Every single visible character and word must be in Vietnamese. Zero English words anywhere.\n"
+        "- STRICT NO 'THỦ BẠT': Under no circumstances render 'Thủ bạt' or any placeholder or meaningless tags.\n"
         "- Do NOT create rows, stacked panels, numbered sections, step lists, comparison blocks, ranking blocks, or repeated animal thumbnails.\n"
         "- Do NOT render any number used as a rank: 01, 02, 03, 04, 05, 1, 2, 3, 4, 5.\n"
         "- Do NOT render long explanatory body text or full sentences beyond the exact hook string.\n"
@@ -1605,7 +1608,7 @@ def build_model_rendered_infographic_prompt(image_prompt: str, topic: dict, cont
         f"\"{stat.upper()}\"\n"
         f"\"{hook}\"\n\n"
         "Recommended composition:\n"
-        "- Top: the headline as one large readable Vietnamese line or two lines (3-5 punchy words).\n"
+        "- Top: the headline as one large readable Vietnamese line or two lines (3-5 punchy words). NO top header pill or corner tag above it.\n"
         "- Center: one dramatic realistic hero subject occupying most of the image, showing the unusual fact clearly.\n"
         "- Lower area: a sleek, high-contrast modern badge or clean typography group presenting the main fact text clearly against a subtle cinematic dark vignette.\n"
         "- Put the hook as a readable micro-fact line near the badge; it should explain why the metric matters, not feel like a generic slogan.\n"
@@ -1615,6 +1618,7 @@ def build_model_rendered_infographic_prompt(image_prompt: str, topic: dict, cont
         "- Make the viewer immediately understand the scale, mechanism, behavior, or biological trick behind the fact.\n"
         f"{'Scene/photo guidance only: ' + scene_prompt if scene_prompt else ''}"
     )
+    return enforce_prompt_language_and_safety(prompt)
 
 
 def image_prompt_renders_final_text(image_prompt: str) -> bool:
@@ -1654,7 +1658,7 @@ def build_engagement_image_prompt(topic: dict, content: dict) -> str:
     primary = compact_text(content.get("overlay_primary") or topic["hook_vi"], 52)
     secondary = compact_text(content.get("overlay_secondary") or topic["main_fact_vi"], 58)
     visual_subject = topic.get("visual_subject_en") or topic["subject_en"]
-    scene_prompt = " ".join((content.get("image_prompt") or "").split()).strip()
+    scene_prompt = sanitize_scene_prompt(content.get("image_prompt") or "")
     if topic["topic_type"] == "myth_vs_fact":
         format_direction = (
             "- Use a visual twist composition: the subject looks cute at first glance, but the environment reveals the hidden survival function.\n"
@@ -1663,7 +1667,7 @@ def build_engagement_image_prompt(topic: dict, content: dict) -> str:
         )
     else:
         format_direction = ""
-    return (
+    prompt = (
         f"{ENGAGEMENT_IMAGE_TEMPLATE}\n\n"
         "Render exactly these 3 visible text strings, and no other text anywhere:\n"
         f"\"{title}\"\n"
@@ -1673,8 +1677,11 @@ def build_engagement_image_prompt(topic: dict, content: dict) -> str:
         "- TEXT GROUP 1 / TITLE: top area only, one copy, large bold headline.\n"
         "- TEXT GROUP 2 / PRIMARY HOOK: middle or lower-left callout only, one copy.\n"
         "- TEXT GROUP 3 / SECONDARY HOOK: bottom callout or badge only, one copy.\n"
+        "- The very top of the canvas must NOT have any pill, tag, badge, header bar, or small label. Strictly NO header tags, NO 'Thủ bạt'.\n"
         "- The hero image area must not contain any additional text, duplicated headline, small caption, label, or decorative word.\n\n"
-        "Strict text repetition rules:\n"
+        "Strict text repetition and language purity rules:\n"
+        "- STRICT ZERO ENGLISH TEXT: Every single visible word and character must be in Vietnamese only. Absolutely NO English words, NO English labels anywhere on the image.\n"
+        "- STRICT NO 'THỦ BẠT': Absolutely NEVER render the word 'Thủ bạt', 'thủ bạt', or any placeholder, Sino-Vietnamese, or meaningless words/tags.\n"
         "- Each exact text string above may appear ONCE only.\n"
         "- Do not repeat, duplicate, mirror, paraphrase, translate, or restate any text string.\n"
         "- The title must appear only in TEXT GROUP 1 and nowhere else.\n"
@@ -1697,6 +1704,7 @@ def build_engagement_image_prompt(topic: dict, content: dict) -> str:
         f"- Visual twist for image planning only: {topic['twist_vi']}.\n"
         f"{'Scene/photo guidance only: ' + scene_prompt if scene_prompt else ''}"
     )
+    return enforce_prompt_language_and_safety(prompt)
 
 
 def build_post_payload(topic: dict, scheduled_at: str, slot: str) -> dict:
