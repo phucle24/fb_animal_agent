@@ -118,6 +118,42 @@ class TestProductCommentService(unittest.TestCase):
             self.assertEqual(inserted_records[2]["product_name"], "Ủng hộ kênh")
             self.assertIn("https://zypage.com/gopmotchut", inserted_records[2]["message"])
 
+    def test_schedule_product_comments_for_post_with_sqlite_row(self):
+        import sqlite3
+        from unittest.mock import patch
+        from datetime import datetime
+        from zoneinfo import ZoneInfo
+        from app.config import TIMEZONE
+        from app.product_comment_service import schedule_product_comments_for_post
+
+        con = sqlite3.connect(":memory:")
+        con.row_factory = sqlite3.Row
+        cur = con.cursor()
+        cur.execute(
+            """CREATE TABLE posts (
+                id INTEGER PRIMARY KEY,
+                title TEXT,
+                caption TEXT,
+                topic_type TEXT,
+                topic_payload TEXT,
+                final_image_path TEXT
+            )"""
+        )
+        cur.execute(
+            """INSERT INTO posts (id, title, caption, topic_type, topic_payload, final_image_path)
+               VALUES (102, 'Báo gấm', 'Tốc độ xé gió', 'standard', '{}', 'assets/final/102.jpg')"""
+        )
+        row = cur.fetchone()
+
+        tz = ZoneInfo(TIMEZONE)
+        posted_at = datetime(2026, 9, 17, 10, 0, 0, tzinfo=tz)
+
+        with patch("app.product_comment_service.pick_products_for_context", return_value=[]), \
+             patch("app.product_comment_service.insert_product_comment", return_value=True), \
+             patch("app.product_comment_service.DONATE_COMMENT_URL", "https://zypage.com/gopmotchut"):
+            count = schedule_product_comments_for_post(row, "fb_test_post_102", posted_at=posted_at)
+            self.assertEqual(count, 1)
+
     def test_schedule_recent_donate_comments_timing_and_order(self):
         from unittest.mock import patch
         from datetime import datetime

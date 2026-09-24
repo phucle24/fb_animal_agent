@@ -863,13 +863,16 @@ def schedule_product_comments_for_post(
     if not fb_post_id:
         return 0
 
+    post_data = dict(post) if hasattr(post, "keys") else (post if isinstance(post, dict) else {})
+    post_id = post_data.get("id")
+
     products = pick_products_for_context(
-        post["id"],
+        post_id,
         PRODUCT_COMMENTS_PER_POST,
-        title=post.get("title", ""),
-        caption=post.get("caption", ""),
-        topic_type=post.get("topic_type", ""),
-        topic_payload=post.get("topic_payload", ""),
+        title=post_data.get("title", ""),
+        caption=post_data.get("caption", ""),
+        topic_type=post_data.get("topic_type", ""),
+        topic_payload=post_data.get("topic_payload", ""),
     )
 
     tz = ZoneInfo(TIMEZONE)
@@ -877,7 +880,7 @@ def schedule_product_comments_for_post(
     if base_time.tzinfo is None:
         base_time = base_time.replace(tzinfo=tz)
 
-    media_type = infer_media_type(post.get("final_image_path"))
+    media_type = infer_media_type(post_data.get("final_image_path"))
     delay_minutes = 0 if immediate else product_comment_delay_minutes(media_type)
 
     inserted = 0
@@ -890,12 +893,12 @@ def schedule_product_comments_for_post(
         last_aff_scheduled_at = scheduled_at
         did_insert = insert_product_comment(
             {
-                "post_id": post["id"],
+                "post_id": post_id,
                 "fb_post_id": fb_post_id,
                 "comment_index": index,
                 "product_name": product["name"],
                 "product_link": product["link"],
-                "message": build_product_comment(product, index, seed=post["id"]),
+                "message": build_product_comment(product, index, seed=post_id),
                 "scheduled_at": scheduled_at.strftime("%Y-%m-%d %H:%M:%S"),
             }
         )
@@ -916,7 +919,7 @@ def schedule_product_comments_for_post(
         donate_index = len(products) + 1
         did_insert_donate = insert_product_comment(
             {
-                "post_id": post["id"],
+                "post_id": post_id,
                 "fb_post_id": fb_post_id,
                 "comment_index": donate_index,
                 "product_name": "Ủng hộ kênh",

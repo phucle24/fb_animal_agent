@@ -189,11 +189,16 @@ def create_app() -> Flask:
             fb_photo_id = result.get("id", "")
             fb_post_id = result.get("post_id") or result.get("id", "")
             mark_posted(post_id, fb_post_id, fb_photo_id)
-            scheduled_comments = schedule_product_comments_for_post(post, fb_post_id)
-            flash(f"Published post #{post_id}. Scheduled {scheduled_comments} product comments.", "success")
         except Exception as exc:
             mark_failed(post_id, str(exc))
             flash(f"Publish failed: {exc}", "error")
+            return redirect(url_for("post_detail", post_id=post_id))
+
+        try:
+            scheduled_comments = schedule_product_comments_for_post(post, fb_post_id)
+            flash(f"Published post #{post_id}. Scheduled {scheduled_comments} product comments.", "success")
+        except Exception as exc:
+            flash(f"Published post #{post_id}, but comment scheduling had issue: {exc}", "warning")
         return redirect(url_for("post_detail", post_id=post_id))
 
     @flask_app.post("/posts/<int:post_id>/status")
