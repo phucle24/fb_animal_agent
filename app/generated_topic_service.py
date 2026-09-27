@@ -34,16 +34,46 @@ ENGAGEMENT_TOPIC_GUIDES = {
 }
 
 STORY_TOPIC_RULES = """
-Nguyên tắc chọn topic đột phá bắt buộc (Kéo reach tự nhiên Facebook):
-- TIÊU CHÍ NOVELTY CAO: Tuyệt đối tránh các loài quá quen thuộc/nhàm chán (như ếch thường, bọ ngựa thường, chó mèo thường) nếu không có góc khai thác cực dị.
-- Tập trung vào 4 nhóm nội dung nam châm hút view:
-  1. Thủy quái biển sâu & Vùng nước tối (Deep-Sea Anomalies): cá mắt thùng đầu trong suốt, cá miệng rộng, sứa ma quỷ, sâu bobbit, cá răng nanh.
-  2. Vũ khí sinh học & Hóa chất dị thường (Extreme Biological Weapons): bọ xịt axit 100°C, ếch biến xương ngón tay thành vuốt Wolverine, sứa hộp độc nhất hành tinh.
-  3. Ký sinh trùng & Thao túng tâm trí (Bizarre Parasites): nấm zombie điều khiển kiến, ong bắp cày ký sinh gián, đẻ nhờ tổ tàn nhẫn.
-  4. Kèo đối đầu kinh điển (Apex Matchups): những cặp đấu cân não về thể hình, lực cắn và chiến thuật sinh tồn trong tự nhiên.
-- Topic phải có "mầm câu chuyện": cảnh nhỏ, mâu thuẫn nhận thức, cú twist sinh học hoặc khoảnh khắc khiến viewer muốn zoom vào ảnh.
-- Luôn có cơ chế rõ ràng: giải thích cơ thể nó hoạt động ra sao, săn ai, né ai, vì sao tiến hóa được như vậy.
-- Giọng văn: Lôi cuốn, sắc bén, kích thích người xem comment tranh luận chia phe.
+Nguyên tắc chọn topic đột phá bắt buộc (Tối ưu lan truyền & Kéo reach tự nhiên Facebook):
+- SỨC HÚT TỪ TIÊU ĐỀ & CHỦ ĐỀ RỘNG (Thumb-Stopping Hook):
+  + Tiêu đề (subject_vi) và hook phải có sức hút cực lớn, khơi gợi tò mò, chạm vào cảm xúc (nể phục, xúc động, rùng mình hoặc ngạc nhiên tột độ), khiến người lướt feed phải dừng ngón tay lại theo dõi ngay lập tức.
+  + TUYỆT ĐỐI TRÁNH tiêu đề chung chung, khô cứng, nhạt nhẽo kiểu sách giáo khoa ("Đặc điểm của chim mỏ sừng", "Tập tính của lửng mật", "Top 5 sinh vật đặc biệt").
+  + Thay bằng tiêu đề mang tính nghịch lý, câu chuyện kịch tính hoặc câu hỏi tò mò:
+    * "Đại ca lửng mật: Vì sao cả chúa sơn lâm cũng phải nhường đường?"
+    * "Chim mỏ sừng: Bản tình ca cảm động hay bi kịch tự giam mình trong ngục tối?"
+    * "Kẻ săn cả hung thần: Vì sao cá mập trắng khiếp sợ cá voi sát thủ?"
+    * "Nghệ sĩ đại dương: Thức trắng 7 ngày đêm vẽ kiệt tác dưới đáy cát để cầu hôn"
+    * "Quái vật xịt máu từ mắt: Vũ khí kinh dị khiến sói hoang tháo chạy"
+- TẬP TRUNG VÀO 6 NHÓM NỘI DUNG NAM CHÂM HÚT VIEW LAN TRUYỀN CAO:
+  1. Câu chuyện sinh tồn độc đáo & Độ lì lợm bản lĩnh hoang dã:
+     * Đại ca lửng mật: "Chí phèo" thảo nguyên, da dày chống nanh vuốt, miễn dịch nọc rắn hổ mang - ngủ một giấc dậy ăn tiếp rắn; solo cả đàn sư tử.
+     * Sói xám đầu đàn: Bản lĩnh lãnh đạo, tinh thần kỷ luật và sự gắn kết sinh tử của bầy đàn.
+     * Gấu Bắc Cực & Cáo tuyết: Sinh tồn phi thường trong băng giá cực hạn.
+  2. Tình mẫu tử & Tình yêu sinh tồn xúc động:
+     * Chim mỏ sừng (Hornbill): Chim mẹ tự trét bùn giam mình trong bọng cây suốt 4 tháng nuôi con, chim bố bay kiệt sức kiếm ăn nuôi cả nhà qua một khe hẹp.
+     * Chim hải âu Laysan (Wisdom): Bà mẹ 72 tuổi vẫn vượt bão Thái Bình Dương ấp trứng nuôi con.
+     * Cánh cụt hoàng đế: Chim bố ôm trứng suốt mùa đông Nam Cực -50°C không ăn uống để ấp con.
+     * Cá ngựa đực: Tình phụ tử kỳ lạ, mang thai và đau đẻ hàng ngàn con non thay cá cái.
+  3. Nghệ sĩ & Bậc thầy kiến trúc tự nhiên:
+     * Cá nóc hoa văn cát (White-spotted pufferfish): Thức trắng tuần dùng vây vẽ vòng tròn mandala đối xứng 2m tuyệt mỹ đáy cát chỉ để cầu hôn.
+     * Chim Bowerbird: Xây lâu đài tình yêu và sưu tầm toàn bộ đồ vật màu xanh dương để tán tỉnh bạn tình.
+     * Hải ly: Kiến trúc sư tự nhiên kiến tạo đập nước thay đổi cả dòng chảy và hệ sinh thái.
+  4. Quái kiệt vũ khí sinh học & Hóa chất dị thường:
+     * Bọ bombardier: Trộn hóa chất xịt luồng hơi sôi 100°C phản lực từ bụng.
+     * Thằn lằn sừng: Tự làm vỡ mạch máu bắn tia máu từ hốc mắt xa 1.5 mét đuổi sói đồng cỏ.
+     * Ếch Wolverine (Hairy frog): Tự bẻ gãy xương ngón chân đâm xuyên thịt làm vuốt nhọn tự vệ.
+     * Cá mang rổ (Archerfish): Súng bắn tỉa mặt nước tính toán góc khúc xạ ánh sáng để hạ côn trùng.
+  5. Thủy quái biển sâu & Kẻ săn mồi đỉnh cao:
+     * Cá voi sát thủ (Orca): Trí tuệ bộ tộc, chiến thuật lật úp gây tê liệt cá mập trắng và tạo sóng hất hải cẩu.
+     * Cá mắt thùng (Barreleye): Chiếc đầu vòm trong suốt nhìn xuyên qua chính sọ của mình.
+     * Sâu Bobbit: Sát thủ mai phục dưới cát đáy biển chém đôi con mồi trong 1 giây.
+     * Mực khổng lồ & Cá nhà táng: Cuộc chiến giác đấu nghìn mét dưới đáy vực thẳm đen tối.
+  6. Kèo đối đầu kinh điển & Cân não tiến hóa (Apex Matchups):
+     * Những cặp đấu cân não về thể hình, lực cắn, vũ khí và chiến thuật sinh tồn trong tự nhiên.
+- YÊU CẦU CÂU CHUYỆN:
+  + Mọi topic phải có "mầm câu chuyện": có mâu thuẫn nhận thức, cú twist sinh học hoặc khoảnh khắc khiến viewer muốn zoom vào ảnh.
+  + Luôn có cơ chế rõ ràng: giải thích cơ thể nó hoạt động ra sao, vì sao tiến hóa được như vậy.
+  + Giọng văn: Lôi cuốn, sắc bén, kích thích người xem comment tranh luận chia phe.
 """
 
 
@@ -187,7 +217,7 @@ Yêu cầu bắt buộc:
 - stat phải ngắn, dễ đọc trên ảnh, không quá 18 ký tự nếu có thể.
 - detail_vi làm rõ stat nghĩa là gì bằng thông tin cụ thể, không quá 14 từ.
 - detail_vi phải giúp người xem hiểu ngay vì sao item đó đáng kinh ngạc, có cơ chế/quy mô/hành vi cụ thể.
-- subject_vi phải gợi cảm giác muốn đọc tiếp, không chỉ là nhãn phân loại khô; ví dụ "Top 5 sinh vật nhìn hiền nhưng có chiêu cực gắt" tốt hơn "Top 5 sinh vật đặc biệt".
+- subject_vi phải giật ngón tay (thumb-stopping hook), mang tính tò mò, cảm xúc hoặc câu chuyện sinh tồn độc đáo (ví dụ: "Top 5 bậc thầy lì lợm nhất thảo nguyên", "Top 5 mối tình chung thủy và hy sinh cảm động nhất tự nhiên", "Top 5 vũ khí quái kiệt khiến kẻ thù khiếp sợ"), tránh nhãn khô như "Top 5 loài động vật đặc biệt".
 - Các item nên cùng tạo thành một "mạch chuyện" hoặc một cú tò mò chung: ai cũng có chiêu riêng, ai cũng có cơ chế wow riêng.
 - Tuyệt đối không dùng detail_vi chung chung kiểu "đặc điểm nổi bật giúp nó săn mồi, sinh tồn hoặc tự vệ".
 - Nếu comparison_angle là "special ability", detail_vi phải nói rõ cơ chế/khoảng cách/cách dùng/lợi ích cụ thể của khả năng đó.
@@ -196,15 +226,15 @@ Yêu cầu bắt buộc:
 - Nếu comparison_angle là "camouflage" hoặc "bioluminescence", detail_vi phải nói rõ môi trường/cách dùng/ngữ cảnh cụ thể.
 - Nếu comparison_angle là "toxicity" hoặc "venom", detail_vi phải nói rõ cơ chế/tác động cụ thể của độc/nọc, không được viết chung chung kiểu "độc tính tự nhiên khiến con người phải thận trọng".
 - Nếu comparison_angle là "building ability", detail_vi phải nói rõ loài đó xây gì, dùng vật liệu/cách xây nào, lợi ích là gì; không được viết chung chung kiểu "xây dựng cấu trúc sống tinh vi".
-- Ưu tiên chủ đề thật sự hấp dẫn: kỷ lục lạ, khả năng sinh tồn, vũ khí tự nhiên, chiến thuật săn mồi, thực vật kỳ dị, hành vi khiến người xem muốn comment hoặc bấm vào ảnh để đọc kỹ.
+- Ưu tiên chủ đề thật sự hấp dẫn: kỷ lục lạ, câu chuyện sinh tồn độc đáo, bản lĩnh lì lợm, tình mẫu tử/phụ tử xúc động, vũ khí tự nhiên, chiến thuật săn mồi, hành vi khiến người xem muốn comment hoặc bấm vào ảnh để đọc kỹ.
 - Không bịa số liệu chính xác nếu không chắc; có thể dùng mô tả định tính ngắn như "Siêu độc", "Tái sinh", "Bẫy dính".
 - Không dùng lại chủ đề cũ.
 """
     elif topic_type == "single_card":
         prompt = f"""
-Bạn là biên tập viên nội dung Facebook về thế giới động vật và thực vật, ưu tiên các fact có hình ảnh rất "wow" và kể được thành một mẩu chuyện ngắn.
+Bạn là biên tập viên nội dung Facebook về thế giới động vật và thực vật, chuyên tạo các chủ đề có sức hút lớn từ tiêu đề và chủ đề rộng, câu chuyện sinh tồn độc đáo (như chim mỏ sừng, đại ca lửng mật) có tính lan truyền cao, thu hút người xem lướt qua dừng lại theo dõi.
 
-Hãy sinh 1 topic single-card mới, dễ viral, lạ, thú vị và có khả năng kéo bình luận.
+Hãy sinh 1 topic single-card mới, cực kỳ lôi cuốn, lạ, thú vị, chạm vào cảm xúc và kích thích bình luận.
 Không được trùng hoặc quá giống các topic đã có:
 {existing_summary}
 
@@ -212,7 +242,7 @@ Chỉ trả về JSON hợp lệ với schema:
 {{
   "topic_type": "single_card",
   "topic_key": "snake_case_english_unique_key_card",
-  "subject_vi": "Tên Tiếng Việt Viết Hoa Chữ Cái Đầu",
+  "subject_vi": "Tên Tiếng Việt Kèm Danh Xưng Biểu Tượng (ví dụ: Đại Ca Lửng Mật, Chim Mỏ Sừng)",
   "subject_en": "English common name",
   "fact_label": "short english label",
   "fact_value": "giá trị cực ngắn",
@@ -223,19 +253,19 @@ Chỉ trả về JSON hợp lệ với schema:
 {STORY_TOPIC_RULES}
 
 Yêu cầu bắt buộc:
-- subject nên là động vật hoặc thực vật rất thú vị, ít nhàm chán.
-- fact_value tối đa 18 ký tự nếu có thể, nên là số liệu/hành vi/khả năng đủ mạnh để làm text lớn trên ảnh.
-- fact_detail phải thật, dễ hiểu, không giật gân sai sự thật, và phải nêu được cơ chế/quy mô/hành vi đặc biệt.
+- subject_vi nên là động vật hoặc thực vật có câu chuyện sinh tồn phi thường hoặc cá tính mạnh mẽ (như Đại Ca Lửng Mật, Chim Mỏ Sừng, Cá Voi Sát Thủ Orca, Nghệ Sĩ Cá Nóc, Thằn Lằn Sừng Bắn Máu Mắt, Ếch Móng Vuốt Wolverine...).
+- fact_value tối đa 18 ký tự nếu có thể, là số liệu/vũ khí/hành vi độc lạ đủ mạnh để làm text lớn trên ảnh.
+- fact_detail phải thật, dễ hiểu, nêu được cơ chế/quy mô/hành vi đặc biệt.
 - detail_vi giải thích cụ thể fact_value nghĩa là gì, dùng tiếng Việt tự nhiên, tối đa 16 từ.
-- fact_value/detail_vi phải đủ tạo cú twist khi kể chuyện: nhìn vậy nhưng hóa ra có vũ khí/cơ chế/sinh tồn/cạm bẫy/kỹ năng kỳ lạ.
+- fact_value/detail_vi phải đủ tạo cú twist khi kể chuyện: nhìn vậy nhưng hóa ra có bản lĩnh lì lợm/vũ khí ngầm/tình cảm hy sinh/cạm bẫy kỳ lạ.
 - Tránh fact quá phẳng kiểu "rất thông minh", "rất nhanh", "rất đặc biệt" nếu không có cơ chế cụ thể.
 - detail_vi không được chung chung kiểu "khả năng đặc biệt", "rất thú vị", "giúp sinh tồn"; phải nói rõ đặc biệt ở đâu.
-- Ưu tiên fact có thể tạo hình ảnh ấn tượng: phát sáng, trong suốt, kích thước lạ, chiến thuật săn mồi, cấu trúc cơ thể, cộng sinh, ngụy trang, tái sinh, siêu giác quan.
+- Ưu tiên fact có thể tạo hình ảnh ấn tượng: khoảnh khắc đối đầu, bản lĩnh bất khuất, tình yêu chung thủy, phát sáng, trong suốt, kích thước lạ, săn mồi đỉnh cao.
 - Không dùng lại chủ đề cũ.
 """
     elif topic_type in ENGAGEMENT_TOPIC_TYPES:
         prompt = f"""
-Bạn là biên tập viên nội dung Facebook về thế giới động vật và thực vật, chuyên tạo format mới lạ, dễ kéo comment, mở đầu từ một câu chuyện khiến viewer tò mò.
+Bạn là biên tập viên nội dung Facebook về thế giới hoang dã, chuyên tạo topic có sức hút lớn từ tiêu đề và chủ đề rộng: các câu chuyện mang tính tò mò, cảm xúc sâu sắc hoặc cơ chế sinh tồn độc đáo (như chim mỏ sừng, đại ca lửng mật) có tính lan truyền cao, thu hút người xem lướt qua dừng lại theo dõi ngay lập tức.
 
 Hãy sinh 1 topic mới cho format: {topic_type}
 Định hướng format: {ENGAGEMENT_TOPIC_GUIDES[topic_type]}
@@ -246,28 +276,26 @@ Chỉ trả về JSON hợp lệ với schema:
 {{
   "topic_type": "{topic_type}",
   "topic_key": "snake_case_english_unique_key",
-  "subject_vi": "Tiêu đề/chủ đề tiếng Việt",
+  "subject_vi": "Tiêu đề giật ngón tay, khơi gợi tò mò hoặc cảm xúc mạnh",
   "subject_en": "English subject",
   "visual_subject_en": "English visual subject for image generation",
-  "hook_vi": "hook chính bằng tiếng Việt, cụ thể và gây tò mò",
-  "main_fact_vi": "fact chính bằng tiếng Việt, đúng sự thật, giàu thông tin",
-  "twist_vi": "twist/cơ chế/chi tiết phụ khiến câu chuyện đáng nhớ",
-  "question_vi": "câu hỏi kéo bình luận"
+  "hook_vi": "hook chính bằng tiếng Việt, cụ thể, giàu cảm xúc và gây tò mò tột độ",
+  "main_fact_vi": "fact chính bằng tiếng Việt, đúng sự thật, giàu thông tin và cơ chế sinh học",
+  "twist_vi": "twist/cơ chế/chi tiết phụ khiến câu chuyện xúc động hoặc bất ngờ khó quên",
+  "question_vi": "câu hỏi kích hoạt tranh luận chia phe hoặc bày tỏ cảm xúc"
 }}
 
 {STORY_TOPIC_RULES}
 
 Yêu cầu bắt buộc:
-- Chủ đề phải thật, không bịa số liệu chính xác nếu không chắc.
-- Ưu tiên động vật/thực vật có hình ảnh mạnh: biển sâu, phát sáng, trong suốt, biến hình, cộng sinh, ngụy trang, săn mồi lạ, cây lừa côn trùng, vòng đời kỳ dị.
-- hook_vi không được chung chung; phải chứa mâu thuẫn, hành vi lạ, cơ chế hiếm hoặc số liệu dễ hình dung.
-- main_fact_vi phải giải thích rõ điểm đặc biệt bằng ngôn ngữ dễ hiểu.
-- twist_vi phải bổ sung cơ chế/quy mô/ngữ cảnh, không lặp lại main_fact_vi.
-- question_vi ngắn, tự nhiên, làm người xem muốn trả lời.
-- subject_vi/hook_vi phải có cảm giác như mở cảnh: viewer nhìn thấy gì trước, hiểu lầm gì, hoặc chi tiết nào làm họ muốn xem tiếp.
-- hook_vi + main_fact_vi + twist_vi khi ghép lại phải thành một mini-story rõ ràng: mở cảnh -> sự thật -> cú wow.
-- Với myth_vs_fact: hook_vi phải là hiểu lầm/cú nhìn đầu tiên cụ thể, main_fact_vi là sự thật đảo chiều, twist_vi là cơ chế sinh tồn hoặc ngữ cảnh làm người xem "ồ".
-- Với myth_vs_fact: tránh các câu khô kiểu "loài này có đặc điểm thú vị"; hãy tạo cảm giác như một cảnh phim ngắn: ai tưởng gì, tự nhiên đang giấu bí mật gì, vì sao đáng bấm vào ảnh.
+- Chủ đề phải thật, thuộc các nhóm nam châm hút view: câu chuyện sinh tồn độc đáo, bản lĩnh lì lợm, tình cảm mẫu tử/phụ tử hy sinh, nghệ sĩ tự nhiên, vũ khí sinh học dị thường, thủy quái biển sâu.
+- subject_vi phải giật ngón tay (thumb-stopping title): tạo mâu thuẫn nhận thức hoặc cảm xúc mạnh ("Chim mỏ sừng: Bản tình ca cảm động hay bi kịch tự giam mình?", "Đại ca lửng mật: Vì sao chúa sơn lâm cũng phải né mặt?").
+- hook_vi không được chung chung; phải chứa mâu thuẫn, tình huống kịch tính hoặc khoảnh khắc chạm đáy cảm xúc.
+- main_fact_vi phải giải thích rõ điểm đặc biệt bằng ngôn ngữ dễ hiểu và giàu hình tượng.
+- twist_vi phải bổ sung cơ chế/quy mô/ngữ cảnh tạo cú wow thực sự, không lặp lại main_fact_vi.
+- question_vi ngắn, kích thích người xem comment tranh luận hoặc chia sẻ cảm xúc.
+- hook_vi + main_fact_vi + twist_vi khi ghép lại phải thành một mini-story kịch tính: mở cảnh -> sự thật bùng nổ -> cú twist cảm xúc/khoa học.
+- Với myth_vs_fact: hook_vi là hiểu lầm phổ biến, main_fact_vi là sự thật đảo chiều, twist_vi là lý do tiến hóa khiến người xem phải thán phục.
 - Không dùng lại chủ thể/góc nội dung cũ.
 - Không mô tả máu me, tra tấn, cổ vũ động vật đánh nhau thật.
 """

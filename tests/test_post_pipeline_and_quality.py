@@ -274,7 +274,64 @@ class TestPostPipelineAndQuality(unittest.TestCase):
         self.assertIn("Thủ bạt", anatomy_prompt)
         self.assertIn("English words", anatomy_prompt)
 
+    def test_viral_topics_presence(self):
+        from app.topic_bank import (
+            ANATOMY_TOPICS,
+            COMPARISON_TOPICS,
+            GUESS_QUIZ_TOPICS,
+            MATCHUP_TOPICS,
+            MYTH_VS_FACT_TOPICS,
+            ONE_STORY_TOPICS,
+            SINGLE_TOPICS,
+        )
+
+        single_keys = {t["topic_key"] for t in SINGLE_TOPICS}
+        self.assertIn("honey_badger_fearless_card", single_keys)
+        self.assertIn("great_hornbill_devotion_card", single_keys)
+        self.assertIn("orca_tonic_immobility_card", single_keys)
+        self.assertIn("pufferfish_sand_mandala_card", single_keys)
+
+        story_keys = {t["topic_key"] for t in ONE_STORY_TOPICS}
+        self.assertIn("hornbill_self_imprisonment_story", story_keys)
+        self.assertIn("honey_badger_cobra_sleep_story", story_keys)
+        self.assertIn("orca_wave_hunt_seal_story", story_keys)
+        self.assertIn("pufferfish_sand_sculptor_story", story_keys)
+
+        myth_keys = {t["topic_key"] for t in MYTH_VS_FACT_TOPICS}
+        self.assertIn("honey_badger_thick_skin_myth_fact", myth_keys)
+        self.assertIn("hornbill_casque_solid_horn_myth_fact", myth_keys)
+
+        quiz_keys = {t["topic_key"] for t in GUESS_QUIZ_TOPICS}
+        self.assertIn("guess_honey_badger", quiz_keys)
+        self.assertIn("guess_great_hornbill", quiz_keys)
+
+        matchup_keys = {t["topic_key"] for t in MATCHUP_TOPICS}
+        self.assertIn("honey_badger_vs_spotted_hyena", matchup_keys)
+        self.assertIn("orca_vs_great_white_shark", matchup_keys)
+
+        comp_keys = {t["topic_key"] for t in COMPARISON_TOPICS}
+        self.assertIn("top5_most_fearless_animals", comp_keys)
+        self.assertIn("top5_touching_parenting_devotion", comp_keys)
+
+        anatomy_keys = {t["topic_key"] for t in ANATOMY_TOPICS}
+        self.assertIn("hornbill_anatomy_infographic", anatomy_keys)
+        self.assertIn("honey_badger_anatomy_infographic", anatomy_keys)
+
+    def test_upgraded_templates_contain_award_winning_photography_guidance(self):
+        from app.post_service import (
+            ENGAGEMENT_IMAGE_TEMPLATE,
+            INFOGRAPHIC_IMAGE_TEMPLATE,
+            MATCHUP_IMAGE_TEMPLATE,
+            SINGLE_CARD_IMAGE_TEMPLATE,
+        )
+
+        for tmpl in (SINGLE_CARD_IMAGE_TEMPLATE, MATCHUP_IMAGE_TEMPLATE, ENGAGEMENT_IMAGE_TEMPLATE, INFOGRAPHIC_IMAGE_TEMPLATE):
+            self.assertIn("award-winning", tmpl.lower())
+            self.assertIn("STRICT ZERO ENGLISH TEXT", tmpl)
+            self.assertIn("STRICT NO 'THỦ BẠT'", tmpl)
+
 
 if __name__ == "__main__":
     unittest.main()
+
 

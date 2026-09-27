@@ -22,59 +22,69 @@ from app.utils import matchup_measure_label, matchup_measure_value, slugify, vie
 
 INFOGRAPHIC_IMAGE_TEMPLATE = """
 FINAL INFOGRAPHIC MUST CONTAIN THE EXACT TEXT BELOW.
-Create a vertical 4:5 finished wildlife ranking presentation for Facebook feed in Vietnamese:
-- black/dark charcoal background panels
-- copper/orange border and separators
-- bold condensed white Vietnamese typography
-- large copper/orange rank numbers
-- stacked horizontal ranking panels
-- left black text block, right realistic wildlife photo block
-- dramatic photorealistic animal images, sharp eyes, motion, cinematic lighting
-- every panel should feel like a tiny visual story, showing the animal/plant doing the behavior or revealing the survival trick behind the data
-- vertical 4:5 layout with enough height for a header and five stacked panels, all text readable without cropping
-- NO English text anywhere, NO top header pill tags, NO "Thủ bạt", NO unrequested words
+Create an ultra-high-definition vertical 4:5 finished wildlife ranking presentation for Facebook feed in Vietnamese:
+- award-winning natural history magazine aesthetic: dark charcoal slate background with brushed warm copper borders and crisp separators
+- bold condensed white Vietnamese typography with maximum mobile readability and flawless diacritics
+- large brushed copper rank numbers (01 to 05)
+- stacked horizontal ranking panels with generous breathing room
+- left dark text block with clean typography, right photorealistic wildlife documentary action photo
+- award-winning wildlife documentary photography (BBC Earth / National Geographic style): sharp piercing eyes, active motion freeze, cinematic atmospheric lighting
+- every panel captures an authentic visual survival story, showing the animal or plant performing its remarkable adaptation, record-breaking feat, or survival mechanism
+- vertical 4:5 layout with enough height for a clean bold header and five stacked panels, all text readable without cropping
+- STRICT ZERO ENGLISH TEXT: Every visible word and label must be in Vietnamese only. Zero English words anywhere
+- STRICT NO 'THỦ BẠT': Absolutely NEVER render the word 'Thủ bạt', 'thủ bạt', or any placeholder tags
+- NO top header pill tags, NO category badges, NO unrequested words
 - no Python overlay will be used later; all text must be rendered by the image model now
 """.strip()
 
 SINGLE_CARD_IMAGE_TEMPLATE = """
 FINAL INFOGRAPHIC MUST CONTAIN THE EXACT TEXT BELOW.
-Create an ultra-high-definition vertical 4:5 Vietnamese wildlife single-subject documentary photo feature for Facebook feed:
-- exactly one dominant photorealistic hero subject, occupying 75-85% of the frame, razor-sharp detail on eyes, skin texture, scales, fur, or plumage
-- action freeze / visual story: capture the subject in an intense, authentic natural moment (hunting, leaping, camouflaging, emitting bioluminescence, or revealing a hidden biological weapon)
-- cinematic high-contrast lighting: chiaroscuro, volumetric natural light beams, atmospheric depth, shallow depth-of-field with creamy bokeh background
-- modern, premium editorial typography integrated organically onto the image with subtle dark vignettes (NO clunky orange boxes, NO heavy border frames, NO generic Wikipedia table look)
-- exactly three visible text groups total: headline (3-5 words, large & punchy), key metric badge (clean, high contrast), and micro-fact hook
+Create an award-winning ultra-high-definition vertical 4:5 Vietnamese wildlife documentary single-subject photo feature for Facebook feed:
+- award-winning National Geographic / BBC Earth documentary photography standard: one dominant, majestic hero subject occupying 75-85% of the frame with razor-sharp macro focus
+- the decisive moment (visual story & emotion): capture the subject in an intense, unforgettable natural survival moment (fearless defiance like a honey badger confronting predators, extreme maternal devotion like a hornbill feeding at the tree cavity, intricate artistry like a pufferfish sculpting sand, or unleashing a hidden biological weapon)
+- intense eye contact: subject directly addressing the camera with piercing, lifelike eyes that instantly stop users scrolling the feed
+- cinematic lighting: dramatic volumetric rim light, golden hour sun shafts through canopy mist, morning dew reflections, deep cinematic chiaroscuro contrast
+- hyper-detailed organic textures: keratin horn grooves, glistening reptilian scales, individual feather barbs, coarse weathered fur, tactile skin wrinkles
+- modern luxury editorial typography integrated seamlessly onto the image with subtle dark vignettes (NO clunky orange boxes, NO heavy border frames, NO generic Wikipedia table look)
+- exactly three visible text groups total: headline (3-5 words, large & punchy in Vietnamese), key metric badge (clean, high contrast), and micro-fact hook
 - clean single-card composition with generous negative space, maximizing thumb-stopping dwell time on mobile screens
 - no rows, no repeated subject thumbnails, no numbered panels, no table, no grid
-- NO top header bar, NO corner tags, NO floating pill badges, NO "Thủ bạt", NO English text of any kind
+- STRICT ZERO ENGLISH TEXT: Every single visible character and word must be in Vietnamese only. Zero English words anywhere
+- STRICT NO 'THỦ BẠT': Under no circumstances render 'Thủ bạt' or any placeholder tags
+- NO top header bar, NO corner tags, NO floating pill badges
 - no Python overlay will be used later; all text must be rendered by the image model now
 """.strip()
 
 MATCHUP_IMAGE_TEMPLATE = """
 FINAL INFOGRAPHIC MUST CONTAIN THE EXACT TEXT BELOW.
-Create an ultra-realistic vertical 4:5 Vietnamese scientific animal face-off comparison feature for Facebook feed:
-- dynamic split-screen composition with left animal versus right animal facing each other in their authentic natural habitat
-- cinematic atmospheric lighting: dramatic volumetric rim light, swirling dust, mist, or deep water rays creating intense primal tension
+Create an award-winning ultra-realistic vertical 4:5 Vietnamese scientific animal face-off comparison feature for Facebook feed:
+- dynamic split-screen composition with left animal versus right animal facing each other in their authentic natural habitats
+- cinematic atmospheric divide: dramatic volumetric rim light, swirling savanna dust, arctic mist, or deep ocean light beams creating primal tension between two evolutionary titans
 - stylish luminous "VS" emblem centered between the two subjects
-- two realistic full-body or half-body animal portraits facing forward, dignified, alert, majestic, with intense eye contact
-- clean translucent spec cards at the lower edge of each side showing concise measurements with sharp modern typography
-- make it feel like a scientific showdown of two different evolutionary marvels, not a static ID card
+- two realistic full-body or half-body animal portraits facing forward, dignified, alert, majestic, with intense piercing eye contact
+- clean translucent spec cards at the lower edge of each side showing concise measurements with sharp modern Vietnamese typography
+- make it feel like an epic scientific showdown of two different evolutionary marvels and survival philosophies, not a static ID card
 - no gore, no blood, no injury, no violent impact
-- NO top header bar, NO corner tags, NO floating pill badges, NO "Thủ bạt", NO English text or labels anywhere (only central graphic "VS" emblem is permitted)
+- STRICT ZERO ENGLISH TEXT: All text must be in Vietnamese. Strictly NO English words or labels anywhere on the image (the only non-Vietnamese graphic allowed is the central 'VS' symbol)
+- STRICT NO 'THỦ BẠT': Absolutely NEVER render 'Thủ bạt' or any placeholder tags
+- NO top header bar, NO corner tags, NO floating pill badges
 - no Python overlay will be used later; all text must be rendered by the image model now
 """.strip()
 
 ENGAGEMENT_IMAGE_TEMPLATE = """
 FINAL INFOGRAPHIC MUST CONTAIN THE EXACT TEXT BELOW.
-Create an ultra-high-definition vertical 4:5 Vietnamese wildlife documentary photo feature for Facebook feed:
-- one breathtaking, thumb-stopping photorealistic hero image capturing a mind-bending natural phenomenon, optical illusion, or bizarre evolutionary adaptation
-- cinematic lighting with extreme subject focus, shallow depth of field, and rich atmospheric mood (mist, glow, deep sea darkness, or golden hour macro)
+Create an award-winning ultra-high-definition vertical 4:5 Vietnamese wildlife documentary photo feature for Facebook feed:
+- breathtaking, thumb-stopping photorealistic hero image capturing a mind-bending natural phenomenon, unique survival story, optical mystery, or astonishing evolutionary adaptation (e.g. hornbill's sealed nest, honey badger's fearless standoff, pufferfish's geometric sand mandala, deep sea glowing entity)
+- the "zoom-in magnet": extraordinary visual detail and mystery that compels viewers to stop scrolling, tap, and inspect the image
+- cinematic lighting with extreme subject focus, shallow depth of field, and rich atmospheric mood (morning mist, volumetric god rays, bioluminescent glow, deep sea darkness, or golden hour macro)
+- hyper-detailed textures: glistening scales, delicate antennae, iridescent plumage, weathered skin
 - sleek modern layout: subtle natural vignettes for contrast, bold crisp Vietnamese typography that is instantly legible on mobile in 0.5 seconds
 - headline is punchy and short (maximum 3-5 words) that triggers immediate curiosity or challenges common knowledge
 - exactly three visible text groups total: headline, primary curiosity hook, secondary factual reveal
 - no extra paragraphs, no random labels, no fake UI text, no heavy artificial borders
-- NO top header bar, NO corner tags, NO floating pill badges, NO "Thủ bạt", NO English text of any kind
-- all visible typography must be in Vietnamese only; zero English letters or words anywhere
+- STRICT ZERO ENGLISH TEXT: Every single visible character and word must be in Vietnamese only. Zero English words anywhere
+- STRICT NO 'THỦ BẠT': Under no circumstances render 'Thủ bạt' or any placeholder tags
+- NO top header bar, NO corner tags, NO floating pill badges
 - no Python overlay will be used later; all text must be rendered by the image model now
 """.strip()
 
@@ -1576,9 +1586,9 @@ def build_model_rendered_infographic_prompt(image_prompt: str, topic: dict, cont
             "- Never crop, truncate, overlap, or replace the listed text.\n"
             "- Do not add watermark, logo, captions, brand text, random symbols, blood, or injury.\n\n"
             "Visual direction:\n"
-            f"- Left animal: realistic {left['name_en']}, dignified, alert, no aggression impact.\n"
-            f"- Right animal: realistic {right['name_en']}, powerful, alert, no aggression impact.\n"
-            "- Create tension through posture, lighting, scale, and composition, not violence.\n\n"
+            f"- Left animal: award-winning realistic {left['name_en']}, dignified, alert, intense piercing eye contact, powerful natural stance.\n"
+            f"- Right animal: award-winning realistic {right['name_en']}, powerful, alert, intense piercing eye contact, majestic natural stance.\n"
+            "- Create primal tension through posture, dramatic volumetric lighting, scale, and atmospheric divide, not violence.\n\n"
             "Additional photo/style guidance from the text model, use only if it does not conflict with exact text rules:\n"
             f"{clean_scene}"
         )
@@ -1613,9 +1623,9 @@ def build_model_rendered_infographic_prompt(image_prompt: str, topic: dict, cont
         "- Lower area: a sleek, high-contrast modern badge or clean typography group presenting the main fact text clearly against a subtle cinematic dark vignette.\n"
         "- Put the hook as a readable micro-fact line near the badge; it should explain why the metric matters, not feel like a generic slogan.\n"
         "- Keep generous margins and make Vietnamese diacritics accurate.\n\n"
-        f"Hero image: realistic {topic['subject_en']} in its natural habitat, cinematic, sharp, dramatic, visually striking.\n"
+        f"Hero image: award-winning realistic {topic['subject_en']} in its natural habitat, cinematic, sharp, dramatic, visually striking, with intense piercing eye contact or active survival moment.\n"
         f"Visual fact to make obvious without rendering as extra text: {visual_detail}\n"
-        "- Make the viewer immediately understand the scale, mechanism, behavior, or biological trick behind the fact.\n"
+        "- Capture the decisive survival moment: make the viewer immediately understand the scale, mechanism, emotion, behavior, or biological trick behind the fact.\n"
         f"{'Scene/photo guidance only: ' + scene_prompt if scene_prompt else ''}"
     )
     return enforce_prompt_language_and_safety(prompt)
@@ -1697,7 +1707,7 @@ def build_engagement_image_prompt(topic: dict, content: dict) -> str:
         "- Do not add watermark, logo, brand text, decorative random symbols, or extra captions.\n"
         "- If text cannot fit, reduce font size or split line breaks; never paraphrase or crop text.\n\n"
         f"{format_direction}"
-        f"Hero visual subject: realistic {visual_subject}, cinematic, sharp, dramatic, visually striking.\n"
+        f"Hero visual subject: award-winning realistic {visual_subject}, cinematic, sharp, dramatic, visually striking, with intense piercing eye contact or active survival moment.\n"
         "PRIVATE VISUAL GUIDANCE ONLY - DO NOT RENDER THIS GUIDANCE AS TEXT:\n"
         f"- Story hook for image planning only: {topic['hook_vi']}.\n"
         f"- Biological fact for image planning only: {topic['main_fact_vi']}.\n"
