@@ -11,6 +11,7 @@ from app.text_service import (
     generate_engagement_format_content,
     generate_matchup_content,
     generate_single_card_content,
+    generate_species_profile_content,
 )
 from app.prompt_safety import (
     enforce_prompt_language_and_safety,
@@ -86,6 +87,44 @@ Create an award-winning ultra-high-definition vertical 4:5 Vietnamese wildlife d
 - STRICT NO 'THỦ BẠT': Under no circumstances render 'Thủ bạt' or any placeholder tags
 - NO top header bar, NO corner tags, NO floating pill badges
 - no Python overlay will be used later; all text must be rendered by the image model now
+""".strip()
+
+SPECIES_PROFILE_IMAGE_TEMPLATE = """
+FINAL INFOGRAPHIC MUST CONTAIN THE EXACT TEXT BELOW.
+Create an award-winning ultra-high-definition vertical 4:5 finished Vietnamese wildlife species profile dossier infographic for Facebook feed:
+- Layout and structure:
+  * Top header section (top 30% of canvas):
+    - Top centered eyebrow banner: horizontal thin gold accent lines flanking "THẾ GIỚI MUÔN LOÀI" in clean, tracked golden capital letters.
+    - Large punchy headline: "ĐÂY LÀ" in crisp bold white, immediately above the main species name in massive bold vibrant golden-yellow typography.
+    - Scientific Latin name directly underneath the species name in refined italicized typography.
+    - Left intro paragraph: concise, highly readable summary text block explaining the species' appearance, biotope, and signature survival behavior.
+    - Top-right hero image: award-winning National Geographic / BBC Earth style macro wildlife documentary photo of the animal perched or standing with intense eye contact, razor-sharp details, and cinematic soft natural lighting.
+  * Information grid (middle & lower canvas):
+    - Exactly 6 information panels arranged in a clean 2-row by 3-column layout below the header.
+    - Each panel is enclosed in a refined dark container with rounded corners and thin metallic gold / copper borders.
+    - Each panel contains:
+      1) Top row: a crisp yellow line-art icon beside a bold golden panel title in Vietnamese capital letters.
+      2) Clean, highly legible white Vietnamese text (or Latin scientific name).
+      3) A dedicated photorealistic documentary image inset illustrating that exact biological attribute:
+         - Panel 1 (TÊN KHOA HỌC): DNA helix icon + scientific Latin name + extreme macro head/eye/organ close-up.
+         - Panel 2 (NHÓM): Phylogenetic cladogram icon + biological taxonomy classification + full-body profile portrait in natural habitat.
+         - Panel 3 (KÍCH THƯỚC): Ruler icon + body length/weight text + profile photo with an authentic scientific measurement bracket line indicating scale.
+         - Panel 4 (MÔI TRƯỜNG SỐNG): Canopy forest trees icon + habitat & geographical distribution text + breathtaking natural ecosystem/habitat landscape photo.
+         - Panel 5 (THỨC ĂN): Cutlery fork-and-knife icon + diet description text + dynamic action shot of animal hunting, feeding, or holding prey.
+         - Panel 6 (ĐẶC ĐIỂM NỔI BẬT): Star icon + 3 bullet points with yellow bullet markers (●) + dynamic expressive behavioral action photo.
+  * Bottom footer section (bottom edge):
+    - Centered bottom divider: horizontal thin gold accent lines flanking "THẾ GIỚI MUÔN LOÀI" in elegant golden capital letters.
+- Aesthetic & visual quality:
+  * Deep charcoal / dark jungle black background with subtle organic gradient and vignette.
+  * Warm metallic gold and copper accents (#E5A93C, #FFC83B) on dark panels.
+  * Premium editorial magazine & museum zoological dossier standard.
+  * Flawless Vietnamese diacritics and typography rendering.
+- STRICT TEXT DEDUPLICATION & PURITY RULES:
+  * STRICT ZERO ENGLISH TEXT: Every visible character and word must be in Vietnamese only (except the Latin scientific name in quotation). Zero English words anywhere.
+  * STRICT NO 'THỦ BẠT': Absolutely NEVER render the word 'Thủ bạt', 'thủ bạt', or any placeholder tags.
+  * NO unrequested labels, NO extra watermark, NO logo, NO brand text.
+  * Render each requested text string exactly as specified.
+  * All text must be rendered by the image model now; no Python overlay will be added later.
 """.strip()
 
 ANATOMY_MASTER_PROMPT_TEMPLATE = """
@@ -1002,6 +1041,7 @@ MODEL_RENDERED_TOPIC_TYPES = {
     "comparison_top5",
     "single_card",
     "matchup_versus",
+    "species_profile",
     *ENGAGEMENT_TOPIC_TYPES,
 }
 
@@ -1717,9 +1757,159 @@ def build_engagement_image_prompt(topic: dict, content: dict) -> str:
     return enforce_prompt_language_and_safety(prompt)
 
 
+def build_species_profile_caption(topic: dict, content: dict | None = None) -> str:
+    content = content or {}
+    title = content.get("title") or f"ĐÂY LÀ {topic['animal_vi'].upper()} – THẾ GIỚI MUÔN LOÀI"
+    intro = normalize_generated_caption_text(
+        content.get("caption_intro") or topic.get("summary_vi") or ""
+    )
+
+    sci_box = topic.get("scientific_box", {})
+    group_box = topic.get("group_box", {})
+    size_box = topic.get("size_box", {})
+    habitat_box = topic.get("habitat_box", {})
+    diet_box = topic.get("diet_box", {})
+    hl_box = topic.get("highlights_box", {})
+
+    bullets = hl_box.get("bullets", [])
+    bullets_text = "\n".join(f"  • {b}" for b in bullets) if bullets else ""
+
+    dossier_lines = [
+        "📋 HỒ SƠ LOÀI (THẾ GIỚI MUÔN LOÀI):",
+        f"- 🧬 Tên khoa học: {sci_box.get('value', topic.get('scientific_name', ''))}",
+        f"- 🌳 Nhóm / Phân loại: {group_box.get('value', '')}",
+        f"- 📏 Kích thước: {size_box.get('value', '')}",
+        f"- 🏞️ Môi trường sống: {habitat_box.get('value', '')}",
+        f"- 🦗 Thức ăn: {diet_box.get('value', '')}",
+        "- ⭐ Đặc điểm nổi bật:",
+    ]
+    if bullets_text:
+        dossier_lines.append(bullets_text)
+
+    question = topic.get(
+        "question_vi",
+        "Bạn thấy ấn tượng nhất về đặc điểm nào của loài sinh vật này? Hãy để lại bình luận nhé!",
+    )
+
+    lines = [
+        vietnamize_common_terms(title),
+        "",
+        intro,
+        "",
+        "\n".join(dossier_lines),
+        "",
+        vietnamize_common_terms(question),
+    ]
+    return finalize_caption("\n".join(lines))
+
+
+def build_species_profile_image_prompt(topic: dict, content: dict) -> str:
+    scene_prompt = sanitize_scene_prompt(content.get("image_prompt") or topic.get("hero_prompt_en", ""))
+
+    animal_vi = topic.get("animal_vi") or topic.get("subject_vi", "")
+    animal_vi_upper = animal_vi.upper()
+    scientific_name = topic.get("scientific_name", "")
+    summary_vi = topic.get("summary_vi", "")
+
+    sci_box = topic.get("scientific_box", {})
+    group_box = topic.get("group_box", {})
+    size_box = topic.get("size_box", {})
+    habitat_box = topic.get("habitat_box", {})
+    diet_box = topic.get("diet_box", {})
+    hl_box = topic.get("highlights_box", {})
+
+    scale_bracket = size_box.get("scale_bracket", size_box.get("value", ""))
+    bullets = hl_box.get("bullets", [])
+    bullets_formatted = "\n".join(f"  ● {b}" for b in bullets)
+
+    prompt = f"""
+{SPECIES_PROFILE_IMAGE_TEMPLATE}
+
+Reference visual layout specification:
+- Canvas ratio: Vertical 4:5 optimized for Facebook feed mobile display.
+- Color palette: Deep dark forest / dark charcoal slate background (#0A100C to #121814) with subtle cinematic vignette. Elegant warm brushed gold and amber borders, divider lines, and card containers (#E5A93C / #FFC83B).
+- Header structure (top 30% of canvas):
+  * Top centered eyebrow: Horizontal thin gold lines flanking "THẾ GIỚI MUÔN LOÀI" in tracked golden capital letters.
+  * Headline: Crisp bold white "ĐÂY LÀ" placed directly above massive vibrant golden-yellow bold text "{animal_vi_upper}".
+  * Subtitle: Italicized scientific Latin name "{scientific_name}" in delicate pale gold / mint green.
+  * Left overview paragraph: A clean, highly legible Vietnamese paragraph rendered in white text with proper diacritics:
+    "{summary_vi}"
+  * Top-right hero image: Award-winning National Geographic / BBC Earth style wildlife documentary photograph of an adult {topic.get('animal_en', animal_vi)} ({scientific_name}) in sharp focus with intense lifelike eye contact, perched/standing naturally with shallow depth of field.
+
+- 6-Panel Dossier Grid (bottom 65% of canvas, 2 rows of 3 equal rounded cards with thin gold borders):
+  * Panel 1 (Row 1, Column 1):
+    - Top icon & title: Yellow line-art DNA double helix icon + yellow bold uppercase title "TÊN KHOA HỌC"
+    - Text: "{sci_box.get('value', scientific_name)}" in clean italic Latin
+    - Inset photo: {sci_box.get('visual_en', 'Macro close-up of distinctive head and bill/facial feature')}
+
+  * Panel 2 (Row 1, Column 2):
+    - Top icon & title: Yellow line-art Cladogram/phylogenetic branching icon + yellow bold uppercase title "NHÓM"
+    - Text: "{group_box.get('value', '')}" in clean white Vietnamese
+    - Inset photo: {group_box.get('visual_en', 'Full body side profile view in natural habitat')}
+
+  * Panel 3 (Row 1, Column 3):
+    - Top icon & title: Yellow line-art Ruler/scale icon + yellow bold uppercase title "KÍCH THƯỚC"
+    - Text: "{size_box.get('value', '')}" in clean white Vietnamese
+    - Inset photo: {size_box.get('visual_en', 'Animal profile with scientific dimension bracket')} with horizontal scale bar line marked "{scale_bracket}"
+
+  * Panel 4 (Row 2, Column 1):
+    - Top icon & title: Yellow line-art Canopy forest trees icon + yellow bold uppercase title "MÔI TRƯỜNG SỐNG"
+    - Text: "{habitat_box.get('value', '')}" in clean white Vietnamese
+    - Inset photo: {habitat_box.get('visual_en', 'Authentic landscape biotope/ecosystem')}
+
+  * Panel 5 (Row 2, Column 2):
+    - Top icon & title: Yellow line-art Cutlery fork-and-knife icon + yellow bold uppercase title "THỨC ĂN"
+    - Text: "{diet_box.get('value', '')}" in clean white Vietnamese
+    - Inset photo: {diet_box.get('visual_en', 'Dynamic feeding or predation action photo')}
+
+  * Panel 6 (Row 2, Column 3):
+    - Top icon & title: Yellow line-art Star/badge icon + yellow bold uppercase title "ĐẶC ĐIỂM NỔI BẬT"
+    - Bullet points with yellow markers (●):
+{bullets_formatted}
+    - Inset photo: {hl_box.get('visual_en', 'Dynamic behavioral expression photo')}
+
+- Footer section (bottom edge):
+  * Centered divider: Thin horizontal gold lines flanking "THẾ GIỚI MUÔN LOÀI" in clean golden uppercase letters.
+
+Strict text & typography rules:
+- TOP AND BOTTOM HEADER/FOOTER BANNER: Must be strictly "THẾ GIỚI MUÔN LOÀI" only. Do not render any other header/footer brand names or banners.
+- STRICT ZERO ENGLISH TEXT: Every visible word must be in Vietnamese, except the Latin scientific binomial "{scientific_name}" in italics. Strictly ZERO other English words or labels anywhere on the image.
+- STRICT NO 'THỦ BẠT': Absolutely NEVER render the word 'Thủ bạt', 'thủ bạt', or any placeholder tags.
+- Flawless Vietnamese diacritics on all Vietnamese text.
+- Render ONLY the exact text strings specified above. Do NOT add extra labels, UI buttons, lorem ipsum, watermarks, or logos.
+{TEXT_DEDUP_RULES}
+
+Photographic & lighting direction:
+{scene_prompt}
+""".strip()
+    return enforce_prompt_language_and_safety(prompt)
+
+
 def build_post_payload(topic: dict, scheduled_at: str, slot: str) -> dict:
     base_name = slugify(f"{scheduled_at}_{slot}_{topic['topic_key']}")
     final_path = str(FINAL_DIR / f"{base_name}.jpg")
+
+    if topic["topic_type"] == "species_profile":
+        content = generate_species_profile_content(topic)
+        image_prompt = build_species_profile_image_prompt(topic, content)
+        caption = build_species_profile_caption(topic, content)
+        return {
+            "scheduled_at": scheduled_at,
+            "slot": slot,
+            "topic_type": topic["topic_type"],
+            "topic_key": topic["topic_key"],
+            "title": content["title"],
+            "overlay_title": f"ĐÂY LÀ {topic['animal_vi'].upper()}",
+            "overlay_subtitle": topic.get("scientific_name"),
+            "overlay_stat": None,
+            "overlay_hook": None,
+            "caption": caption,
+            "image_prompt": image_prompt,
+            "topic_payload": json.dumps(topic, ensure_ascii=False),
+            "raw_image_path": final_path,
+            "final_image_path": final_path,
+            "status": "READY",
+        }
 
     if topic["topic_type"] == "anatomy_infographic":
         content = generate_anatomy_content(topic)

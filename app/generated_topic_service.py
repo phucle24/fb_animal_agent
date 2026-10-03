@@ -125,6 +125,70 @@ def generate_topic(topic_type: str, existing_topics: list[dict]) -> dict:
         for topic in existing_topics[-80:]
     )
 
+    if topic_type == "species_profile":
+        prompt = f"""
+Bạn là chuyên gia sinh học và biên tập viên nội dung thế giới động vật series "Thế Giới Muôn Loài", chuyên tạo hồ sơ loài (Species Profile Dossier Infographic) 6 ô chi tiết, trực quan, chính xác khoa học và cực kỳ hấp dẫn trên Facebook.
+
+Hãy sinh 1 topic mới dạng species_profile theo đúng cấu trúc infographic 6 ô thông tin.
+Không được trùng hoặc quá giống các loài đã có:
+{existing_summary}
+
+Chỉ trả về JSON hợp lệ với schema:
+{{
+  "topic_type": "species_profile",
+  "topic_key": "snake_case_english_unique_key",
+  "subject_vi": "Tên loài tiếng Việt",
+  "subject_en": "Common English name",
+  "animal_vi": "Tên loài tiếng Việt",
+  "animal_en": "Common English name",
+  "scientific_name": "Tên khoa học Latinh chính xác (ví dụ: Panthera tigris)",
+  "summary_vi": "Đoạn văn ngắn 2-3 câu (khoảng 35-50 từ) tóm tắt ngoại hình nổi bật, môi trường sống và tập tính săn mồi hoặc sinh tồn đặc trưng nhất.",
+  "scientific_box": {{
+    "title": "TÊN KHOA HỌC",
+    "value": "Tên khoa học Latinh chính xác",
+    "visual_en": "mô tả góc chụp macro cận cảnh đặc tả bộ phận đầu/mắt/mỏ hoặc đặc điểm nhận dạng của loài vật"
+  }},
+  "group_box": {{
+    "title": "NHÓM",
+    "value": "Phân loại sinh học (ví dụ: Chim, bộ Passeriformes, họ Eurylaimidae)",
+    "visual_en": "mô tả ảnh chân dung toàn thân tư thế tự nhiên trong sinh cảnh"
+  }},
+  "size_box": {{
+    "title": "KÍCH THƯỚC",
+    "value": "Số liệu kích thước hoặc cân nặng tiếng Việt (ví dụ: Dài khoảng 20 – 24 cm)",
+    "scale_bracket": "chuỗi kích thước hiển thị trên thanh thước đo tỉ lệ (ví dụ: 20 – 24 cm)",
+    "visual_en": "mô tả ảnh chụp dáng nghiêng với thanh thước đo tỉ lệ khoa học"
+  }},
+  "habitat_box": {{
+    "title": "MÔI TRƯỜNG SỐNG",
+    "value": "Môi trường sống và phân bố địa lý tiếng Việt",
+    "visual_en": "mô tả phong cảnh sinh cảnh tự nhiên nguyên sơ tuyệt đẹp của loài vật"
+  }},
+  "diet_box": {{
+    "title": "THỨC ĂN",
+    "value": "Thức ăn và con mồi chính tiếng Việt",
+    "visual_en": "mô tả khoảnh khắc săn mồi hoặc gặm/ngậm thức ăn trong miệng"
+  }},
+  "highlights_box": {{
+    "title": "ĐẶC ĐIỂM NỔI BẬT",
+    "bullets": [
+      "Đặc điểm độc lạ 1 (dưới 8 từ)",
+      "Đặc điểm độc lạ 2 (dưới 8 từ)",
+      "Đặc điểm độc lạ 3 (dưới 8 từ)"
+    ],
+    "visual_en": "mô tả khoảnh khắc hành vi hoặc biểu cảm động lực học ấn tượng nhất"
+  }},
+  "hero_prompt_en": "English award-winning wildlife photography prompt of the adult specimen in its natural habitat with cinematic lighting",
+  "hook_vi": "Câu hook giật ngón tay về vũ khí hoặc điều kỳ lạ của loài vật",
+  "question_vi": "Câu hỏi kéo bình luận tương tác bàn luận sôi nổi"
+}}
+"""
+        return validate_generated_topic(
+            generate_json(prompt, system="Bạn chỉ trả về JSON hợp lệ, không markdown, không giải thích."),
+            topic_type,
+            existing_topics,
+        )
+
     if topic_type == "anatomy_infographic":
         prompt = f"""
 Bạn là biên tập viên nội dung Facebook về sinh học động vật, chuyên tạo topic infographic giải phẫu sạch, dễ hiểu, có giá trị giáo dục và hình ảnh đẹp cho series "Giải phẫu muôn loài".
@@ -579,6 +643,29 @@ def find_duplicate_reason(candidate: dict, existing_topics: list[dict]) -> str |
             if content_similarity >= 0.45:
                 return f"kèo đối đầu quá giống {existing.get('topic_key')}"
 
+        elif candidate["topic_type"] == "species_profile":
+            subject_similarity = jaccard(
+                token_set(
+                    " ".join([
+                        candidate.get("subject_vi", ""),
+                        candidate.get("animal_vi", ""),
+                        candidate.get("scientific_name", ""),
+                    ])
+                ),
+                token_set(
+                    " ".join([
+                        existing.get("subject_vi", ""),
+                        existing.get("animal_vi", ""),
+                        existing.get("scientific_name", ""),
+                    ])
+                ),
+            )
+            content_similarity = jaccard(token_set(topic_text(candidate)), token_set(topic_text(existing)))
+            if subject_similarity >= 0.45:
+                return f"trùng/giống loài species_profile với {existing.get('topic_key')}"
+            if content_similarity >= 0.45:
+                return f"nội dung species_profile quá giống {existing.get('topic_key')}"
+
         elif candidate["topic_type"] in ENGAGEMENT_TOPIC_TYPES:
             subject_similarity = jaccard(token_set(candidate.get("subject_vi", "") + " " + candidate.get("subject_en", "")), token_set(existing.get("subject_vi", "") + " " + existing.get("subject_en", "")))
             content_similarity = jaccard(token_set(topic_text(candidate)), token_set(topic_text(existing)))
@@ -605,7 +692,35 @@ def validate_generated_topic(topic: dict, expected_type: str, existing_topics: l
         suffix += 1
     topic["topic_key"] = topic_key
 
-    if expected_type == "anatomy_infographic":
+    if expected_type == "species_profile":
+        for key in (
+            "subject_vi",
+            "subject_en",
+            "animal_vi",
+            "animal_en",
+            "scientific_name",
+            "summary_vi",
+            "hook_vi",
+            "question_vi",
+        ):
+            value = str(topic.get(key, "")).strip()
+            if not value:
+                raise ValueError(f"Generated species_profile topic missing {key}.")
+            topic[key] = value
+
+        for box_key in ("scientific_box", "group_box", "size_box", "habitat_box", "diet_box"):
+            box = topic.get(box_key)
+            if not isinstance(box, dict):
+                raise ValueError(f"Generated species_profile topic missing {box_key} dict.")
+            for field in ("title", "value"):
+                if not str(box.get(field, "")).strip():
+                    raise ValueError(f"Generated species_profile {box_key} missing {field}.")
+
+        hl_box = topic.get("highlights_box")
+        if not isinstance(hl_box, dict) or not isinstance(hl_box.get("bullets"), list) or len(hl_box["bullets"]) < 3:
+            raise ValueError("Generated species_profile highlights_box must have at least 3 bullets.")
+
+    elif expected_type == "anatomy_infographic":
         for key in (
             "subject_vi",
             "subject_en",

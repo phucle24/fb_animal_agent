@@ -317,15 +317,27 @@ class TestPostPipelineAndQuality(unittest.TestCase):
         self.assertIn("hornbill_anatomy_infographic", anatomy_keys)
         self.assertIn("honey_badger_anatomy_infographic", anatomy_keys)
 
+        from app.topic_bank import SPECIES_PROFILE_TOPICS
+        species_keys = {t["topic_key"] for t in SPECIES_PROFILE_TOPICS}
+        self.assertIn("black_and_red_broadbill_profile", species_keys)
+        self.assertIn("great_hornbill_profile", species_keys)
+
     def test_upgraded_templates_contain_award_winning_photography_guidance(self):
         from app.post_service import (
             ENGAGEMENT_IMAGE_TEMPLATE,
             INFOGRAPHIC_IMAGE_TEMPLATE,
             MATCHUP_IMAGE_TEMPLATE,
             SINGLE_CARD_IMAGE_TEMPLATE,
+            SPECIES_PROFILE_IMAGE_TEMPLATE,
         )
 
-        for tmpl in (SINGLE_CARD_IMAGE_TEMPLATE, MATCHUP_IMAGE_TEMPLATE, ENGAGEMENT_IMAGE_TEMPLATE, INFOGRAPHIC_IMAGE_TEMPLATE):
+        for tmpl in (
+            SINGLE_CARD_IMAGE_TEMPLATE,
+            MATCHUP_IMAGE_TEMPLATE,
+            ENGAGEMENT_IMAGE_TEMPLATE,
+            INFOGRAPHIC_IMAGE_TEMPLATE,
+            SPECIES_PROFILE_IMAGE_TEMPLATE,
+        ):
             self.assertIn("award-winning", tmpl.lower())
             self.assertIn("STRICT ZERO ENGLISH TEXT", tmpl)
             self.assertIn("STRICT NO 'THỦ BẠT'", tmpl)

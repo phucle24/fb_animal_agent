@@ -432,3 +432,67 @@ Chỉ trả về JSON, không giải thích thêm.
         system="Bạn chỉ trả về JSON hợp lệ, không markdown, không giải thích.",
     )
 
+
+def generate_species_profile_content(topic: dict) -> dict:
+    animal_vi = topic.get("animal_vi") or topic.get("subject_vi", "")
+    scientific_name = topic.get("scientific_name", "")
+    summary_vi = topic.get("summary_vi", "")
+
+    prompt = f"""
+Bạn là biên tập viên Facebook chuyên về thế giới động vật và thiên nhiên hoang dã series "Thế Giới Muôn Loài", chuyên tạo bài viết dossier hồ sơ loài sinh động, lôi cuốn, vừa có giá trị tri thức khoa học vừa có sức hút lan truyền tự nhiên cao.
+
+Hãy tạo output JSON hợp lệ với đúng các key sau:
+- title
+- caption_intro
+- image_prompt
+
+Thông tin loài vật:
+- Tên tiếng Việt: {animal_vi}
+- Tên tiếng Anh: {topic.get("animal_en", topic.get("subject_en", ""))}
+- Tên khoa học: {scientific_name}
+- Tóm tắt mở đầu: {summary_vi}
+- Hook: {topic.get("hook_vi", "")}
+- Câu hỏi kéo tương tác: {topic.get("question_vi", "")}
+
+{STORYTELLING_RULES}
+{CAPTION_STYLE_RULES}
+
+Yêu cầu:
+1. title
+- tiếng Việt, viết hoa tên loài nếu cần, tối đa 14 từ
+- ví dụ: "ĐÂY LÀ CHIM MỎ RỘNG ĐEN ĐỎ – TUYỆT TÁC SẮC MÀU RỪNG NHIỆT ĐỚI"
+- giật ngón tay, kích thích người xem dừng lại mở xem hồ sơ chi tiết
+
+2. caption_intro
+- 4 đến 6 câu ngắn, khoảng 100-140 chữ
+- mở đầu bằng một chi tiết thị giác hoặc cú twist sinh tồn kỳ thú của loài vật
+- kể chuyện giàu cảm xúc, cuốn hút như phim tài liệu BBC Earth
+- không lặp lại nguyên văn từng câu tóm tắt, hãy viết sinh động hơn
+- KHÔNG viết "Ảnh minh họa AI" hoặc nhắc đến AI
+
+3. image_prompt
+- tiếng Anh
+- CHỈ mô tả thêm chi tiết thị giác, ánh sáng, góc máy cho bức ảnh đại diện loài vật ({topic.get("animal_en", "")})
+- TUYỆT ĐỐI KHÔNG chứa từ khóa layout hay poster
+- Phong cách ảnh tài liệu động vật hoang dã đoạt giải National Geographic / BBC Earth, siêu nét, ánh sáng tự nhiên tuyệt đẹp
+
+Chỉ trả về JSON, không markdown, không giải thích.
+"""
+    try:
+        data = generate_json(
+            prompt,
+            system="Bạn chỉ trả về JSON hợp lệ, không markdown, không giải thích.",
+        )
+        return {
+            "title": data.get("title") or f"ĐÂY LÀ {animal_vi.upper()} – THẾ GIỚI MUÔN LOÀI",
+            "caption_intro": data.get("caption_intro") or summary_vi,
+            "image_prompt": data.get("image_prompt") or topic.get("hero_prompt_en", ""),
+        }
+    except Exception:
+        return {
+            "title": f"ĐÂY LÀ {animal_vi.upper()} – THẾ GIỚI MUÔN LOÀI",
+            "caption_intro": summary_vi,
+            "image_prompt": topic.get("hero_prompt_en", ""),
+        }
+
+

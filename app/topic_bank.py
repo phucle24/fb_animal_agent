@@ -1463,6 +1463,393 @@ ANATOMY_TOPICS = [
 ]
 
 
+SPECIES_PROFILE_TOPICS = [
+    {
+        "topic_type": "species_profile",
+        "topic_key": "black_and_red_broadbill_profile",
+        "subject_vi": "Chim mỏ rộng đen đỏ",
+        "subject_en": "Black-and-red broadbill",
+        "animal_vi": "Chim mỏ rộng đen đỏ",
+        "animal_en": "Black-and-red broadbill",
+        "scientific_name": "Cymbirhynchus macrorhynchos",
+        "summary_vi": "Chim mỏ rộng đen đỏ là loài chim rừng nhiệt đới nổi bật với chiếc mỏ to sặc sỡ, lưng đen và phần bụng đỏ tươi. Chúng sống ở rừng thấp và ven sông Đông Nam Á, thường săn côn trùng từ các cành cây thấp.",
+        "scientific_box": {
+            "title": "TÊN KHOA HỌC",
+            "value": "Cymbirhynchus macrorhynchos",
+            "visual_en": "Macro extreme close-up of bird's distinctive head showing intense dark eye and massive turquoise and crimson bill",
+        },
+        "group_box": {
+            "title": "NHÓM",
+            "value": "Chim, bộ Passeriformes, họ Eurylaimidae",
+            "visual_en": "Full body side profile view of bird perched naturally on a lush mossy branch in lowland jungle",
+        },
+        "size_box": {
+            "title": "KÍCH THƯỚC",
+            "value": "Dài khoảng 20 – 24 cm",
+            "scale_bracket": "20 – 24 cm",
+            "visual_en": "Bird profile with scientific measurement bracket line indicating 20 – 24 cm",
+        },
+        "habitat_box": {
+            "title": "MÔI TRƯỜNG SỐNG",
+            "value": "Rừng mưa thấp, ven sông và rừng ngập nước Đông Nam Á",
+            "visual_en": "Lush tropical lowland river winding through dense Southeast Asian rainforest canopy with morning mist",
+        },
+        "diet_box": {
+            "title": "THỨC ĂN",
+            "value": "Côn trùng, nhện, quả nhỏ và động vật không xương sống",
+            "visual_en": "Dynamic macro action shot of bird holding a large insect cricket in its powerful colorful bill",
+        },
+        "highlights_box": {
+            "title": "ĐẶC ĐIỂM NỔI BẬT",
+            "bullets": [
+                "Mỏ lớn rất nổi bật",
+                "Bụng đỏ tươi, lưng đen",
+                "Hay đậu im rồi lao ra bắt mồi",
+            ],
+            "visual_en": "Expressive dynamic close-up of bird calling with bill open wide on branch",
+        },
+        "hero_prompt_en": "Award-winning macro wildlife documentary photograph of an adult Black-and-red broadbill (Cymbirhynchus macrorhynchos) perched on a mossy tropical branch, luminous turquoise and crimson beak, velvety black upperparts and radiant ruby belly, sharp eye focus, lush rainforest bokeh",
+        "hook_vi": "Chiếc mỏ sặc sỡ như đồ chơi nhưng lại là cỗ máy săn mồi chớp nhoáng ven sông Đông Nam Á.",
+        "question_vi": "Bạn ấn tượng nhất với màu mỏ lam ngọc rực rỡ hay bộ lông đen đỏ tương phản của loài chim này?",
+    },
+    {
+        "topic_type": "species_profile",
+        "topic_key": "great_hornbill_profile",
+        "subject_vi": "Chim mỏ sừng lớn",
+        "subject_en": "Great hornbill",
+        "animal_vi": "Chim mỏ sừng lớn",
+        "animal_en": "Great hornbill",
+        "scientific_name": "Buceros bicornis",
+        "summary_vi": "Chim mỏ sừng lớn là chúa tể tầng tán rừng nhiệt đới với chiếc mũ sừng vàng khổng lồ và sải cánh uy nghi. Chúng nổi tiếng với tập tính làm tổ thủy chung kỳ lạ bậc nhất thế giới tự nhiên.",
+        "scientific_box": {
+            "title": "TÊN KHOA HỌC",
+            "value": "Buceros bicornis",
+            "visual_en": "Extreme macro close-up of the magnificent golden-yellow curved bill and hollow casque with intense red eye and dark eyelashes",
+        },
+        "group_box": {
+            "title": "NHÓM",
+            "value": "Chim, bộ Bucerotiformes, họ Bucerotidae",
+            "visual_en": "Full body majestic side view perched on emergent rainforest giant branch with long white and black tail feathers",
+        },
+        "size_box": {
+            "title": "KÍCH THƯỚC",
+            "value": "Dài 95 – 120 cm, sải cánh tới 1.5 m",
+            "scale_bracket": "95 – 120 cm",
+            "visual_en": "Perched hornbill side profile with scientific measurement bracket line indicating 95 – 120 cm",
+        },
+        "habitat_box": {
+            "title": "MÔI TRƯỜNG SỐNG",
+            "value": "Rừng mưa nhiệt đới nguyên sinh Ấn Độ và Đông Nam Á",
+            "visual_en": "Misty primary rainforest canopy with giant emergent ancient trees bathed in dawn sunlight",
+        },
+        "diet_box": {
+            "title": "THỨC ĂN",
+            "value": "Quả sung rừng, quả mọng, thằn lằn, chim nhỏ và côn trùng",
+            "visual_en": "Action shot of hornbill tossing a bright wild fig into the air to catch in its huge bill",
+        },
+        "highlights_box": {
+            "title": "ĐẶC ĐIỂM NỔI BẬT",
+            "bullets": [
+                "Mũ sừng vàng rỗng khuếch đại âm",
+                "Mẹ trét bùn tự nhốt mình ấp trứng",
+                "Mắt có lông mi bảo vệ như người",
+            ],
+            "visual_en": "Close-up of hornbill male delivering food through a narrow tree slot to female inside",
+        },
+        "hero_prompt_en": "Award-winning wildlife portrait of an adult Great Hornbill (Buceros bicornis) with immense golden casque and curved bill, brilliant contrast plumage, piercing ruby eye, perched atop an ancient mossy rainforest tree",
+        "hook_vi": "Chiếc mũ sừng khổng lồ nhìn như ngà đặc nhưng bên trong lại là buồng khuếch đại âm thanh xốp rỗng.",
+        "question_vi": "Bạn thấy thán phục chiếc mũ sừng uy nghi hay sự hy sinh tự nhốt mình nuôi con của chim mẹ hơn?",
+    },
+    {
+        "topic_type": "species_profile",
+        "topic_key": "honey_badger_profile",
+        "subject_vi": "Lửng mật",
+        "subject_en": "Honey badger",
+        "animal_vi": "Lửng mật",
+        "animal_en": "Honey badger",
+        "scientific_name": "Mellivora capensis",
+        "summary_vi": "Lửng mật là loài ăn thịt nhỏ bé nhưng sở hữu bản lĩnh lì lợm bậc nhất hành tinh. Chúng có lớp da dày đàn hồi chống nanh vuốt và cơ chế kháng độc rắn hổ mang kỳ diệu.",
+        "scientific_box": {
+            "title": "TÊN KHOA HỌC",
+            "value": "Mellivora capensis",
+            "visual_en": "Macro close-up of honey badger's fearless snout, sharp white teeth, small alert eyes and coarse fur",
+        },
+        "group_box": {
+            "title": "NHÓM",
+            "value": "Thú có vú, bộ Carnivora, họ Mustelidae",
+            "visual_en": "Full body side profile standing low to ground with distinctive silver-white mantle over pitch black body",
+        },
+        "size_box": {
+            "title": "KÍCH THƯỚC",
+            "value": "Dài 55 – 77 cm, nặng 9 – 16 kg",
+            "scale_bracket": "55 – 77 cm",
+            "visual_en": "Honey badger profile stance with clean scientific dimension measurement bracket 55 – 77 cm",
+        },
+        "habitat_box": {
+            "title": "MÔI TRƯỜNG SỐNG",
+            "value": "Thảo nguyên, hoang mạc và xavan khô Châu Phi, Tây Á",
+            "visual_en": "Arid African savanna landscape with red dust, acacia trees and golden dry grass",
+        },
+        "diet_box": {
+            "title": "THỨC ĂN",
+            "value": "Rắn độc, mật và ấu trùng ong, bọ cạp, thú nhỏ và củ",
+            "visual_en": "Action shot of honey badger fearlessly gripping a venomous cobra snake in its jaws",
+        },
+        "highlights_box": {
+            "title": "ĐẶC ĐIỂM NỔI BẬT",
+            "bullets": [
+                "Kháng nọc rắn độc cực đỉnh",
+                "Da dày lỏng xoay người phản đòn",
+                "Không biết sợ bất kỳ kẻ săn mồi nào",
+            ],
+            "visual_en": "Dynamic head-on snarling stance defying larger predators with fearless posture",
+        },
+        "hero_prompt_en": "Cinematic National Geographic wildlife photograph of an adult Honey badger (Mellivora capensis) walking purposefully across savanna dust, sharp claws, silver-gray back mantle, piercing defiant eyes facing camera directly",
+        "hook_vi": "Bị rắn hổ mang cắn chỉ ngủ một giấc rồi tỉnh dậy ăn tiếp con rắn - độ lì lợm vô đối trong tự nhiên.",
+        "question_vi": "Theo bạn vũ khí nào của lửng mật đáng nể nhất: lớp da chống răng nanh hay bộ não không biết sợ?",
+    },
+    {
+        "topic_type": "species_profile",
+        "topic_key": "harpy_eagle_profile",
+        "subject_vi": "Đại bàng Harpy",
+        "subject_en": "Harpy eagle",
+        "animal_vi": "Đại bàng Harpy",
+        "animal_en": "Harpy eagle",
+        "scientific_name": "Harpia harpyja",
+        "summary_vi": "Đại bàng Harpy là kẻ thống trị bầu trời rừng mưa Amazon với bộ móng vuốt to ngang móng gấu xám và lực bóp kinh hoàng. Chúng có thể bay lượn khéo léo qua tán rừng rậm để săn khỉ và lười.",
+        "scientific_box": {
+            "title": "TÊN KHOA HỌC",
+            "value": "Harpia harpyja",
+            "visual_en": "Macro extreme close-up of harpy eagle facial disc with raised double crest feathers and piercing pale eyes",
+        },
+        "group_box": {
+            "title": "NHÓM",
+            "value": "Chim, bộ Accipitriformes, họ Accipitridae",
+            "visual_en": "Full body side profile perched majestically on massive Amazonian kapok branch",
+        },
+        "size_box": {
+            "title": "KÍCH THƯỚC",
+            "value": "Dài 86 – 107 cm, sải cánh tới 2.2 m",
+            "scale_bracket": "86 – 107 cm",
+            "visual_en": "Perched harpy eagle with scientific measurement bracket line indicating 86 – 107 cm",
+        },
+        "habitat_box": {
+            "title": "MÔI TRƯỜNG SỐNG",
+            "value": "Tầng tán trên rừng mưa nhiệt đới Trung và Nam Mỹ",
+            "visual_en": "Lush misty canopy of Amazon rainforest stretching endlessly to horizon under soft sunlight",
+        },
+        "diet_box": {
+            "title": "THỨC ĂN",
+            "value": "Vượn, khỉ, lười, cầy hương rừng và cự đà lớn",
+            "visual_en": "Action shot of massive yellow talons clutched powerfully on thick branch",
+        },
+        "highlights_box": {
+            "title": "ĐẶC ĐIỂM NỔI BẬT",
+            "bullets": [
+                "Móng vuốt dài tới 13 cm như gấu",
+                "Lực bóp vuốt hơn 50 kg/cm2",
+                "Mào lông dựng đứng định vị âm",
+            ],
+            "visual_en": "Dramatic low-angle shot of eagle spreading wings in canopy with piercing gaze",
+        },
+        "hero_prompt_en": "Ultra-detailed BBC Earth wildlife documentary photograph of an adult Harpy eagle (Harpia harpyja), double crest raised, enormous hooked bill, lethal yellow talons, sharp macro plumage, cinematic green jungle canopy lighting",
+        "hook_vi": "Bộ móng vuốt to bằng vuốt gấu xám với lực bóp bẻ gãy xương con mồi trong chớp mắt.",
+        "question_vi": "Nhìn ánh mắt và bộ vuốt khổng lồ này, bạn có thấy đây là loài chim săn mồi ấn tượng nhất hành tinh?",
+    },
+    {
+        "topic_type": "species_profile",
+        "topic_key": "killer_whale_profile",
+        "subject_vi": "Cá voi sát thủ",
+        "subject_en": "Killer whale",
+        "animal_vi": "Cá voi sát thủ",
+        "animal_en": "Killer whale",
+        "scientific_name": "Orcinus orca",
+        "summary_vi": "Cá voi sát thủ thực chất là thành viên lớn nhất họ cá heo, sở hữu trí tuệ siêu việt và cấu trúc bộ tộc mẫu hệ vững chắc. Chúng là kẻ săn mồi đỉnh cao tuyệt đối không có thiên địch tự nhiên trong đại dương.",
+        "scientific_box": {
+            "title": "TÊN KHOA HỌC",
+            "value": "Orcinus orca",
+            "visual_en": "Extreme macro close-up of orca head breaking water showing white eye patch and conical interlocking teeth",
+        },
+        "group_box": {
+            "title": "NHÓM",
+            "value": "Thú có vú, bộ Cetartiodactyla, họ Delphinidae",
+            "visual_en": "Full body underwater profile of orca gliding gracefully with tall dorsal fin and black-white pattern",
+        },
+        "size_box": {
+            "title": "KÍCH THƯỚC",
+            "value": "Dài 6 – 8 m, nặng 3000 – 6000 kg",
+            "scale_bracket": "6 – 8 m",
+            "visual_en": "Underwater side profile with clean scientific measurement bracket indicating 6 – 8 m",
+        },
+        "habitat_box": {
+            "title": "MÔI TRƯỜNG SỐNG",
+            "value": "Tất cả các đại dương trên thế giới, đặc biệt vùng nước lạnh",
+            "visual_en": "Dramatic deep blue sub-polar ocean with snow-capped coastal mountains and sea ice",
+        },
+        "diet_box": {
+            "title": "THỨC ĂN",
+            "value": "Cá hồi, hải cẩu, cá heo, chim cánh cụt và cá mập trắng",
+            "visual_en": "Dynamic surface action of orca breaching while hunting in ocean waves",
+        },
+        "highlights_box": {
+            "title": "ĐẶC ĐIỂM NỔI BẬT",
+            "bullets": [
+                "Trí tuệ bộ tộc và ngôn ngữ riêng",
+                "Kỹ thuật lật úp cá mập gây bất động",
+                "Chế độ mẫu hệ gắn kết suốt đời",
+            ],
+            "visual_en": "Orca spyhopping vertically out of crystal clear water with piercing intelligent eye",
+        },
+        "hero_prompt_en": "Award-winning marine photography of an adult Orca (Orcinus orca) surfacing through crystal clear emerald-blue fjord waters, blowhole mist catching golden sunset rim light, glistening black skin, towering dorsal fin",
+        "hook_vi": "Loài sinh vật thông minh đến mức phát triển phương ngữ bộ tộc riêng và dạy chiến thuật săn cá mập qua nhiều thế hệ.",
+        "question_vi": "Bạn thấy điều gì đáng kinh ngạc nhất: sức mạnh đỉnh cao đại dương hay trí thông minh và tình mẫu hệ của chúng?",
+    },
+    {
+        "topic_type": "species_profile",
+        "topic_key": "axolotl_profile",
+        "subject_vi": "Kỳ giông Axolotl",
+        "subject_en": "Axolotl",
+        "animal_vi": "Kỳ giông Axolotl",
+        "animal_en": "Axolotl",
+        "scientific_name": "Ambystoma mexicanum",
+        "summary_vi": "Axolotl là loài lưỡng cư kỳ lạ giữ nguyên hình dáng ấu trùng suốt đời với chùm mang ngoài hồng hào như vương miện. Chúng nắm giữ khả năng tái sinh kỳ diệu: mọc lại hoàn chỉnh tứ chi, tim và não bộ.",
+        "scientific_box": {
+            "title": "TÊN KHOA HỌC",
+            "value": "Ambystoma mexicanum",
+            "visual_en": "Extreme macro close-up of axolotl face with gentle smiling mouth, dark eyes and feathery pink external gills",
+        },
+        "group_box": {
+            "title": "NHÓM",
+            "value": "Lưỡng cư, bộ Urodela, họ Ambystomatidae",
+            "visual_en": "Full body underwater profile swimming gracefully with translucent fin along spine",
+        },
+        "size_box": {
+            "title": "KÍCH THƯỚC",
+            "value": "Dài 15 – 30 cm, nặng 150 – 300 g",
+            "scale_bracket": "15 – 30 cm",
+            "visual_en": "Axolotl side view in water with scientific dimension bracket indicating 15 – 30 cm",
+        },
+        "habitat_box": {
+            "title": "MÔI TRƯỜNG SỐNG",
+            "value": "Hồ nước ngọt Xochimilco và kênh đào cổ Mexico City",
+            "visual_en": "Tranquil freshwater lake with floating chinampas gardens and underwater aquatic plants",
+        },
+        "diet_box": {
+            "title": "THỨC ĂN",
+            "value": "Giun, ấu trùng côn trùng, động vật giáp xác và cá nhỏ",
+            "visual_en": "Action shot of axolotl vacuum feeding an aquatic worm into mouth with suction",
+        },
+        "highlights_box": {
+            "title": "ĐẶC ĐIỂM NỔI BẬT",
+            "bullets": [
+                "Tái sinh hoàn hảo chân tim và não",
+                "Hiện tượng ấu nhi giữ nét con non",
+                "Chùm mang ngoài như lông vũ hồng",
+            ],
+            "visual_en": "Axolotl floating weightlessly among green aquatic moss looking directly at camera",
+        },
+        "hero_prompt_en": "Macro underwater documentary photograph of a leucistic Axolotl (Ambystoma mexicanum) hovering in clear water, radiant pink feathery external gill branches, translucent pale skin, gentle curious expression, soft studio lighting",
+        "hook_vi": "Mất chân, tim hay một phần não đều có thể mọc lại nguyên vẹn không để lại một vết sẹo.",
+        "question_vi": "Nếu con người giải mã được bí mật tái sinh cơ thể của Axolotl, y học tương lai sẽ thay đổi ra sao?",
+    },
+    {
+        "topic_type": "species_profile",
+        "topic_key": "snow_leopard_profile",
+        "subject_vi": "Báo tuyết",
+        "subject_en": "Snow leopard",
+        "animal_vi": "Báo tuyết",
+        "animal_en": "Snow leopard",
+        "scientific_name": "Panthera uncia",
+        "summary_vi": "Báo tuyết được mệnh danh là 'bóng ma của dãy Himalaya' nhờ khả năng ngụy trang hòa lẫn tuyệt đối vào vách đá tuyết. Chiếc đuôi dài khổng lồ vừa giữ thăng bằng khi nhảy xa 15 mét vừa làm chăn sưởi ấm.",
+        "scientific_box": {
+            "title": "TÊN KHOA HỌC",
+            "value": "Panthera uncia",
+            "visual_en": "Macro close-up of snow leopard face with icy pale green eyes, wide nasal cavity and dense smoke-gray rosetted fur",
+        },
+        "group_box": {
+            "title": "NHÓM",
+            "value": "Thú có vú, bộ Carnivora, họ Felidae",
+            "visual_en": "Full body side profile perched on steep craggy granite cliff covered in patches of snow",
+        },
+        "size_box": {
+            "title": "KÍCH THƯỚC",
+            "value": "Dài 100 – 130 cm, đuôi 80 – 100 cm",
+            "scale_bracket": "100 – 130 cm",
+            "visual_en": "Snow leopard side profile with scientific measurement bracket line indicating 100 – 130 cm",
+        },
+        "habitat_box": {
+            "title": "MÔI TRƯỜNG SỐNG",
+            "value": "Vùng núi cao 3000 – 5000m Trung Á và Himalaya",
+            "visual_en": "Majestic snow-dusted jagged Himalayan peaks under dramatic cold blue sky and swirling alpine winds",
+        },
+        "diet_box": {
+            "title": "THỨC ĂN",
+            "value": "Cừu xanh Bharal, dê núi Ibex, thỏ pika và gà lôi tuyết",
+            "visual_en": "Action shot of snow leopard leaping across a rocky ravine in mid-air",
+        },
+        "highlights_box": {
+            "title": "ĐẶC ĐIỂM NỔI BẬT",
+            "bullets": [
+                "Cú nhảy xa tới 15 mét qua hẻm núi",
+                "Đuôi dày cuộn tròn đắp mặt giữ ấm",
+                "Bàn chân to có đệm lông đi trên tuyết",
+            ],
+            "visual_en": "Snow leopard resting on cliff edge with thick tail wrapped cozy over its nose and paws",
+        },
+        "hero_prompt_en": "National Geographic standard wildlife photograph of an adult Snow Leopard (Panthera uncia) perched on high Himalayan rock ledge, dense woolly fur, massive rosetted tail, piercing pale eyes staring intensely into lens, blizzard mist background",
+        "hook_vi": "Chiếc đuôi dài bằng cả thân mình dùng làm bánh lái khi nhảy 15m và làm chăn sưởi ấm giữa bão tuyết -40°C.",
+        "question_vi": "Bạn ấn tượng nhất về cú nhảy thần sầu 15 mét hay biệt tài tàng hình biến mất vào vách đá của loài báo này?",
+    },
+    {
+        "topic_type": "species_profile",
+        "topic_key": "blue_ringed_octopus_profile",
+        "subject_vi": "Bạch tuộc đốm xanh",
+        "subject_en": "Blue-ringed octopus",
+        "animal_vi": "Bạch tuộc đốm xanh",
+        "animal_en": "Blue-ringed octopus",
+        "scientific_name": "Hapalochlaena lunulata",
+        "summary_vi": "Bạch tuộc đốm xanh có kích thước chỉ nhỏ bằng quả bóng golf nhưng mang độc tố tetrodotoxin mạnh gấp 1000 lần xyanua. Khi bị đe dọa, hàng chục vòng tròn màu xanh lam phát sáng rực rỡ cảnh báo tử thần.",
+        "scientific_box": {
+            "title": "TÊN KHOA HỌC",
+            "value": "Hapalochlaena lunulata",
+            "visual_en": "Extreme macro close-up of mantle with iridescent electric-blue glowing neon rings and dark eye",
+        },
+        "group_box": {
+            "title": "NHÓM",
+            "value": "Thân mềm, lớp Cephalopoda, họ Octopodidae",
+            "visual_en": "Full body top view resting on coral reef with eight tentacles curled gracefully",
+        },
+        "size_box": {
+            "title": "KÍCH THƯỚC",
+            "value": "Dài 12 – 20 cm, nặng 25 – 80 g",
+            "scale_bracket": "12 – 20 cm",
+            "visual_en": "Blue-ringed octopus profile with scientific measurement bracket line indicating 12 – 20 cm",
+        },
+        "habitat_box": {
+            "title": "MÔI TRƯỜNG SỐNG",
+            "value": "Rạn san hô nông và vũng triều Ấn Độ Dương - Thái Bình Dương",
+            "visual_en": "Vibrant shallow tropical coral reef with crystal clear water and sun rays penetrating tide pool",
+        },
+        "diet_box": {
+            "title": "THỨC ĂN",
+            "value": "Cua nhỏ, tôm ẩn sĩ và cá đáy rạn san hô",
+            "visual_en": "Action shot of tentacles wrapping around a small reef crab to deliver paralyzing venom",
+        },
+        "highlights_box": {
+            "title": "ĐẶC ĐIỂM NỔI BẬT",
+            "bullets": [
+                "Nọc độc tetrodotoxin gấp 1000 lần xyanua",
+                "60 đốm lam sáng rực khi bị kích động",
+                "Kích thước hạt tiêu nhưng hạ gục 26 người",
+            ],
+            "visual_en": "Dynamic macro shot showing brilliant pulsating electric-blue rings flashing warning",
+        },
+        "hero_prompt_en": "Award-winning macro underwater photograph of a Greater Blue-ringed Octopus (Hapalochlaena lunulata), 50 iridescent neon electric-blue rings pulsating vividly across golden-brown skin, perched on tropical coral, crystalline reef clarity",
+        "hook_vi": "Nhỏ lọt thỏm trong lòng bàn tay nhưng một vết cắn chứa đủ độc tố hạ gục 26 người trưởng thành trong vài phút.",
+        "question_vi": "Vẻ đẹp ma mị của những vòng tròn phát sáng hay độc tố chết người khiến bạn rùng mình hơn?",
+    },
+]
+
 
 SINGLE_TOPICS = [
     {
@@ -2528,6 +2915,7 @@ BEFORE_AFTER_TOPICS = [
 
 
 GENERAL_TOPIC_BANKS = [
+    ("species_profile", SPECIES_PROFILE_TOPICS),
     ("matchup_versus", MATCHUP_TOPICS),
     ("one_story", ONE_STORY_TOPICS),
     ("myth_vs_fact", MYTH_VS_FACT_TOPICS),
@@ -2535,6 +2923,7 @@ GENERAL_TOPIC_BANKS = [
     ("single_card", SINGLE_TOPICS),
     ("before_after", BEFORE_AFTER_TOPICS),
 ]
+
 
 
 def get_topic_by_index(index: int, slot: str | None = None) -> dict:
