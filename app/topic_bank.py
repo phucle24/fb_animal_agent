@@ -2922,6 +2922,7 @@ GENERAL_TOPIC_BANKS = [
     ("guess_quiz", GUESS_QUIZ_TOPICS),
     ("single_card", SINGLE_TOPICS),
     ("before_after", BEFORE_AFTER_TOPICS),
+    ("anatomy_infographic", ANATOMY_TOPICS),
 ]
 
 
@@ -2930,7 +2931,7 @@ def get_topic_by_index(index: int, slot: str | None = None) -> dict:
     """
     Slot-aware topic picker:
     - If slot is 'night' or 'evening': dedicated to anatomy_infographic (Master Prompt).
-    - If slot is 'morning' or unspecified: rotates across GENERAL_TOPIC_BANKS.
+    - If slot is 'morning' or unspecified: rotates across GENERAL_TOPIC_BANKS (all formats).
     """
     if slot in {"night", "evening"}:
         if index < len(ANATOMY_TOPICS):
@@ -2941,7 +2942,7 @@ def get_topic_by_index(index: int, slot: str | None = None) -> dict:
         existing_topics = list(ANATOMY_TOPICS)
         return get_generated_topic("anatomy_infographic", index - len(ANATOMY_TOPICS), existing_topics)
 
-    # General rotation for morning slot
+    # General rotation for morning slot (all formats)
     topic_banks = GENERAL_TOPIC_BANKS
     topic_group = index % len(topic_banks)
     group_index = index // len(topic_banks)
@@ -2956,6 +2957,5 @@ def get_topic_by_index(index: int, slot: str | None = None) -> dict:
     for _, bank in topic_banks:
         existing_topics.extend(bank)
     existing_topics.extend(COMPARISON_TOPICS)
-    existing_topics.extend(ANATOMY_TOPICS)
     return get_generated_topic(topic_type, group_index - len(topics), existing_topics)
 
