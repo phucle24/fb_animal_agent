@@ -8,12 +8,12 @@ from app.topic_bank import get_topic_by_index, ANATOMY_TOPICS, GENERAL_TOPIC_BAN
 
 class TestScheduleSlotsAndTopicRouting(unittest.TestCase):
     def test_posting_slots_times(self):
-        # Every day should have 1 photo post at 10:00 morning
+        # Every day should have 1 photo post at 07:30 morning
         for weekday in range(7):
             sample_day = date(2026, 9, 10 + weekday)
             slots = posting_slots_for_date(sample_day)
             self.assertEqual(len(slots), 1)
-            self.assertEqual(slots[0], ("morning", 10, 0))
+            self.assertEqual(slots[0], ("morning", 7, 30))
 
     def test_night_slot_returns_anatomy(self):
         # Night slot if queried returns anatomy_infographic

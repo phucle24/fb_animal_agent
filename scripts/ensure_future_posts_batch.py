@@ -42,3 +42,17 @@ if __name__ == "__main__":
         )
     else:
         print("No batch submitted.")
+
+    # Also ensure video reels from Google Drive
+    try:
+        from app.reel_service import ensure_future_reels
+
+        reel_result = ensure_future_reels()
+        print(f"\nReel ensure: {reel_result['message']}")
+        for item in reel_result["items"]:
+            print(
+                f"Scheduled reel ID={item['id']} | {item['scheduled_at']} | "
+                f"slot={item['slot']} | {item['topic_key']} | {item['title']}"
+            )
+    except Exception as exc:
+        print(f"Reel ensure error: {exc}")

@@ -28,9 +28,10 @@ BOOTSTRAP_STATE_PATH = DB_PATH.parent / "direct_image_bootstrap_until.txt"
 
 def posting_slots_for_date(day):
     # Daily posting schedule:
-    # 1. 10:00 AM (morning): 1 photo post (automated, rotates across all topic formats)
-    # 2. 19:00 (7 PM): 1 video (manual by user; product comment service automatically engages)
-    return [("morning", 10, 0)]
+    # 1. 07:30 AM (morning): 1 photo post (automated, rotates across all topic formats)
+    # 2. 12:15 PM (reel_1): video reels 1 (auto from Google Drive)
+    # 3. 20:00 PM (reel_2): video reels 2 (auto from Google Drive)
+    return [("morning", 7, 30)]
 
 
 def generate_schedule(days: int = 7):

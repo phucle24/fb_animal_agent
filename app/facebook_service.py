@@ -1,4 +1,5 @@
 import time
+from pathlib import Path
 import requests
 
 from app.config import FB_GRAPH_VERSION, FB_PAGE_ID, FB_PAGE_TOKEN
@@ -90,6 +91,107 @@ def publish_photo(image_path: str, caption: str, retries: int = 3) -> dict:
     if last_error:
         raise last_error
     raise RuntimeError("Failed to publish photo after retries")
+
+
+def publish_reel(video_path: str, caption: str, retries: int = 3) -> dict:
+    _ensure_facebook_config()
+    file_path = Path(video_path)
+    if not file_path.exists():
+        raise FileNotFoundError(f"Video file not found: {video_path}")
+
+    file_size = file_path.stat().st_size
+    if file_size == 0:
+        raise ValueError(f"Video file is empty: {video_path}")
+
+    last_error = None
+    for attempt in range(retries):
+        try:
+            # 1. Start upload session
+            start_url = f"https://graph.facebook.com/{FB_GRAPH_VERSION}/{FB_PAGE_ID}/video_reels"
+            start_resp = _request_with_retry(
+                "POST",
+                start_url,
+                retries=1,
+                data={
+                    "upload_phase": "start",
+                    "access_token": FB_PAGE_TOKEN,
+                },
+                timeout=60,
+            )
+            start_data = start_resp.json()
+            if start_resp.status_code >= 400 or "error" in start_data:
+                err = FacebookGraphError(start_data, start_resp.status_code)
+                if err.is_transient and attempt < retries - 1:
+                    time.sleep(2 ** attempt)
+                    continue
+                raise err
+
+            video_id = start_data["video_id"]
+            upload_url = start_data["upload_url"]
+
+            # 2. Upload video binary
+            upload_headers = {
+                "Authorization": f"OAuth {FB_PAGE_TOKEN}",
+                "offset": "0",
+                "file_size": str(file_size),
+                "Content-Type": "application/octet-stream",
+            }
+            with open(file_path, "rb") as video_file:
+                upload_resp = _request_with_retry(
+                    "POST",
+                    upload_url,
+                    retries=1,
+                    headers=upload_headers,
+                    data=video_file,
+                    timeout=600,
+                )
+            upload_data = upload_resp.json()
+            if upload_resp.status_code >= 400 or "error" in upload_data:
+                err = FacebookGraphError(upload_data, upload_resp.status_code)
+                if err.is_transient and attempt < retries - 1:
+                    time.sleep(2 ** attempt)
+                    continue
+                raise err
+
+            # 3. Finish & publish reel
+            finish_resp = _request_with_retry(
+                "POST",
+                start_url,
+                retries=1,
+                data={
+                    "upload_phase": "finish",
+                    "video_id": video_id,
+                    "video_state": "PUBLISHED",
+                    "description": caption,
+                    "access_token": FB_PAGE_TOKEN,
+                },
+                timeout=60,
+            )
+            finish_data = finish_resp.json()
+            if finish_resp.status_code >= 400 or "error" in finish_data:
+                err = FacebookGraphError(finish_data, finish_resp.status_code)
+                if err.is_transient and attempt < retries - 1:
+                    time.sleep(2 ** attempt)
+                    continue
+                raise err
+
+            return {
+                "id": video_id,
+                "video_id": video_id,
+                "post_id": video_id,
+                "success": True,
+                "result": finish_data,
+            }
+        except Exception as exc:
+            last_error = exc
+            if attempt < retries - 1:
+                time.sleep(2 ** attempt)
+                continue
+            raise
+
+    if last_error:
+        raise last_error
+    raise RuntimeError("Failed to publish reel after retries")
 
 
 def publish_comment(fb_post_id: str, message: str, retries: int = 3) -> dict:

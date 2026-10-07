@@ -17,7 +17,7 @@ from app.db import (
     mark_posted,
     update_status,
 )
-from app.facebook_service import publish_photo
+from app.facebook_service import publish_photo, publish_reel
 from app.product_comment_service import (
     pick_products_for_context,
     schedule_product_comments_for_post,
@@ -178,6 +178,17 @@ def create_app() -> Flask:
             flash(f"Create test post failed: {exc}", "error")
             return redirect(url_for("index"))
 
+    @flask_app.post("/actions/sync-drive-reels")
+    def action_sync_drive_reels():
+        try:
+            from app.reel_service import ensure_future_reels
+
+            result = ensure_future_reels()
+            flash(result["message"], "success")
+        except Exception as exc:
+            flash(f"Sync Drive reels failed: {exc}", "error")
+        return redirect(url_for("index"))
+
     @flask_app.post("/posts/<int:post_id>/publish")
     def action_publish(post_id: int):
         post = get_post(post_id)
@@ -185,10 +196,16 @@ def create_app() -> Flask:
             abort(404)
 
         try:
-            result = publish_photo(post["final_image_path"], post["caption"])
-            fb_photo_id = result.get("id", "")
-            fb_post_id = result.get("post_id") or result.get("id", "")
-            mark_posted(post_id, fb_post_id, fb_photo_id)
+            if post.get("topic_type") == "reel":
+                result = publish_reel(post["final_image_path"], post["caption"])
+                fb_video_id = result.get("video_id") or result.get("id", "")
+                fb_post_id = fb_video_id
+                mark_posted(post_id, fb_video_id, "")
+            else:
+                result = publish_photo(post["final_image_path"], post["caption"])
+                fb_photo_id = result.get("id", "")
+                fb_post_id = result.get("post_id") or result.get("id", "")
+                mark_posted(post_id, fb_post_id, fb_photo_id)
         except Exception as exc:
             mark_failed(post_id, str(exc))
             flash(f"Publish failed: {exc}", "error")
