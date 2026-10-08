@@ -40,6 +40,25 @@ class TestReelService(unittest.TestCase):
         with self.assertRaises(FileNotFoundError):
             publish_reel("/nonexistent/video.mp4", "caption")
 
+    def test_sqlite3_row_dict_conversion(self):
+        import sqlite3
+
+        conn = sqlite3.connect(":memory:")
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        cur.execute("CREATE TABLE test_posts (id INTEGER, topic_type TEXT)")
+        cur.execute("INSERT INTO test_posts VALUES (1, 'reel')")
+        cur.execute("SELECT * FROM test_posts")
+        row = cur.fetchone()
+
+        # Direct .get() fails on sqlite3.Row
+        with self.assertRaises(AttributeError):
+            row.get("topic_type")
+
+        # Converted to dict succeeds
+        post = dict(row)
+        self.assertEqual(post.get("topic_type"), "reel")
+
 
 if __name__ == "__main__":
     unittest.main()

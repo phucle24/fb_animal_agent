@@ -38,6 +38,7 @@ if __name__ == "__main__":
     print(f"Found {len(posts)} due posts for slot={slot} at {now_iso}.")
 
     for post in posts:
+        post = dict(post)
         if dry_run:
             print(
                 "Would post "

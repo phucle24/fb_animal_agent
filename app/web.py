@@ -194,6 +194,7 @@ def create_app() -> Flask:
         post = get_post(post_id)
         if not post:
             abort(404)
+        post = dict(post)
 
         try:
             if post.get("topic_type") == "reel":
