@@ -52,6 +52,7 @@ if __name__ == "__main__":
                 result = publish_reel(post["final_image_path"], post["caption"])
                 fb_video_id = result.get("video_id") or result.get("id", "")
                 fb_post_id = fb_video_id
+                fb_photo_id = ""
                 mark_posted(post["id"], fb_post_id, "")
             else:
                 result = publish_photo(post["final_image_path"], post["caption"])
