@@ -216,3 +216,66 @@ def overlay_comparison_top5(
     out = Image.alpha_composite(img, overlay).convert("RGB")
     out.save(final_path, quality=95)
     return final_path
+
+
+def overlay_morning_meme(
+    raw_path: str,
+    final_path: str,
+    in_image_text: str,
+) -> str:
+    """
+    Renders high-impact Vietnamese meme text onto the top 1/3 negative space of the 4:5 image.
+    Ensures crisp legibility with a subtle top gradient vignette and bold white text with black outline.
+    """
+    import shutil
+
+    if not in_image_text or not in_image_text.strip():
+        Path(final_path).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(raw_path, final_path)
+        return final_path
+
+    img = Image.open(raw_path).convert("RGBA")
+    img = fit_cover(img, TARGET_SIZE)
+
+    # Subtle top vignette for contrast and legibility in the top third
+    vignette = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    vdraw = ImageDraw.Draw(vignette)
+    for y in range(480):
+        alpha = int(140 * (1.0 - (y / 480) ** 1.5))
+        vdraw.line([(0, y), (TARGET_SIZE[0], y)], fill=(0, 0, 0, alpha))
+    img = Image.alpha_composite(img, vignette)
+    draw = ImageDraw.Draw(img)
+
+    font_size = 56
+    font = load_font(FONT_BOLD, font_size, BOLD_FONT_CANDIDATES)
+    max_w = TARGET_SIZE[0] - 160  # 80px margin each side
+
+    lines = wrap_text_by_width(draw, in_image_text.strip(), font, max_w)
+    if len(lines) > 3:
+        font_size = 46
+        font = load_font(FONT_BOLD, font_size, BOLD_FONT_CANDIDATES)
+        lines = wrap_text_by_width(draw, in_image_text.strip(), font, max_w)
+
+    line_height = font_size + 18
+    total_text_h = len(lines) * line_height
+    start_y = max(60, (400 - total_text_h) // 2)
+
+    for i, line in enumerate(lines):
+        line_w = text_width(draw, line, font)
+        line_x = (TARGET_SIZE[0] - line_w) // 2
+        line_y = start_y + i * line_height
+
+        draw_text(
+            draw,
+            (line_x, line_y),
+            line,
+            font,
+            fill=(255, 255, 255, 255),
+            stroke_width=4,
+            stroke_fill=(0, 0, 0, 240),
+        )
+
+    final_file = Path(final_path)
+    final_file.parent.mkdir(parents=True, exist_ok=True)
+    img.convert("RGB").save(final_file, format="JPEG", quality=95)
+    return str(final_file)

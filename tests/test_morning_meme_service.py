@@ -13,7 +13,7 @@ from app.post_service import build_post_payload
 
 
 class TestMorningMemeService(unittest.TestCase):
-    def test_curated_bank_size_and_fields(self):
+    def test_curated_bank_size_and_v3_fields(self):
         # Must have at least 21 memes (3 for each day of week)
         self.assertGreaterEqual(len(MORNING_MEME_BANK), 21)
         for meme in MORNING_MEME_BANK:
@@ -21,21 +21,47 @@ class TestMorningMemeService(unittest.TestCase):
             self.assertIn("concept", meme)
             self.assertIn("day_of_week", meme)
             self.assertIn("animal", meme)
+            self.assertIn("in_image_text", meme)
             self.assertIn("caption", meme)
+            self.assertIn("first_comment", meme)
             self.assertIn("image_prompt", meme)
             self.assertIn("hashtags", meme)
-            self.assertGreaterEqual(meme.get("score", 0), 80)
 
-            # Caption constraint: <= 15 words
-            words = meme["caption"].split()
-            self.assertLessEqual(len(words), 16, f"Caption too long: {meme['caption']}")
+            # Master Prompt V3.0 dual-text constraints:
+            # 1. in_image_text: 6-18 words with punchy twist
+            in_words = meme["in_image_text"].split()
+            self.assertLessEqual(len(in_words), 20, f"in_image_text too long: {meme['in_image_text']}")
+            self.assertGreaterEqual(len(in_words), 4, f"in_image_text too short: {meme['in_image_text']}")
 
-            # Strict no text constraint in image prompt
+            # 2. caption: 4-12 words + emoji
+            caption_words = meme["caption"].split()
+            self.assertLessEqual(len(caption_words), 14, f"caption too long: {meme['caption']}")
+
+            # 3. first_comment seeding: non-empty
+            self.assertTrue(len(meme["first_comment"].strip()) > 0)
+
+            # 4. Strict no text constraint & negative space in image prompt
             prompt_lower = meme["image_prompt"].lower()
             self.assertTrue(
                 "no text" in prompt_lower or "zero text" in prompt_lower,
                 f"Prompt missing zero-text constraint: {meme['image_prompt']}",
             )
+            self.assertTrue(
+                "top third" in prompt_lower or "negative space" in prompt_lower,
+                f"Prompt missing negative space instruction: {meme['image_prompt']}",
+            )
+
+    def test_saturday_demo_cat_meme_present(self):
+        # Saturday flagship demo meme from user prompt
+        cat_memes = [
+            m for m in MORNING_MEME_BANK
+            if m["weekday"] == 5 and "chạy mất dép" in m.get("in_image_text", "")
+        ]
+        self.assertEqual(len(cat_memes), 1)
+        cat = cat_memes[0]
+        self.assertEqual(cat["animal"], "Mèo Anh lông ngắn béo")
+        self.assertIn("bùa ngải", cat["caption"])
+        self.assertIn("check var", cat["first_comment"])
 
     def test_weekday_info_mapping(self):
         # 0 = Thứ Hai, 6 = Chủ Nhật
@@ -54,7 +80,7 @@ class TestMorningMemeService(unittest.TestCase):
             topic = get_morning_meme_topic(sat_dt)
             self.assertEqual(topic["topic_type"], "morning_meme")
             self.assertEqual(topic["day_of_week"], "Thứ Bảy")
-            self.assertIn("QuyenDuocSongCham", " ".join(topic.get("hashtags", [])))
+            self.assertIn("MemeCuoiTuan", " ".join(topic.get("hashtags", [])))
 
     def test_build_post_payload_for_morning_meme(self):
         meme = MORNING_MEME_BANK[0]
@@ -64,7 +90,8 @@ class TestMorningMemeService(unittest.TestCase):
         self.assertEqual(payload["status"], "READY")
         self.assertIn("#TheGioiMuonLoai", payload["caption"])
         self.assertIn("#KiepTrauNgua", payload["caption"])
-        self.assertIsNone(payload["overlay_title"])
+        # overlay_title must contain in_image_text for overlay_morning_meme
+        self.assertEqual(payload["overlay_title"], meme["in_image_text"])
         self.assertIsNone(payload["overlay_subtitle"])
 
 

@@ -1,10 +1,10 @@
 [Unit]
-Description=Poll FB Animal Agent Gemini Batch image jobs every 6 hours
-
+Description=Poll FB Animal Agent Gemini Batch image jobs every hour
+ 
 [Timer]
-OnCalendar=*-*-* 00/6:15:00
+OnCalendar=*-*-* *:15:00
 Persistent=true
 Unit=fb-animal-agent-poll-batch.service
-
+ 
 [Install]
 WantedBy=timers.target

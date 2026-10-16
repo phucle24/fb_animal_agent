@@ -4,7 +4,11 @@ import re
 from app.config import FINAL_DIR, RAW_DIR
 from app.db import insert_post
 from app.image_service import generate_image
-from app.overlay_service import overlay_comparison_top5, overlay_single_card
+from app.overlay_service import (
+    overlay_comparison_top5,
+    overlay_morning_meme,
+    overlay_single_card,
+)
 from app.text_service import (
     generate_anatomy_content,
     generate_comparison_content,
@@ -1037,7 +1041,6 @@ Global text safety & language purity rules:
 
 ENGAGEMENT_TOPIC_TYPES = {"myth_vs_fact", "guess_quiz", "one_story", "before_after"}
 MODEL_RENDERED_TOPIC_TYPES = {
-    "morning_meme",
     "anatomy_infographic",
     "comparison_top5",
     "single_card",
@@ -2031,10 +2034,10 @@ def build_post_payload(topic: dict, scheduled_at: str, slot: str) -> dict:
         }
 
     if topic["topic_type"] == "morning_meme":
+        raw_path = str(RAW_DIR / f"{base_name}.jpg")
+        final_path = str(FINAL_DIR / f"{base_name}.jpg")
+
         caption_lines = [topic["caption"]]
-        if topic.get("interactive_prompt"):
-            caption_lines.append("")
-            caption_lines.append(topic["interactive_prompt"])
         if topic.get("hashtags"):
             tags = topic["hashtags"]
             tags_str = " ".join(tags) if isinstance(tags, list) else str(tags)
@@ -2042,6 +2045,7 @@ def build_post_payload(topic: dict, scheduled_at: str, slot: str) -> dict:
             caption_lines.append(tags_str)
         caption = "\n".join(caption_lines)
 
+        in_image_text = topic.get("in_image_text") or topic.get("punchline") or ""
         image_prompt = enforce_prompt_language_and_safety(topic["image_prompt"])
         title = topic.get("concept") or f"Meme {topic.get('animal', 'động vật')}: {topic['caption']}"
         return {
@@ -2050,14 +2054,14 @@ def build_post_payload(topic: dict, scheduled_at: str, slot: str) -> dict:
             "topic_type": topic["topic_type"],
             "topic_key": topic["topic_key"],
             "title": title,
-            "overlay_title": None,
+            "overlay_title": in_image_text,
             "overlay_subtitle": None,
             "overlay_stat": None,
             "overlay_hook": None,
             "caption": caption,
             "image_prompt": image_prompt,
             "topic_payload": json.dumps(topic, ensure_ascii=False),
-            "raw_image_path": final_path,
+            "raw_image_path": raw_path,
             "final_image_path": final_path,
             "status": "READY",
         }
@@ -2085,6 +2089,14 @@ def overlay_post_image(post_data: dict) -> str:
             overlay_hook=post_data["overlay_hook"],
         )
 
+    if post_data["topic_type"] == "morning_meme":
+        in_image_text = topic.get("in_image_text") or topic.get("punchline") or post_data.get("overlay_title") or ""
+        return overlay_morning_meme(
+            raw_path=post_data["raw_image_path"],
+            final_path=post_data["final_image_path"],
+            in_image_text=in_image_text,
+        )
+
     if post_data["topic_type"] in MODEL_RENDERED_TOPIC_TYPES:
         return post_data["final_image_path"]
 
@@ -2095,9 +2107,10 @@ def build_post(topic: dict, scheduled_at: str, slot: str, image_fallback_on_erro
     post_data = build_post_payload(topic, scheduled_at, slot)
     generate_image(
         post_data["image_prompt"],
-        post_data["final_image_path"],
+        post_data["raw_image_path"],
         fallback_on_error=image_fallback_on_error,
     )
+    overlay_post_image(post_data)
     return insert_post(post_data)
 
 

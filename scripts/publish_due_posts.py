@@ -64,6 +64,24 @@ if __name__ == "__main__":
             print(f"Failed local_id={post['id']} => {exc}")
             continue
 
+        # Seed first comment immediately for morning memes (Master Prompt V3.0)
+        target_comment_id = fb_post_id or fb_photo_id
+        if post.get("topic_type") == "morning_meme" and target_comment_id:
+            try:
+                import json
+                from app.facebook_service import publish_comment
+
+                payload = json.loads(post.get("topic_payload") or "{}")
+                first_comment = payload.get("first_comment")
+                if first_comment and first_comment.strip():
+                    comment_res = publish_comment(target_comment_id, first_comment.strip())
+                    print(
+                        f"Seeded first comment for local_id={post['id']} => "
+                        f"comment_id={comment_res.get('id')}"
+                    )
+            except Exception as comment_exc:
+                print(f"First comment seeding failed for local_id={post['id']}: {comment_exc}")
+
         try:
             scheduled_comments = schedule_product_comments_for_post(post, fb_post_id)
             print(
