@@ -22,15 +22,29 @@ class TestScheduleSlotsAndTopicRouting(unittest.TestCase):
             self.assertEqual(topic["topic_type"], "anatomy_infographic")
             self.assertIn("labels", topic)
 
-    def test_morning_slot_rotates_across_formats(self):
-        # Morning slot rotates across diverse topic types
-        seen_types = set()
-        for idx in range(16):
-            topic = get_topic_by_index(idx, slot="morning")
-            seen_types.add(topic["topic_type"])
+    def test_morning_slot_uses_morning_meme(self):
+        # Morning slot is dedicated to Master Prompt V2.0 morning animal memes
+        topic = get_topic_by_index(0, slot="morning")
+        self.assertEqual(topic["topic_type"], "morning_meme")
+        self.assertIn("animal", topic)
+        self.assertIn("caption", topic)
+        self.assertIn("image_prompt", topic)
+        self.assertTrue(len(topic["caption"].split()) <= 16)
+        self.assertIn("no text", topic["image_prompt"].lower())
 
-        # Should have rotated across multiple types including anatomy
-        self.assertTrue(len(seen_types) >= 5)
+    def test_morning_slot_day_of_week_routing(self):
+        # Morning slot correctly maps each day of week (Mon-Sun) to theme
+        from datetime import datetime
+        from zoneinfo import ZoneInfo
+        from app.config import TIMEZONE
+
+        # Mon=2026-10-19 to Sun=2026-10-25
+        expected_days = ["Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy", "Chủ Nhật"]
+        for day_offset, expected_name in enumerate(expected_days):
+            dt = datetime(2026, 10, 19 + day_offset, 7, 5, tzinfo=ZoneInfo(TIMEZONE))
+            topic = get_topic_by_index(0, slot="morning", dt=dt)
+            self.assertEqual(topic["topic_type"], "morning_meme")
+            self.assertEqual(topic["day_of_week"], expected_name)
 
     def test_general_topic_banks_structure(self):
         # GENERAL_TOPIC_BANKS contains all topic types including anatomy_infographic

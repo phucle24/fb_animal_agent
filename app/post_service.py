@@ -1037,6 +1037,7 @@ Global text safety & language purity rules:
 
 ENGAGEMENT_TOPIC_TYPES = {"myth_vs_fact", "guess_quiz", "one_story", "before_after"}
 MODEL_RENDERED_TOPIC_TYPES = {
+    "morning_meme",
     "anatomy_infographic",
     "comparison_top5",
     "single_card",
@@ -2020,6 +2021,38 @@ def build_post_payload(topic: dict, scheduled_at: str, slot: str) -> dict:
             "overlay_title": content["overlay_title"],
             "overlay_subtitle": content["overlay_primary"],
             "overlay_stat": content["overlay_secondary"],
+            "overlay_hook": None,
+            "caption": caption,
+            "image_prompt": image_prompt,
+            "topic_payload": json.dumps(topic, ensure_ascii=False),
+            "raw_image_path": final_path,
+            "final_image_path": final_path,
+            "status": "READY",
+        }
+
+    if topic["topic_type"] == "morning_meme":
+        caption_lines = [topic["caption"]]
+        if topic.get("interactive_prompt"):
+            caption_lines.append("")
+            caption_lines.append(topic["interactive_prompt"])
+        if topic.get("hashtags"):
+            tags = topic["hashtags"]
+            tags_str = " ".join(tags) if isinstance(tags, list) else str(tags)
+            caption_lines.append("")
+            caption_lines.append(tags_str)
+        caption = "\n".join(caption_lines)
+
+        image_prompt = enforce_prompt_language_and_safety(topic["image_prompt"])
+        title = topic.get("concept") or f"Meme {topic.get('animal', 'động vật')}: {topic['caption']}"
+        return {
+            "scheduled_at": scheduled_at,
+            "slot": slot,
+            "topic_type": topic["topic_type"],
+            "topic_key": topic["topic_key"],
+            "title": title,
+            "overlay_title": None,
+            "overlay_subtitle": None,
+            "overlay_stat": None,
             "overlay_hook": None,
             "caption": caption,
             "image_prompt": image_prompt,

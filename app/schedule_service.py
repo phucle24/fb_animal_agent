@@ -82,10 +82,10 @@ def prepare_weekly_posts(days: int = 7) -> list[dict]:
             continue
 
         if slot_name in {"night", "evening"}:
-            topic = get_topic_by_index(night_base + night_offset, slot=slot_name)
+            topic = get_topic_by_index(night_base + night_offset, slot=slot_name, dt=dt)
             night_offset += 1
         else:
-            topic = get_topic_by_index(morning_base + morning_offset, slot=slot_name)
+            topic = get_topic_by_index(morning_base + morning_offset, slot=slot_name, dt=dt)
             morning_offset += 1
 
         post_id = build_post(topic, scheduled_at, slot_name)
@@ -118,10 +118,10 @@ def prepare_weekly_posts_for_batch(days: int = 7) -> list[dict]:
             continue
 
         if slot_name in {"night", "evening"}:
-            topic = get_topic_by_index(night_base + night_offset, slot=slot_name)
+            topic = get_topic_by_index(night_base + night_offset, slot=slot_name, dt=dt)
             night_offset += 1
         else:
-            topic = get_topic_by_index(morning_base + morning_offset, slot=slot_name)
+            topic = get_topic_by_index(morning_base + morning_offset, slot=slot_name, dt=dt)
             morning_offset += 1
 
         post_id = build_post_for_batch(topic, scheduled_at, slot_name)
@@ -159,10 +159,10 @@ def prepare_future_posts_for_batch(posts_to_create: int, start_after_iso: str | 
             continue
 
         if slot_name in {"night", "evening"}:
-            topic = get_topic_by_index(night_base + night_offset, slot=slot_name)
+            topic = get_topic_by_index(night_base + night_offset, slot=slot_name, dt=dt)
             night_offset += 1
         else:
-            topic = get_topic_by_index(morning_base + morning_offset, slot=slot_name)
+            topic = get_topic_by_index(morning_base + morning_offset, slot=slot_name, dt=dt)
             morning_offset += 1
 
         post_id = build_post_for_batch(topic, scheduled_at, slot_name)
@@ -259,10 +259,10 @@ def prepare_future_posts_direct(posts_to_create: int, cutoff_iso: str) -> list[d
             continue
 
         if slot_name in {"night", "evening"}:
-            topic = get_topic_by_index(night_base + night_offset, slot=slot_name)
+            topic = get_topic_by_index(night_base + night_offset, slot=slot_name, dt=dt)
             night_offset += 1
         else:
-            topic = get_topic_by_index(morning_base + morning_offset, slot=slot_name)
+            topic = get_topic_by_index(morning_base + morning_offset, slot=slot_name, dt=dt)
             morning_offset += 1
 
         post_id = build_post(topic, scheduled_at, slot_name)

@@ -2927,12 +2927,18 @@ GENERAL_TOPIC_BANKS = [
 
 
 
-def get_topic_by_index(index: int, slot: str | None = None) -> dict:
+def get_topic_by_index(index: int, slot: str | None = None, dt=None) -> dict:
     """
     Slot-aware topic picker:
-    - If slot is 'night' or 'evening': dedicated to anatomy_infographic (Master Prompt).
-    - If slot is 'morning' or unspecified: rotates across GENERAL_TOPIC_BANKS (all formats).
+    - If slot is 'morning': dedicated to MASTER PROMPT V2.0 Morning Animal Memes.
+    - If slot is 'night' or 'evening': dedicated to anatomy_infographic.
+    - If legacy: rotates across GENERAL_TOPIC_BANKS (preserved intact for future reuse).
     """
+    if slot == "morning":
+        from app.morning_meme_service import get_morning_meme_topic
+
+        return get_morning_meme_topic(dt=dt, index=index)
+
     if slot in {"night", "evening"}:
         if index < len(ANATOMY_TOPICS):
             return deepcopy(ANATOMY_TOPICS[index])
@@ -2942,7 +2948,7 @@ def get_topic_by_index(index: int, slot: str | None = None) -> dict:
         existing_topics = list(ANATOMY_TOPICS)
         return get_generated_topic("anatomy_infographic", index - len(ANATOMY_TOPICS), existing_topics)
 
-    # General rotation for morning slot (all formats)
+    # General rotation for legacy slots (preserved intact for future reuse)
     topic_banks = GENERAL_TOPIC_BANKS
     topic_group = index % len(topic_banks)
     group_index = index // len(topic_banks)
