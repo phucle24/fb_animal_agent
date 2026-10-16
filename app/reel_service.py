@@ -18,10 +18,10 @@ logger = logging.getLogger(__name__)
 def reel_slots_for_date(day) -> list[tuple[str, int, int]]:
     """
     Daily video reels schedule:
-    1. 12:15 PM (noon): Reel 1
-    2. 20:00 PM (night): Reel 2
+    1. 11:50 AM (noon): Reel 1
+    2. 20:15 PM (night): Reel 2
     """
-    return [("reel_1", 12, 15), ("reel_2", 20, 0)]
+    return [("reel_1", 11, 50), ("reel_2", 20, 15)]
 
 
 def generate_future_reel_schedule(target_slots: int = 14, lookahead_days: int = 30) -> list[tuple[str, datetime]]:
@@ -90,7 +90,7 @@ def prepare_reel_media(reel: dict) -> tuple[Path, str]:
 def ensure_future_reels(max_reels: int | None = None, folder_id: str | None = None) -> dict:
     """
     Checks Google Drive for unposted reels, downloads videos and captions,
-    and schedules them into the next available 12:15 and 20:00 slots.
+    and schedules them into the next available 11:50 and 20:15 slots.
     """
     unposted_reels = get_unposted_drive_reels(folder_id)
     if not unposted_reels:

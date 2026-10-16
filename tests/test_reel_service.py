@@ -19,11 +19,11 @@ class TestReelService(unittest.TestCase):
         self.assertIsNone(extract_file_number("abc_test.mp4"))
 
     def test_reel_slots_times(self):
-        # 12:15 and 20:00
+        # 11:50 and 20:15
         slots = reel_slots_for_date(date(2026, 10, 8))
         self.assertEqual(len(slots), 2)
-        self.assertEqual(slots[0], ("reel_1", 12, 15))
-        self.assertEqual(slots[1], ("reel_2", 20, 0))
+        self.assertEqual(slots[0], ("reel_1", 11, 50))
+        self.assertEqual(slots[1], ("reel_2", 20, 15))
 
     def test_generate_future_reel_schedule(self):
         slots = generate_future_reel_schedule(target_slots=6, lookahead_days=5)

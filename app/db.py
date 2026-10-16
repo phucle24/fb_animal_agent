@@ -201,19 +201,25 @@ def count_posts_by_slot(slot: str) -> int:
     return total
 
 
-def count_future_posts(now_iso: str, statuses: tuple[str, ...] = ("READY", "WAITING_IMAGE")) -> int:
+def count_future_posts(
+    now_iso: str,
+    statuses: tuple[str, ...] = ("READY", "WAITING_IMAGE"),
+    exclude_topic_type: str | None = None,
+) -> int:
     conn = get_conn()
     cur = conn.cursor()
     placeholders = ",".join("?" for _ in statuses)
-    cur.execute(
-        f"""
+    sql = f"""
         SELECT COUNT(*) AS total
         FROM posts
         WHERE scheduled_at > ?
           AND status IN ({placeholders})
-        """,
-        (now_iso, *statuses),
-    )
+    """
+    params = [now_iso, *statuses]
+    if exclude_topic_type:
+        sql += " AND topic_type != ?"
+        params.append(exclude_topic_type)
+    cur.execute(sql, params)
     total = cur.fetchone()["total"]
     conn.close()
     return total
