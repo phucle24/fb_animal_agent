@@ -35,16 +35,18 @@ class TestScheduleSlotsAndTopicRouting(unittest.TestCase):
     def test_morning_slot_day_of_week_routing(self):
         # Morning slot correctly maps each day of week (Mon-Sun) to theme
         from datetime import datetime
+        from unittest.mock import patch
         from zoneinfo import ZoneInfo
         from app.config import TIMEZONE
 
         # Mon=2026-10-19 to Sun=2026-10-25
         expected_days = ["Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy", "Chủ Nhật"]
-        for day_offset, expected_name in enumerate(expected_days):
-            dt = datetime(2026, 10, 19 + day_offset, 7, 5, tzinfo=ZoneInfo(TIMEZONE))
-            topic = get_topic_by_index(0, slot="morning", dt=dt)
-            self.assertEqual(topic["topic_type"], "morning_meme")
-            self.assertEqual(topic["day_of_week"], expected_name)
+        with patch("app.morning_meme_service.generate_morning_meme_via_llm", return_value=None):
+            for day_offset, expected_name in enumerate(expected_days):
+                dt = datetime(2026, 10, 19 + day_offset, 7, 5, tzinfo=ZoneInfo(TIMEZONE))
+                topic = get_topic_by_index(0, slot="morning", dt=dt)
+                self.assertEqual(topic["topic_type"], "morning_meme")
+                self.assertEqual(topic["day_of_week"], expected_name)
 
     def test_general_topic_banks_structure(self):
         # GENERAL_TOPIC_BANKS contains all topic types including anatomy_infographic

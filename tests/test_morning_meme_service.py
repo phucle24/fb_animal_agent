@@ -45,13 +45,16 @@ class TestMorningMemeService(unittest.TestCase):
         self.assertEqual(WEEKDAY_INFO[6]["name"], "Chủ Nhật")
 
     def test_get_morning_meme_topic_weekday_dispatch(self):
+        from unittest.mock import patch
+
         tz = ZoneInfo(TIMEZONE)
         # Saturday 2026-10-17
         sat_dt = datetime(2026, 10, 17, 7, 5, tzinfo=tz)
-        topic = get_morning_meme_topic(sat_dt)
-        self.assertEqual(topic["topic_type"], "morning_meme")
-        self.assertEqual(topic["day_of_week"], "Thứ Bảy")
-        self.assertIn("QuyenDuocSongCham", " ".join(topic.get("hashtags", [])))
+        with patch("app.morning_meme_service.generate_morning_meme_via_llm", return_value=None):
+            topic = get_morning_meme_topic(sat_dt)
+            self.assertEqual(topic["topic_type"], "morning_meme")
+            self.assertEqual(topic["day_of_week"], "Thứ Bảy")
+            self.assertIn("QuyenDuocSongCham", " ".join(topic.get("hashtags", [])))
 
     def test_build_post_payload_for_morning_meme(self):
         meme = MORNING_MEME_BANK[0]
