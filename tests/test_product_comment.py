@@ -195,6 +195,63 @@ class TestProductCommentService(unittest.TestCase):
             self.assertEqual(results[1]["kind"], "donate")
             self.assertEqual(results[1]["scheduled_at"], "2026-09-17 12:35:00")
 
+    def test_featured_products_content_and_rotation(self):
+        from app.product_comment_service import FEATURED_PRODUCTS, pick_featured_products
+
+        self.assertEqual(len(FEATURED_PRODUCTS), 2)
+        links = {p["link"] for p in FEATURED_PRODUCTS}
+        self.assertIn("https://s.shopee.vn/gQv0nQVjh", links)
+        self.assertIn("https://s.shopee.vn/6VOhxZGZAd", links)
+
+        # Both products have image paths
+        for p in FEATURED_PRODUCTS:
+            self.assertTrue(p["image_path"].endswith(".jpg"))
+
+        # Pick 2 products returns both
+        picked = pick_featured_products(seed=10, count=2)
+        self.assertEqual(len(picked), 2)
+        self.assertEqual({p["link"] for p in picked}, links)
+
+    def test_publish_comment_with_photo_success(self):
+        from unittest.mock import patch, MagicMock
+        from app.facebook_service import publish_comment
+
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = {"id": "comment_12345"}
+
+        with patch("app.facebook_service.FB_PAGE_ID", "123"), \
+             patch("app.facebook_service.FB_PAGE_TOKEN", "token_abc"), \
+             patch("app.facebook_service.upload_unpublished_photo", return_value="photo_99999"), \
+             patch("app.facebook_service._request_with_retry", return_value=mock_resp) as mock_req:
+
+            res = publish_comment("post_001", "Hello test", image_path="data/products/test.jpg")
+            self.assertEqual(res.get("id"), "comment_12345")
+            # Verify attachment_id was included in data
+            data_sent = mock_req.call_args[1].get("data")
+            self.assertEqual(data_sent.get("attachment_id"), "photo_99999")
+            self.assertEqual(data_sent.get("message"), "Hello test")
+
+    def test_publish_comment_with_photo_fallback_to_text_on_reel(self):
+        from unittest.mock import patch, MagicMock
+        from app.facebook_service import publish_comment
+
+        fail_resp = MagicMock()
+        fail_resp.status_code = 500
+        fail_resp.json.return_value = {"error": {"code": 2, "message": "An unexpected error has occurred"}}
+
+        success_resp = MagicMock()
+        success_resp.status_code = 200
+        success_resp.json.return_value = {"id": "comment_text_only_123"}
+
+        with patch("app.facebook_service.FB_PAGE_ID", "123"), \
+             patch("app.facebook_service.FB_PAGE_TOKEN", "token_abc"), \
+             patch("app.facebook_service.upload_unpublished_photo", return_value="photo_99999"), \
+             patch("app.facebook_service._request_with_retry", side_effect=[fail_resp, success_resp]):
+
+            res = publish_comment("reel_post_001", "Affiliate link message", image_path="data/products/test.jpg")
+            self.assertEqual(res.get("id"), "comment_text_only_123")
+
 
 if __name__ == "__main__":
     unittest.main()

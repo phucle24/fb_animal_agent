@@ -75,6 +75,7 @@ def init_db():
             comment_index INTEGER NOT NULL,
             product_name TEXT NOT NULL,
             product_link TEXT NOT NULL,
+            image_path TEXT,
             message TEXT NOT NULL,
             scheduled_at TEXT NOT NULL,
             status TEXT NOT NULL DEFAULT 'PENDING',
@@ -109,6 +110,7 @@ def ensure_runtime_schema():
     conn = get_conn()
     cur = conn.cursor()
     _ensure_columns(cur, "posts", {"fb_photo_id": "TEXT"})
+    _ensure_columns(cur, "post_product_comments", {"image_path": "TEXT"})
     conn.commit()
     conn.close()
 
@@ -429,18 +431,20 @@ def update_status(post_id: int, status: str):
 
 
 def insert_product_comment(data: dict) -> bool:
+    ensure_runtime_schema()
     conn = get_conn()
     cur = conn.cursor()
     cur.execute(
         """
         INSERT INTO post_product_comments (
             post_id, fb_post_id, comment_index, product_name, product_link,
-            message, scheduled_at, status
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, 'PENDING')
+            image_path, message, scheduled_at, status
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'PENDING')
         ON CONFLICT(post_id, comment_index) DO UPDATE SET
             fb_post_id = excluded.fb_post_id,
             product_name = excluded.product_name,
             product_link = excluded.product_link,
+            image_path = excluded.image_path,
             message = excluded.message,
             scheduled_at = excluded.scheduled_at,
             status = 'PENDING',
@@ -454,6 +458,7 @@ def insert_product_comment(data: dict) -> bool:
             data["comment_index"],
             data["product_name"],
             data["product_link"],
+            data.get("image_path"),
             data["message"],
             data["scheduled_at"],
         ),
@@ -465,6 +470,7 @@ def insert_product_comment(data: dict) -> bool:
 
 
 def insert_product_comment_once(data: dict) -> bool:
+    ensure_runtime_schema()
     conn = get_conn()
     cur = conn.cursor()
     cur.execute(
@@ -485,8 +491,8 @@ def insert_product_comment_once(data: dict) -> bool:
         """
         INSERT OR IGNORE INTO post_product_comments (
             post_id, fb_post_id, comment_index, product_name, product_link,
-            message, scheduled_at, status
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, 'PENDING')
+            image_path, message, scheduled_at, status
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'PENDING')
         """,
         (
             data["post_id"],
@@ -494,6 +500,7 @@ def insert_product_comment_once(data: dict) -> bool:
             data["comment_index"],
             data["product_name"],
             data["product_link"],
+            data.get("image_path"),
             data["message"],
             data["scheduled_at"],
         ),

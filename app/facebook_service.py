@@ -194,21 +194,85 @@ def publish_reel(video_path: str, caption: str, retries: int = 3) -> dict:
     raise RuntimeError("Failed to publish reel after retries")
 
 
-def publish_comment(fb_post_id: str, message: str, retries: int = 3) -> dict:
+def upload_unpublished_photo(image_path: str, retries: int = 3) -> str:
+    _ensure_facebook_config()
+    path = Path(image_path)
+    if not path.is_absolute():
+        from app.config import BASE_DIR
+        path = (BASE_DIR / path).resolve()
+    if not path.exists():
+        raise FileNotFoundError(f"Image not found for unpublished upload: {image_path}")
+
+    url = f"https://graph.facebook.com/{FB_GRAPH_VERSION}/{FB_PAGE_ID}/photos"
+    last_error = None
+    for attempt in range(retries):
+        with open(path, "rb") as img:
+            files = {"source": img}
+            data = {
+                "published": "false",
+                "access_token": FB_PAGE_TOKEN,
+            }
+            try:
+                response = _request_with_retry("POST", url, retries=1, files=files, data=data, timeout=120)
+                result = response.json()
+            except Exception as exc:
+                last_error = exc
+                if attempt < retries - 1:
+                    time.sleep(2 ** attempt)
+                    continue
+                raise
+
+        if response.status_code >= 400 or "error" in result:
+            err = FacebookGraphError(result, response.status_code)
+            if err.is_transient and attempt < retries - 1:
+                time.sleep(2 ** attempt)
+                continue
+            raise err
+
+        photo_id = result.get("id")
+        if not photo_id:
+            raise RuntimeError(f"No photo ID returned from unpublished photo upload: {result}")
+        return str(photo_id)
+
+    if last_error:
+        raise last_error
+    raise RuntimeError("Failed to upload unpublished photo after retries")
+
+
+def publish_comment(
+    fb_post_id: str,
+    message: str,
+    attachment_id: str | None = None,
+    image_path: str | None = None,
+    retries: int = 3,
+) -> dict:
     _ensure_facebook_config()
     url = f"https://graph.facebook.com/{FB_GRAPH_VERSION}/{fb_post_id}/comments"
 
+    post_attachment_id = attachment_id
+    if not post_attachment_id and image_path:
+        try:
+            post_attachment_id = upload_unpublished_photo(image_path)
+        except Exception as exc:
+            import logging
+            logging.warning("Failed to upload unpublished photo for comment (%s): %s", image_path, exc)
+            post_attachment_id = None
+
     last_error = None
     for attempt in range(retries):
+        payload = {
+            "message": message,
+            "access_token": FB_PAGE_TOKEN,
+        }
+        if post_attachment_id:
+            payload["attachment_id"] = post_attachment_id
+
         try:
             response = _request_with_retry(
                 "POST",
                 url,
                 retries=1,
-                data={
-                    "message": message,
-                    "access_token": FB_PAGE_TOKEN,
-                },
+                data=payload,
                 timeout=60,
             )
             result = response.json()
@@ -221,6 +285,18 @@ def publish_comment(fb_post_id: str, message: str, retries: int = 3) -> dict:
 
         if response.status_code >= 400 or "error" in result:
             err = FacebookGraphError(result, response.status_code)
+            # If posting with attachment failed (e.g. video reels reject attachment_id in comments with code 2 / 500),
+            # fall back immediately to text-only comment so affiliate link is always delivered.
+            if post_attachment_id:
+                import logging
+                logging.warning(
+                    "Publishing comment with attachment %s to %s failed (%s). Retrying text-only...",
+                    post_attachment_id,
+                    fb_post_id,
+                    err,
+                )
+                return publish_comment(fb_post_id, message, retries=retries)
+
             if err.is_transient and attempt < retries - 1:
                 time.sleep(2 ** attempt)
                 continue

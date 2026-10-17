@@ -14,6 +14,7 @@ from app.config import (
     DONATE_COMMENT_LOOKBACK_HOURS,
     DONATE_COMMENT_SCAN_LIMIT,
     DONATE_COMMENT_URL,
+    FEATURED_PRODUCTS_ONLY,
     PRODUCT_COMMENT_IMAGE_DELAY_MINUTES,
     PRODUCT_COMMENT_VIDEO_DELAY_MINUTES,
     PRODUCT_COMMENTS_PER_POST,
@@ -52,6 +53,40 @@ SOLD_FIELDS = (
     "sales",
     "sold_count",
 )
+
+FEATURED_PRODUCTS = [
+    {
+        "name": "(Độc Quyền) Bánh Tráng Bò Tỏi Chua Cay Duy Best - Vị Tỏi Cay Nồng & Chua Tươi Mới",
+        "raw_name": "(Độc Quyền) Bánh Tráng Bò Tỏi Chua Cay Duy Best - Vị Tỏi Cay Nồng & Chua Tươi Mới",
+        "link": "https://s.shopee.vn/gQv0nQVjh",
+        "image_path": "data/products/banh_trang_bo_toi_duy_best.jpg",
+        "sold": "",
+    },
+    {
+        "name": "Combo 20 chân gà rút xương tê cay - ĂN CÙNG BÀ TUYẾT",
+        "raw_name": "Combo 20 chân gà rút xương tê cay - ĂN CÙNG BÀ TUYẾT",
+        "link": "https://s.shopee.vn/6VOhxZGZAd",
+        "image_path": "data/products/chan_ga_rut_xuong_ba_tuyet.jpg",
+        "sold": "",
+    },
+]
+
+PRODUCT_LINK_TO_IMAGE = {
+    p["link"]: p["image_path"] for p in FEATURED_PRODUCTS
+}
+
+
+def pick_featured_products(seed: int | str, count: int) -> list[dict]:
+    if not FEATURED_PRODUCTS:
+        return []
+    seed_value = seed if isinstance(seed, int) else zlib.crc32(str(seed).encode("utf-8"))
+    start_idx = seed_value % len(FEATURED_PRODUCTS)
+
+    selected = []
+    for i in range(count):
+        idx = (start_idx + i) % len(FEATURED_PRODUCTS)
+        selected.append(dict(FEATURED_PRODUCTS[idx]))
+    return selected
 
 IMPORTANT_SHORT_TOKENS = {"ca", "ga", "bo", "de", "oc"}
 PRODUCT_STOPWORDS = {
@@ -499,6 +534,9 @@ def pick_products_for_context(
     topic_type: str = "",
     topic_payload: str = "",
 ) -> list[dict]:
+    if FEATURED_PRODUCTS_ONLY:
+        return pick_featured_products(seed=seed, count=count)
+
     products = load_products()
     if not products:
         return []
@@ -801,6 +839,7 @@ def schedule_recent_donate_comments(now: datetime | None = None, dry_run: bool =
                 "comment_index": offset,
                 "product_name": product["name"],
                 "product_link": product["link"],
+                "image_path": product.get("image_path", ""),
                 "message": build_product_comment(product, offset, seed=item["fb_post_id"]),
                 "scheduled_at": product_scheduled_at.strftime("%Y-%m-%d %H:%M:%S"),
             }
@@ -898,6 +937,7 @@ def schedule_product_comments_for_post(
                 "comment_index": index,
                 "product_name": product["name"],
                 "product_link": product["link"],
+                "image_path": product.get("image_path", ""),
                 "message": build_product_comment(product, index, seed=post_id),
                 "scheduled_at": scheduled_at.strftime("%Y-%m-%d %H:%M:%S"),
             }
@@ -942,8 +982,17 @@ def should_try_photo_fallback(exc: Exception) -> bool:
 
 def publish_comment_with_fallback(row) -> dict:
     tried = [row["fb_post_id"]]
+    image_path = None
     try:
-        return publish_comment(row["fb_post_id"], row["message"])
+        image_path = row["image_path"] or None
+    except (IndexError, KeyError):
+        image_path = None
+
+    if not image_path and row.get("product_link") in PRODUCT_LINK_TO_IMAGE:
+        image_path = PRODUCT_LINK_TO_IMAGE[row["product_link"]]
+
+    try:
+        return publish_comment(row["fb_post_id"], row["message"], image_path=image_path)
     except Exception as first_exc:
         fb_photo_id = ""
         try:
@@ -953,7 +1002,7 @@ def publish_comment_with_fallback(row) -> dict:
 
         if fb_photo_id and fb_photo_id not in tried and should_try_photo_fallback(first_exc):
             try:
-                return publish_comment(fb_photo_id, row["message"])
+                return publish_comment(fb_photo_id, row["message"], image_path=image_path)
             except Exception as second_exc:
                 raise RuntimeError(
                     f"post_id target failed: {first_exc}; photo_id fallback failed: {second_exc}"
