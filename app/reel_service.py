@@ -87,14 +87,134 @@ def prepare_reel_media(reel: dict) -> tuple[Path, str]:
     return dest_video_path, caption
 
 
+def sync_existing_scheduled_reels(folder_id: str | None = None) -> list[dict]:
+    """
+    Checks all currently scheduled reels in DB with status 'READY' (not yet posted).
+    If Google Drive has an updated file (different filename like _final_sponsor.mp4,
+    different file ID, or different size), downloads the new file and updates the post in DB.
+    """
+    all_reels = get_sorted_reels_from_drive(folder_id)
+    reels_by_key = {r["topic_key"]: r for r in all_reels}
+
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        SELECT id, scheduled_at, slot, topic_key, title, caption, final_image_path, topic_payload
+        FROM posts
+        WHERE topic_type = 'reel' AND status = 'READY'
+        ORDER BY scheduled_at ASC
+        """
+    )
+    rows = cur.fetchall()
+
+    updated_items = []
+    for row in rows:
+        post_id = row["id"]
+        topic_key = row["topic_key"]
+        if topic_key not in reels_by_key:
+            continue
+
+        reel = reels_by_key[topic_key]
+        drive_video = reel["video_file"]
+        current_path = Path(row["final_image_path"]) if row["final_image_path"] else None
+
+        # Check if filename or size or drive_id differs
+        payload = {}
+        if row["topic_payload"]:
+            try:
+                payload = json.loads(row["topic_payload"])
+            except Exception:
+                payload = {}
+
+        old_filename = payload.get("filename") or (current_path.name if current_path else "")
+        new_filename = drive_video["name"]
+        old_drive_id = payload.get("drive_video_id")
+        new_drive_id = drive_video["id"]
+
+        needs_update = False
+        if old_filename != new_filename:
+            needs_update = True
+        elif old_drive_id != new_drive_id:
+            needs_update = True
+        elif current_path and not current_path.exists():
+            needs_update = True
+        elif current_path and drive_video.get("size"):
+            if current_path.stat().st_size != int(drive_video["size"]):
+                needs_update = True
+
+        if needs_update:
+            try:
+                local_video_path, caption = prepare_reel_media(reel)
+                new_payload = json.dumps(
+                    {
+                        "drive_video_id": drive_video["id"],
+                        "drive_caption_id": reel.get("caption_file", {}).get("id"),
+                        "video_number": reel["number"],
+                        "filename": drive_video["name"],
+                    }
+                )
+                cur.execute(
+                    """
+                    UPDATE posts
+                    SET title = ?,
+                        caption = ?,
+                        final_image_path = ?,
+                        topic_payload = ?
+                    WHERE id = ?
+                    """,
+                    (
+                        reel["title"],
+                        caption,
+                        str(local_video_path),
+                        new_payload,
+                        post_id,
+                    ),
+                )
+                conn.commit()
+                updated_items.append(
+                    {
+                        "id": post_id,
+                        "scheduled_at": row["scheduled_at"],
+                        "slot": row["slot"],
+                        "topic_key": topic_key,
+                        "old_file": old_filename,
+                        "new_file": new_filename,
+                        "video_path": str(local_video_path),
+                    }
+                )
+                logger.info(
+                    "Updated scheduled reel ID=%d: %s -> %s (at %s)",
+                    post_id,
+                    old_filename,
+                    new_filename,
+                    row["scheduled_at"],
+                )
+            except Exception as exc:
+                logger.error("Failed to update scheduled reel %s: %s", topic_key, exc, exc_info=True)
+
+    conn.close()
+    return updated_items
+
+
 def ensure_future_reels(max_reels: int | None = None, folder_id: str | None = None) -> dict:
     """
-    Checks Google Drive for unposted reels, downloads videos and captions,
-    and schedules them into the next available 11:50 and 20:15 slots.
+    1. Checks existing scheduled reels in status 'READY' and updates them if Drive files were updated.
+    2. Checks Google Drive for any unposted reels, downloads videos and captions,
+       and schedules them into the next available 11:50 and 20:15 slots.
     """
+    updated_items = sync_existing_scheduled_reels(folder_id)
+
     unposted_reels = get_unposted_drive_reels(folder_id)
     if not unposted_reels:
-        return {"scheduled": 0, "items": [], "message": "No unposted reels found on Drive."}
+        msg = f"Updated {len(updated_items)} existing reels. No new unposted reels found on Drive." if updated_items else "No unposted reels found on Drive."
+        return {
+            "scheduled": 0,
+            "items": [],
+            "updated": len(updated_items),
+            "updated_items": updated_items,
+            "message": msg,
+        }
 
     if max_reels is not None and max_reels > 0:
         reels_to_schedule = unposted_reels[:max_reels]
@@ -166,8 +286,16 @@ def ensure_future_reels(max_reels: int | None = None, folder_id: str | None = No
         except Exception as exc:
             logger.error("Failed to prepare/schedule reel %s: %s", reel.get("topic_key"), exc, exc_info=True)
 
+    msg = f"Successfully scheduled {len(scheduled_items)} reels"
+    if updated_items:
+        msg += f" and updated {len(updated_items)} existing scheduled reels."
+    else:
+        msg += "."
+
     return {
         "scheduled": len(scheduled_items),
         "items": scheduled_items,
-        "message": f"Successfully scheduled {len(scheduled_items)} reels.",
+        "updated": len(updated_items),
+        "updated_items": updated_items,
+        "message": msg,
     }

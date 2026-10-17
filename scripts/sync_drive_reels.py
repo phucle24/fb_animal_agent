@@ -24,7 +24,12 @@ if __name__ == "__main__":
     print("\nEnsuring future reel schedules and downloading media...")
     result = ensure_future_reels(max_reels=max_reels)
     print(f"Result: {result['message']}")
-    for item in result["items"]:
+    for item in result.get("updated_items", []):
+        print(
+            f"Updated ID={item['id']} | {item['scheduled_at']} | "
+            f"slot={item['slot']} | {item['topic_key']} | {item['old_file']} -> {item['new_file']}"
+        )
+    for item in result.get("items", []):
         print(
             f"Scheduled ID={item['id']} | {item['scheduled_at']} | "
             f"slot={item['slot']} | {item['topic_key']} | {item['title']}"

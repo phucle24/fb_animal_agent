@@ -7,5 +7,6 @@ data/*.db
 data/*.db-*
 assets/raw/*
 assets/final/*
+assets/reels/*
 logs/*.log
-
+config/*.json

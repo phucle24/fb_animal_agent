@@ -10,6 +10,7 @@ from app.config import (
     GOOGLE_CLIENT_SECRET,
     GOOGLE_DRIVE_REELS_FOLDER_ID,
     GOOGLE_REFRESH_TOKEN,
+    GOOGLE_SERVICE_ACCOUNT_PATH,
     REELS_DIR,
 )
 
@@ -20,16 +21,39 @@ _TOKEN_CACHE: tuple[str, float] | None = None
 
 
 def get_access_token() -> str:
-    """Obtains a valid Google OAuth2 access token, caching it until expiry."""
+    """
+    Obtains a valid Google access token.
+    Prioritizes Google Service Account (which never expires).
+    Falls back to User OAuth2 refresh token if service account is unavailable.
+    """
     global _TOKEN_CACHE
     now = time.time()
     if _TOKEN_CACHE and _TOKEN_CACHE[1] > now + 60:
         return _TOKEN_CACHE[0]
 
+    # 1. Try Google Service Account first (never expires)
+    if GOOGLE_SERVICE_ACCOUNT_PATH and os.path.exists(GOOGLE_SERVICE_ACCOUNT_PATH):
+        try:
+            from google.oauth2 import service_account
+            from google.auth.transport.requests import Request
+
+            creds = service_account.Credentials.from_service_account_file(
+                GOOGLE_SERVICE_ACCOUNT_PATH,
+                scopes=["https://www.googleapis.com/auth/drive.readonly"],
+            )
+            creds.refresh(Request())
+            if creds.token:
+                expires_at = creds.expiry.timestamp() if getattr(creds, "expiry", None) else now + 3600
+                _TOKEN_CACHE = (creds.token, expires_at)
+                return creds.token
+        except Exception as exc:
+            logger.warning("Service account token refresh failed: %s, falling back to OAuth", exc)
+
+    # 2. Fall back to OAuth2 refresh token
     if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET or not GOOGLE_REFRESH_TOKEN:
         raise RuntimeError(
-            "Missing Google OAuth credentials. Ensure GOOGLE_CLIENT_ID, "
-            "GOOGLE_CLIENT_SECRET, and GOOGLE_REFRESH_TOKEN are configured."
+            "Missing Google Drive credentials. Ensure GOOGLE_SERVICE_ACCOUNT_PATH or "
+            "GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and GOOGLE_REFRESH_TOKEN are configured."
         )
 
     url = "https://oauth2.googleapis.com/token"
@@ -121,9 +145,15 @@ def get_sorted_reels_from_drive(folder_id: str | None = None) -> list[dict]:
 
         lower_name = name.lower()
         if lower_name.endswith(".mp4"):
-            # Prefer _vi.mp4 if duplicate exists
-            if num_int not in videos_by_num or "_vi." in lower_name:
+            # Prefer _final_sponsor.mp4 over _vi.mp4 or older files
+            if num_int not in videos_by_num:
                 videos_by_num[num_int] = f
+            else:
+                existing_lower = videos_by_num[num_int]["name"].lower()
+                if "_final_sponsor" in lower_name:
+                    videos_by_num[num_int] = f
+                elif "_final_sponsor" not in existing_lower and "_vi." in lower_name:
+                    videos_by_num[num_int] = f
         elif lower_name.endswith(".txt"):
             captions_by_num[num_int] = f
 
@@ -135,7 +165,7 @@ def get_sorted_reels_from_drive(folder_id: str | None = None) -> list[dict]:
 
         # Clean title from video filename without extension
         base_name = re.sub(r"\.mp4$", "", video_file["name"], flags=re.I)
-        clean_title = re.sub(r"_vi$", "", base_name, flags=re.I).replace("_", " ").strip()
+        clean_title = re.sub(r"(_final_sponsor|_sponsor|_vi)$", "", base_name, flags=re.I).replace("_", " ").strip()
 
         reels.append(
             {

@@ -37,10 +37,14 @@ DONATE_COMMENT_DELAY_MINUTES = int(os.getenv("ANIMAL_AGENT_DONATE_COMMENT_DELAY_
 DONATE_COMMENT_SCAN_LIMIT = int(os.getenv("ANIMAL_AGENT_DONATE_COMMENT_SCAN_LIMIT", "25"))
 DONATE_COMMENT_LOOKBACK_HOURS = int(os.getenv("ANIMAL_AGENT_DONATE_COMMENT_LOOKBACK_HOURS", "72"))
 
-# Google Drive OAuth for Video Reels
+# Google Drive OAuth / Service Account for Video Reels
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "").strip()
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "").strip()
 GOOGLE_REFRESH_TOKEN = os.getenv("GOOGLE_REFRESH_TOKEN", "").strip()
+GOOGLE_SERVICE_ACCOUNT_PATH = os.getenv(
+    "GOOGLE_SERVICE_ACCOUNT_PATH",
+    str(BASE_DIR / "config/google_service_account.json"),
+).strip()
 GOOGLE_DRIVE_REELS_FOLDER_ID = os.getenv(
     "GOOGLE_DRIVE_REELS_FOLDER_ID",
     "1kFbS76S35Qd9bOo3jE_21o98DuZD5Mga",
