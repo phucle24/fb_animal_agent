@@ -82,8 +82,9 @@ def pick_featured_products(seed: int | str, count: int) -> list[dict]:
     seed_value = seed if isinstance(seed, int) else zlib.crc32(str(seed).encode("utf-8"))
     start_idx = seed_value % len(FEATURED_PRODUCTS)
 
+    actual_count = min(count, len(FEATURED_PRODUCTS))
     selected = []
-    for i in range(count):
+    for i in range(actual_count):
         idx = (start_idx + i) % len(FEATURED_PRODUCTS)
         selected.append(dict(FEATURED_PRODUCTS[idx]))
     return selected

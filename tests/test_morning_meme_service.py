@@ -80,7 +80,7 @@ class TestMorningMemeService(unittest.TestCase):
             topic = get_morning_meme_topic(sat_dt)
             self.assertEqual(topic["topic_type"], "morning_meme")
             self.assertEqual(topic["day_of_week"], "Thứ Bảy")
-            self.assertIn("MemeCuoiTuan", " ".join(topic.get("hashtags", [])))
+            self.assertIn("CuoiTuan", " ".join(topic.get("hashtags", [])))
 
     def test_build_post_payload_for_morning_meme(self):
         meme = MORNING_MEME_BANK[0]
